@@ -70,6 +70,7 @@ PROJ_OBJ += usec_time.o
 PROJ_OBJ += system.o comm.o console.o pid.o crtpservice.o param.o
 PROJ_OBJ += commander.o controller.o sensfusion6.o stabilizer.o
 PROJ_OBJ += log.o worker.o
+PROJ_OBJ += thrustcommander.o thruster.o
 
 # Utilities
 PROJ_OBJ += filter.o cpuid.o cfassert.o configblock.o eprintf.o crc.o fp16.o debug.o abort.o
