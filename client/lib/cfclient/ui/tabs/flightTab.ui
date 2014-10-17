@@ -341,6 +341,20 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="LCMCheckBox">
+         <property name="text">
+          <string>LCM Mode</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="VICONCheckBox">
+         <property name="text">
+          <string>VICON Bridge</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

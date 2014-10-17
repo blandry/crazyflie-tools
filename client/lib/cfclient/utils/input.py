@@ -71,7 +71,7 @@ class JoystickReader:
     def __init__(self, do_device_discovery=True):
         # TODO: Should be OS dependant
         self.inputdevice = PyGameReader()
-        
+
         self._min_thrust = 0
         self._max_thrust = 0
         self._thrust_slew_rate = 0
@@ -82,6 +82,9 @@ class JoystickReader:
 
         self._old_thrust = 0
         self._old_alt_hold = False
+
+        self._old_lcmmode = False
+        self._lcmmode_enabled = False
 
         self._trim_roll = Config().get("trim_roll")
         self._trim_pitch = Config().get("trim_pitch")
@@ -119,7 +122,7 @@ class JoystickReader:
         self._read_timer = PeriodicTimer(0.01, self.read_input)
 
         if do_device_discovery:
-            self._discovery_timer = PeriodicTimer(1.0, 
+            self._discovery_timer = PeriodicTimer(1.0,
                             self._do_device_discovery)
             self._discovery_timer.start()
 
@@ -144,6 +147,7 @@ class JoystickReader:
         self.device_discovery = Caller()
         self.device_error = Caller()
         self.althold_updated = Caller()
+        self.lcmmode_updated = Caller()
 
     def setAltHoldAvailable(self, available):
         self._has_pressure_sensor = available
@@ -166,13 +170,13 @@ class JoystickReader:
         approved_devs = []
 
         for dev in devs:
-            if ((not self._dev_blacklist) or 
+            if ((not self._dev_blacklist) or
                     (self._dev_blacklist and not
                      self._dev_blacklist.match(dev["name"]))):
                 self._available_devices[dev["name"]] = dev["id"]
                 approved_devs.append(dev)
 
-        return approved_devs 
+        return approved_devs
 
     def enableRawReading(self, deviceId):
         """
@@ -254,6 +258,7 @@ class JoystickReader:
             trim_roll = data["rollcal"]
             trim_pitch = data["pitchcal"]
             althold = data["althold"]
+            lcmmode = data["lcmmode"]
 
             if (self._old_alt_hold != althold):
                 self.althold_updated.call(str(althold))
@@ -263,10 +268,19 @@ class JoystickReader:
                 self._emergency_stop = emergency_stop
                 self.emergency_stop_updated.call(self._emergency_stop)
 
+            if lcmmode != self._old_lcmmode:
+                if lcmmode:
+                    if self._lcmmode_enabled:
+                        self._lcmmode_enabled = False
+                    else:
+                        self._lcmmode_enabled = True
+                    self.lcmmode_updated.call(self._lcmmode_enabled)
+                self._old_lcmmode = lcmmode
+
             # Thust limiting (slew, minimum and emergency stop)
             if althold and self._has_pressure_sensor:
                 thrust = int(round(JoystickReader.deadband(thrust,0.2)*32767 + 32767)) #Convert to uint16
-            
+
             else:
                 if raw_thrust < 0.05 or emergency_stop:
                     thrust = 0
@@ -286,7 +300,7 @@ class JoystickReader:
             self._old_thrust = thrust
             # Yaw deadband
             # TODO: Add to input device config?
-            yaw = JoystickReader.deadband(yaw,0.2)*self._max_yaw_rate           
+            yaw = JoystickReader.deadband(yaw,0.2)*self._max_yaw_rate
 
             if trim_roll != 0 or trim_pitch != 0:
                 self._trim_roll += trim_roll

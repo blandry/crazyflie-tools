@@ -70,7 +70,7 @@ class InputConfigDialogue(QtGui.QWidget, inputconfig_widget_class):
 
         self.cancelButton.clicked.connect(self.close)
         self.saveButton.clicked.connect(self.saveConfig)
-        
+
         self.detectPitch.clicked.connect(lambda : self.doAxisDetect("pitch", "Pitch axis",
                                                  "Press the pitch axis to max %s pitch", ["forward", "backward"]))
         self.detectRoll.clicked.connect(lambda : self.doAxisDetect("roll", "Roll axis",
@@ -92,7 +92,9 @@ class InputConfigDialogue(QtGui.QWidget, inputconfig_widget_class):
         self.detectExitapp.clicked.connect(lambda : self.doButtonDetect("exitapp", "Exit application",
                                                     "Press the button for the exiting the application"))
         self.detectAltHold.clicked.connect(lambda : self.doButtonDetect("althold", "Altitude hold",
-                                                    "Press the button for altitude hold mode activation (releasing returns to manual mode)"))        
+                                                    "Press the button for altitude hold mode activation (releasing returns to manual mode)"))
+        self.detectLCM.clicked.connect(lambda : self.doButtonDetect("lcmmode", "LCM mode",
+                                                    "Press the button you want to use to toggle the LCM mode"))
 
         self.configButton.clicked.connect(self.startConfigOfInputDevice)
         self.loadButton.clicked.connect(self.loadConfig)
@@ -105,7 +107,7 @@ class InputConfigDialogue(QtGui.QWidget, inputconfig_widget_class):
                               self.detectPitchPos, self.detectPitchNeg,
                               self.detectRollPos, self.detectRollNeg,
                               self.detectKillswitch, self.detectExitapp,
-                              self.detectAltHold]
+                              self.detectAltHold, self.detectLCM]
 
         self._reset_mapping()
         self.btnDetect = ""
@@ -127,6 +129,7 @@ class InputConfigDialogue(QtGui.QWidget, inputconfig_widget_class):
             "killswitch": {"id":-1, "indicator": self.killswitch},
             "exitapp": {"id":-1, "indicator": self.exitapp},
             "althold": {"id":-1, "indicator": self.althold},
+            "lcmmode": {"id":-1, "indicator": self.lcmmode},
             }
 
         self.axismapping = {
@@ -208,7 +211,7 @@ class InputConfigDialogue(QtGui.QWidget, inputconfig_widget_class):
                         self.combinedDetection = 2
                         message = self.box.originalMessage % self.box.directions[1]
                         self.box.setText(message)
-                            
+
         for a in data:
             for m in self.axismapping:
                 if "id" in self.axismapping[m]:
@@ -246,7 +249,7 @@ class InputConfigDialogue(QtGui.QWidget, inputconfig_widget_class):
             else:
                 if (len(self.axismapping[m]["ids"]) != 2):
                     canSave = False
-                
+
         if (canSave == True):
             self.saveButton.setEnabled(True)
 
@@ -285,6 +288,8 @@ class InputConfigDialogue(QtGui.QWidget, inputconfig_widget_class):
             newKey = "exitapp"
         if ("althold" in key):
             newKey = "althold"
+        if ("lcmmode" in key):
+            newKey = "lcmmode"
         if (len(newKey) > 0):
             self.buttonmapping[newKey]['id'] = btnId
         else:
@@ -367,11 +372,14 @@ class InputConfigDialogue(QtGui.QWidget, inputconfig_widget_class):
             if ("exit" in a):
                 newC['key'] = "exit"
                 newC['name'] = a
-                
+
             if ("althold" in a):
                 newC['key'] = "althold"
-                newC['name'] = a               
-                
+                newC['name'] = a
+
+            if ("lcmmode" in a):
+                newC['key'] = "lcmmode"
+                newC['name'] = a
 
             inputConfig['inputdevice']['axis'].append(newC)
 

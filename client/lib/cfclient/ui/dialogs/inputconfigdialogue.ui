@@ -505,9 +505,9 @@
           <property name="geometry">
            <rect>
             <x>600</x>
-            <y>200</y>
+            <y>190</y>
             <width>292</width>
-            <height>123</height>
+            <height>128</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_5">
@@ -577,6 +577,29 @@
              </property>
              <property name="text">
               <string>Detect</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="detectLCM">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Detect</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QCheckBox" name="lcmmode">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>LCM mode</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
              </property>
             </widget>
            </item>

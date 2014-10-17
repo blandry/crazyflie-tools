@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#     ||          ____  _ __                           
-#  +------+      / __ )(_) /_______________ _____  ___ 
+#     ||          ____  _ __
+#  +------+      / __ )(_) /_______________ _____  ___
 #  | 0xBC |     / __  / / __/ ___/ ___/ __ `/_  / / _ \
 #  +------+    / /_/ / / /_/ /__/ /  / /_/ / / /_/  __/
 #   ||  ||    /_____/_/\__/\___/_/   \__,_/ /___/\___/
@@ -15,7 +15,7 @@
 #  modify it under the terms of the GNU General Public License
 #  as published by the Free Software Foundation; either version 2
 #  of the License, or (at your option) any later version.
-#  
+#
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -44,7 +44,7 @@ class PyGameReader():
     def start_input(self, deviceId, inputMap):
         """Initalize the reading and open the device with deviceId and set the mapping for axis/buttons using the
         inputMap"""
-        self.data = {"roll":0.0, "pitch":0.0, "yaw":0.0, "thrust":0.0, "pitchcal":0.0, "rollcal":0.0, "estop": False, "exit":False, "althold":False}
+        self.data = {"roll":0.0, "pitch":0.0, "yaw":0.0, "thrust":0.0, "pitchcal":0.0, "rollcal":0.0, "estop": False, "exit":False, "althold":False, "lcmmode": False}
         self.inputMap = inputMap
         self.j = pygame.joystick.Joystick(deviceId)
         self.j.init()
@@ -55,10 +55,10 @@ class PyGameReader():
         # save this value.
         self.data["pitchcal"] = 0.0
         self.data["rollcal"]  = 0.0
-        
+
         for e in pygame.event.get():
           if e.type == pygame.locals.JOYAXISMOTION:
-            index = "Input.AXIS-%d" % e.axis 
+            index = "Input.AXIS-%d" % e.axis
             try:
                 if (self.inputMap[index]["type"] == "Input.AXIS"):
                     key = self.inputMap[index]["key"]
@@ -69,10 +69,10 @@ class PyGameReader():
                     self.data[key] = axisvalue
             except Exception:
                 # Axis not mapped, ignore..
-                pass          
+                pass
 
           if e.type == pygame.locals.JOYBUTTONDOWN:
-            index = "Input.BUTTON-%d" % e.button            
+            index = "Input.BUTTON-%d" % e.button
             try:
                 if (self.inputMap[index]["type"] == "Input.BUTTON"):
                     key = self.inputMap[index]["key"]
@@ -81,24 +81,28 @@ class PyGameReader():
                     elif (key == "exit"):
                         self.data["exit"] = True
                     elif (key == "althold"):
-                        self.data["althold"] = not self.data["althold"]                        
+                        self.data["althold"] = not self.data["althold"]
+                    elif (key == "lcmmode"):
+                        self.data["lcmmode"] = True
                     else: # Generic cal for pitch/roll
                         self.data[key] = self.inputMap[index]["scale"]
             except Exception:
                 # Button not mapped, ignore..
                 pass
-          
+
           if e.type == pygame.locals.JOYBUTTONUP:
-            index = "Input.BUTTON-%d" % e.button            
+            index = "Input.BUTTON-%d" % e.button
             try:
                 if (self.inputMap[index]["type"] == "Input.BUTTON"):
                     key = self.inputMap[index]["key"]
                     if (key == "althold"):
-                        self.data["althold"] = False                     
+                        self.data["althold"] = False
+                    if (key == "lcmmode"):
+                        self.data["lcmmode"] = False
             except Exception:
                 # Button not mapped, ignore..
-                pass            
-            
+                pass
+
 
         return self.data
 
@@ -142,4 +146,3 @@ class PyGameReader():
             dev.append({"id":i, "name" : name})
             names.append(name)
         return dev
-

@@ -104,9 +104,11 @@ class FlightTab(Tab, flight_tab_class):
         self._emergency_stop_updated_signal.connect(self.updateEmergencyStop)
         self.helper.inputDeviceReader.emergency_stop_updated.add_callback(
                                      self._emergency_stop_updated_signal.emit)
-        
+
         self.helper.inputDeviceReader.althold_updated.add_callback(
                     lambda enabled: self.helper.cf.param.set_value("flightmode.althold", enabled))
+
+        self.helper.inputDeviceReader.lcmmode_updated.add_callback(self._lcmmode_data_received)
 
         self._imu_data_signal.connect(self._imu_data_received)
         self._baro_data_signal.connect(self._baro_data_received)
@@ -138,6 +140,10 @@ class FlightTab(Tab, flight_tab_class):
                              lambda enabled:
                              self.helper.cf.param.set_value("flightmode.x",
                                                             str(enabled)))
+
+        self.LCMCheckBox.toggled.connect(self._lcm_mode_checkbox_changed)
+        self.VICONCheckBox.toggled.connect(self._vicon_bridge_checkbox_changed)
+
         self.helper.cf.param.add_update_callback(
                         group="flightmode", name="xmode",
                         cb=( lambda name, checked:
@@ -154,7 +160,7 @@ class FlightTab(Tab, flight_tab_class):
                     group="flightmode", name="ratepid",
                     cb=(lambda name, checked:
                     self.ratePidRadioButton.setChecked(eval(checked))))
-        
+
         self.helper.cf.param.add_update_callback(
                     group="flightmode", name="althold",
                     cb=(lambda name, enabled:
@@ -163,7 +169,7 @@ class FlightTab(Tab, flight_tab_class):
         self.helper.cf.param.add_update_callback(
                         group="imu_sensors",
                         cb=self._set_available_sensors)
-                
+
         self.logBaro = None
         self.logAltHold = None
 
@@ -197,25 +203,39 @@ class FlightTab(Tab, flight_tab_class):
             self.actualM2.setValue(data["motor.m2"])
             self.actualM3.setValue(data["motor.m3"])
             self.actualM4.setValue(data["motor.m4"])
-        
+
     def _baro_data_received(self, timestamp, data, logconf):
         if self.isVisible():
             self.actualASL.setText(("%.2f" % data["baro.aslLong"]))
             self.ai.setBaro(data["baro.aslLong"])
-        
+
     def _althold_data_received(self, timestamp, data, logconf):
         if self.isVisible():
             target = data["altHold.target"]
             if target>0:
                 if not self.targetASL.isEnabled():
-                    self.targetASL.setEnabled(True) 
+                    self.targetASL.setEnabled(True)
                 self.targetASL.setText(("%.2f" % target))
-                self.ai.setHover(target)    
+                self.ai.setHover(target)
             elif self.targetASL.isEnabled():
                 self.targetASL.setEnabled(False)
-                self.targetASL.setText("Not set")   
-                self.ai.setHover(0)    
-        
+                self.targetASL.setText("Not set")
+                self.ai.setHover(0)
+
+    def _lcm_mode_checkbox_changed(self, checked):
+        pass
+
+    def _vicon_bridge_checkbox_changed(self, checked):
+        pass
+
+    def _lcmmode_data_received(self, enabled):
+        if self.isVisible():
+            self.LCMCheckBox.setChecked(enabled)
+            # disable all the other buttons
+            # change the firmware mode here...
+            # will have to change some of the callbacks?
+            # use the existing connection
+            
     def _imu_data_received(self, timestamp, data, logconf):
         if self.isVisible():
             self.actualRoll.setText(("%.2f" % data["stabilizer.roll"]))
@@ -224,7 +244,7 @@ class FlightTab(Tab, flight_tab_class):
             self.actualThrust.setText("%.2f%%" %
                                       self.thrustToPercentage(
                                                       data["stabilizer.thrust"]))
-    
+
             self.ai.setRollPitch(-data["stabilizer.roll"],
                                  data["stabilizer.pitch"])
 
@@ -260,7 +280,7 @@ class FlightTab(Tab, flight_tab_class):
         else:
             logger.warning("Could not setup logconfiguration after "
                            "connection!")
-            
+
     def _set_available_sensors(self, name, available):
         logger.info("[%s]: %s", name, available)
         available = eval(available)
@@ -285,7 +305,7 @@ class FlightTab(Tab, flight_tab_class):
                         self.logBaro.start()
                     else:
                         logger.warning("Could not setup logconfiguration after "
-                                       "connection!")            
+                                       "connection!")
                     self.logAltHold = LogConfig("AltHold", 200)
                     self.logAltHold.add_variable("altHold.target", "float")
 
@@ -298,7 +318,7 @@ class FlightTab(Tab, flight_tab_class):
                         self.logAltHold.start()
                     else:
                         logger.warning("Could not setup logconfiguration after "
-                                       "connection!")                        
+                                       "connection!")
 
     def disconnected(self, linkURI):
         self.ai.setRollPitch(0, 0)

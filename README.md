@@ -56,3 +56,8 @@ $ python log_to_mat.py -f -l <lcm types>,<another lcm type> <lcm log file>
 so for a file called lcmlog-2010-09.02 that contains two LCM types (lcmt_glider_optotrak and lcmt_hotrod_u), we run:
 
 $ python log_to_mat.py -f -l vicon_t <your log file>
+
+INSTALLING THE LIB
+==================
+cd client
+sudo setup.py

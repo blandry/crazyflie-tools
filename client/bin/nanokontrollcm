@@ -1,0 +1,102 @@
+import time
+
+import pygame
+import pygame.midi
+
+import lcm
+from crazylcm import crazyflie_thrust_t
+
+class Kon():
+
+    def __init__(self):
+        pygame.init()
+        pygame.midi.init()
+        (in_device_id, out_device_id) = self.find_nano_kontrol()
+        self.midi_in = pygame.midi.Input(in_device_id)
+        print "using input  id: %s" % in_device_id
+        self.sliders = dict(zip(range(2,14), [0]*12))
+        self.lc = lcm.LCM()
+
+    def find_nano_kontrol(self):
+        print "ID: Device Info"
+        print "---------------"
+        in_id = None
+        out_id = None
+        for i in range( pygame.midi.get_count() ):
+            r = pygame.midi.get_device_info(i)
+            (interf, name, input, output, opened) = r
+
+            in_out = ""
+            if input:
+                in_out = "(input)"
+            if output:
+                in_out = "(output)"
+
+            if name == "nanoKONTROL MIDI 1" and input:
+                in_id = i
+            elif name == "nanoKONTROL MIDI 1" and output:
+                out_id = i
+
+            print ("%2i: interface :%s:, name :%s:, opened :%s:  %s" %
+                   (i, interf, name, opened, in_out))
+
+        return (in_id, out_id)
+
+    def read_input(self):
+        if self.midi_in.poll():
+            midi_events = self.midi_in.read(100)
+            midi_evs = pygame.midi.midis2events(midi_events, self.midi_in.device_id)
+            for me in midi_evs:
+                self.sliders[me.data1] = me.data2
+
+    def send_lcm_thrusts(self,thrust1,thrust2,thrust3,thrust4):
+        # Makes sure it will fit in the
+        # crazyflie thrust limits
+        USHRT_MAX = 2**16-1
+        if thrust1>USHRT_MAX:
+            thrust1 = USHRT_MAX
+        if thrust1<0:
+            thrust1 = 0
+        if thrust2>USHRT_MAX:
+            thrust2 = USHRT_MAX
+        if thrust2<0:
+            thrust2 = 0
+        if thrust3>USHRT_MAX:
+            thrust3 = USHRT_MAX
+        if thrust3<0:
+            thrust3 = 0
+        if thrust4>USHRT_MAX:
+            thrust4 = USHRT_MAX
+        if thrust4<0:
+            thrust4 = 0
+        msg = crazyflie_thrust_t()
+        # LCM doesn't have unsigned integer for java comp
+        # this needs to be corrected before being broadcasted
+        # to the crazyflie
+        msg.thrust1 = thrust1-32768
+        msg.thrust2 = thrust2-32768
+        msg.thrust3 = thrust3-32768
+        msg.thrust4 = thrust4-32768
+        self.lc.publish("crazyflie_thrust", msg.encode())
+
+    def forward_kon_to_lcm(self):
+        self.read_input()
+        thrust1_input = 500*self.sliders.get(2,0)
+        thrust2_input = 500*self.sliders.get(3,0)
+        thrust3_input = 500*self.sliders.get(4,0)
+        thrust4_input = 500*self.sliders.get(5,0)
+        if thrust1_input>0:
+            thrust1_input += 10000
+        if thrust2_input>0:
+            thrust2_input += 10000
+        if thrust3_input>0:
+            thrust3_input += 10000
+        if thrust4_input>0:
+            thrust4_input += 10000
+        self.send_lcm_thrusts(thrust1_input,thrust2_input,thrust3_input,thrust4_input)
+
+if __name__=='__main__':
+    kon = Kon()
+    while True:
+        kon.forward_kon_to_lcm()
+        time.sleep(0.1)
