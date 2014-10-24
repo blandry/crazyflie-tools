@@ -94,7 +94,7 @@ to exclude the API function. */
 #define INCLUDE_uxTaskPriorityGet		0
 #define INCLUDE_vTaskDelete				0
 #define INCLUDE_vTaskCleanUpResources	0
-#define INCLUDE_vTaskSuspend			0
+#define INCLUDE_vTaskSuspend			1
 #define INCLUDE_vTaskDelayUntil			1
 #define INCLUDE_vTaskDelay				1
 
@@ -116,12 +116,13 @@ to exclude the API function. */
 #define configUSE_APPLICATION_TASK_TAG  1
 #define configQUEUE_REGISTRY_SIZE       10
 
-#define TASK_LED_ID_NBR         1
-#define TASK_RADIO_ID_NBR       2
-#define TASK_STABILIZER_ID_NBR  3
-#define TASK_ADC_ID_NBR         4
-#define TASK_PM_ID_NBR          5
-#define TASK_THRUSTER_ID_NBR    6
+#define TASK_LED_ID_NBR             1
+#define TASK_RADIO_ID_NBR           2
+#define TASK_STABILIZER_ID_NBR      3
+#define TASK_ADC_ID_NBR             4
+#define TASK_PM_ID_NBR              5
+#define TASK_OFFBOARDCTRL_ID_NBR    6
+#define TASK_SUPERVISOR_ID_NBR      7
 
 #define traceTASK_SWITCHED_IN() \
   { \

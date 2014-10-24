@@ -168,4 +168,3 @@ void commanderGetThrust(uint16_t* thrust)
 PARAM_GROUP_START(flightmode)
 PARAM_ADD(PARAM_UINT8, althold, &altHoldMode)
 PARAM_GROUP_STOP(flightmode)
-

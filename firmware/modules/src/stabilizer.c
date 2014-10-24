@@ -136,7 +136,7 @@ static void stabilizerAltHoldUpdate(void);
 static void distributePower(const uint16_t thrust, const int16_t roll,
                             const int16_t pitch, const int16_t yaw);
 static uint16_t limitThrust(int32_t value);
-static void stabilizerTask(void* param);
+void stabilizerTask(void* param);
 static float constrain(float value, const float minVal, const float maxVal);
 static float deadband(float value, const float threshold);
 
@@ -154,9 +154,6 @@ void stabilizerInit(void)
   pitchRateDesired = 0;
   yawRateDesired = 0;
 
-  xTaskCreate(stabilizerTask, (const signed char * const)"STABILIZER",
-              2*configMINIMAL_STACK_SIZE, NULL, /*Piority*/2, NULL);
-
   isInit = TRUE;
 }
 
@@ -172,7 +169,7 @@ bool stabilizerTest(void)
   return pass;
 }
 
-static void stabilizerTask(void* param)
+void stabilizerTask(void* param)
 {
   uint32_t attitudeCounter = 0;
   uint32_t altHoldCounter = 0;
@@ -495,4 +492,3 @@ PARAM_ADD(PARAM_UINT16, baseThrust, &altHoldBaseThrust)
 PARAM_ADD(PARAM_UINT16, maxThrust, &altHoldMaxThrust)
 PARAM_ADD(PARAM_UINT16, minThrust, &altHoldMinThrust)
 PARAM_GROUP_STOP(altHold)
-

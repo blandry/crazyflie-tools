@@ -1,6 +1,6 @@
 /*
- *    ||          ____  _ __                           
- * +------+      / __ )(_) /_______________ _____  ___ 
+ *    ||          ____  _ __
+ * +------+      / __ )(_) /_______________ _____  ___
  * | 0xBC |     / __  / / __/ ___/ ___/ __ `/_  / / _ \
  * +------+    / /_/ / / /_/ /__/ /  / /_/ / / /_/  __/
  *  ||  ||    /_____/_/\__/\___/_/   \__,_/ /___/\___/
@@ -46,10 +46,7 @@
 #include "freeRTOSdebug.h"
 #include "uart.h"
 #include "comm.h"
-//#include "stabilizer.h"
-//#include "commander.h"
-#include "thruster.h"
-#include "thrustcommander.h"
+#include "supervisor.h"
 
 #include "console.h"
 
@@ -86,19 +83,19 @@ void systemInit(void)
   adcInit();
   ledseqInit();
   pmInit();
-    
+
   isInit = true;
 }
 
 bool systemTest()
 {
   bool pass=isInit;
-  
+
   pass &= adcTest();
   pass &= ledseqTest();
   pass &= pmTest();
   pass &= workerTest();
-  
+
   return pass;
 }
 
@@ -109,7 +106,7 @@ extern int paramsLen;
 void systemTask(void *arg)
 {
   bool pass = true;
-  
+
   //Init the high-levels modules
   systemInit();
 
@@ -131,18 +128,12 @@ void systemTask(void *arg)
               *((int*)(0x1FFFF7E8+8)), *((int*)(0x1FFFF7E8+4)),
               *((int*)(0x1FFFF7E8+0)), *((short*)(0x1FFFF7E0)));
 
-  //commanderInit();
-  //stabilizerInit();
-  thrustCommanderInit();
-  thrusterInit();
+  supervisorInit();
 
   //Test the modules
   pass &= systemTest();
   pass &= commTest();
-  //pass &= commanderTest();
-  //pass &= stabilizerTest();
-  pass &= thrustCommanderTest();
-  pass &= thrusterTest();
+  pass &= supervisorTest();
 
   //Start the firmware
   if(pass)
@@ -167,9 +158,9 @@ void systemTask(void *arg)
       ledSet(LED_RED, true);
     }
   }
-  
+
   workerLoop();
-  
+
   //Should never reach this point!
   while(1)
     vTaskDelay(portMAX_DELAY);
@@ -215,4 +206,3 @@ PARAM_GROUP_STOP(cpu)
 LOG_GROUP_START(sys)
 LOG_ADD(LOG_INT8, canfly, &canFly)
 LOG_GROUP_STOP(sys)
-

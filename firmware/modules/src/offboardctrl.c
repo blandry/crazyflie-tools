@@ -6,6 +6,7 @@
 #include "offboardctrl.h"
 #include "crtp.h"
 #include "motors.h"
+#include "system.h"
 #include "debug.h"
 
 struct ThrustCrtpValues
@@ -28,7 +29,7 @@ static uint16_t thrust3;
 static uint16_t thrust4;
 
 static void offboardCtrlCrtpCB(CRTPPacket* pk);
-static void offboardCtrlTask(void* param);
+void offboardCtrlTask(void* param);
 static void offboardCtrlWatchdogReset(void);
 static void updateThrusts(void);
 
@@ -39,9 +40,7 @@ void offboardCtrlInit(void)
 
   crtpInit();
   motorsInit();
-  crtpRegisterPortCB(CRTP_PORT_OFFBOARDCTRL, offboardCtrlCB);
-  xTaskCreate(offboardCtrlTask, (const signed char * const)"OFFBOARDCTRL",
-              2*configMINIMAL_STACK_SIZE, NULL, /*Piority*/2, NULL);
+  crtpRegisterPortCB(CRTP_PORT_OFFBOARDCTRL, offboardCtrlCrtpCB);
 
   lastUpdate = xTaskGetTickCount();
   isInactive = TRUE;
@@ -93,7 +92,7 @@ static void updateThrusts(void)
   motorsSetRatio(MOTOR_M4,(uint32_t) thrust4);
 }
 
-static void offboardCtrlTask(void* param)
+void offboardCtrlTask(void* param)
 {
   vTaskSetApplicationTaskTag(0, (void*)TASK_OFFBOARDCTRL_ID_NBR);
   systemWaitStart();

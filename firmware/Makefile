@@ -13,14 +13,14 @@ CROSS_COMPILE     ?= arm-none-eabi-
 PYTHON2           ?= python
 CLOAD             ?= 1
 DEBUG             ?= 0
-CLOAD_SCRIPT      ?= ../crazyflie-clients-python/bin/cfloader
+CLOAD_SCRIPT      ?= ../client/bin/cfloader
 
 ## Flag that can be added to config.mk
 # CFLAGS += -DUSE_UART_CRTP        # Set CRTP link to UART
 # CFLAGS += -DUSE_ESKYLINK         # Set CRTP link to E-SKY receiver
 # CFLAGS += -DENABLE_UART          # To enable the uart
 # CFLAGS += -DDEBUG_PRINT_ON_UART  # Redirect the console output to the UART
-# CFLAGS += -DENABLE_FAST_CHARGE   # Will enable ~800mA USB current for wall adapters. Should only be used with batteries 
+# CFLAGS += -DENABLE_FAST_CHARGE   # Will enable ~800mA USB current for wall adapters. Should only be used with batteries
 	  															 # that can handle ~740mA charge current or it will degrade the battery.
 
 REV               ?= E
@@ -69,8 +69,8 @@ PROJ_OBJ += usec_time.o
 # Modules
 PROJ_OBJ += system.o comm.o console.o pid.o crtpservice.o param.o
 PROJ_OBJ += commander.o controller.o sensfusion6.o stabilizer.o
+PROJ_OBJ += offboardctrl.o supervisor.o
 PROJ_OBJ += log.o worker.o
-PROJ_OBJ += thrustcommander.o thruster.o
 
 # Utilities
 PROJ_OBJ += filter.o cpuid.o cfassert.o configblock.o eprintf.o crc.o fp16.o debug.o abort.o

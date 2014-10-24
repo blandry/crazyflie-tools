@@ -7,5 +7,6 @@
 
 void offboardCtrlInit(void);
 bool offboardCtrlTest(void);
+void offboardCtrlTask(void*);
 
 #endif /* OFFBOARDCTRL_H_ */
