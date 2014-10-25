@@ -33,6 +33,9 @@ void supervisorInit(void)
     return;
 
   mode = 0;
+  modeCmd = pvPortMalloc(sizeof(struct SupervisorCrtpCommand));
+  modeCmd->mode = mode;
+
   crtpInit();
   offboardCtrlInit();
   commanderInit();
@@ -40,6 +43,7 @@ void supervisorInit(void)
   crtpRegisterPortCB(CRTP_PORT_SUPERVISOR, supervisorCrtpCB);
   xTaskCreate(supervisorTask, (const signed char * const)"SUPERVISOR",
               2*configMINIMAL_STACK_SIZE, NULL, /*Piority*/2, NULL);
+
   isInit = TRUE;
 }
 
@@ -67,8 +71,7 @@ static void supervisorTask(void* param)
   {
     vTaskDelayUntil(&lastWakeTime, F2T(MODE_UPDATE_FREQ));
 
-    //if (mode==0&&modeCmd->mode==1)
-    if (1)
+    if (mode==0&&modeCmd->mode==1)
     {
 
       // stop stabilizer
@@ -91,8 +94,7 @@ static void supervisorTask(void* param)
       mode=1;
 
     }
-    //else if (mode==1&&modeCmd->mode==0)
-    else
+    else if (mode==1&&modeCmd->mode==0)
     {
 
       // stop offboard

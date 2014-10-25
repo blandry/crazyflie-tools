@@ -49,6 +49,7 @@ from cfclient.utils.input import JoystickReader
 from cfclient.utils.guiconfig import GuiConfig
 from cfclient.utils.logconfigreader import LogConfigReader
 from cfclient.utils.config_manager import ConfigManager
+from cfclient.utils.lcmbridge import LCMBridge
 
 import cfclient.ui.toolboxes
 import cfclient.ui.tabs
@@ -122,8 +123,8 @@ class MainUI(QtGui.QMainWindow, main_window_class):
         self.connectionDoneSignal.connect(self.connectionDone)
         self.cf.connection_failed.add_callback(self.connectionFailedSignal.emit)
         self.connectionFailedSignal.connect(self.connectionFailed)
-        
-        
+
+
         self._input_device_error_signal.connect(self.inputDeviceError)
         self.joystickReader.device_error.add_callback(
                         self._input_device_error_signal.emit)
@@ -142,12 +143,12 @@ class MainUI(QtGui.QMainWindow, main_window_class):
         self.batteryUpdatedSignal.connect(self.updateBatteryVoltage)
         self._menuitem_rescandevices.triggered.connect(self._rescan_devices)
         self._menuItem_openconfigfolder.triggered.connect(self._open_config_folder)
-           
+
         self._auto_reconnect_enabled = GuiConfig().get("auto_reconnect")
         self.autoReconnectCheckBox.toggled.connect(
                                               self._auto_reconnect_changed)
         self.autoReconnectCheckBox.setChecked(GuiConfig().get("auto_reconnect"))
-        
+
         # Do not queue data from the controller output to the Crazyflie wrapper
         # to avoid latency
         #self.joystickReader.sendControlSetpointSignal.connect(
@@ -242,6 +243,10 @@ class MainUI(QtGui.QMainWindow, main_window_class):
         except Exception as e:
             logger.warning("Exception while opening tabs [%s]", e)
 
+        # start the lcm bridge
+        self.lcm_bridge = LCMBridge(self.cf,"crazyflie_input")
+        self.lcm_bridge.start()
+
     def setUIState(self, newState, linkURI=""):
         self.uiState = newState
         if (newState == UIState.DISCONNECTED):
@@ -300,11 +305,11 @@ class MainUI(QtGui.QMainWindow, main_window_class):
     def configInputDevice(self):
         self.inputConfig = InputConfigDialogue(self.joystickReader)
         self.inputConfig.show()
-        
+
     def _auto_reconnect_changed(self, checked):
-        self._auto_reconnect_enabled = checked 
+        self._auto_reconnect_enabled = checked
         GuiConfig().set("auto_reconnect", checked)
-        logger.info("Auto reconnect enabled: %s", checked)     
+        logger.info("Auto reconnect enabled: %s", checked)
 
     def doLogConfigDialogue(self):
         self.logConfigDialogue.show()

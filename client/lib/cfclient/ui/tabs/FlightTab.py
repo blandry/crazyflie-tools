@@ -33,6 +33,7 @@ __author__ = 'Bitcraze AB'
 __all__ = ['FlightTab']
 
 import sys
+import struct
 
 import logging
 logger = logging.getLogger(__name__)
@@ -44,6 +45,7 @@ from PyQt4.QtCore import Qt, pyqtSlot, pyqtSignal, QThread, SIGNAL
 from PyQt4.QtGui import QMessageBox
 
 from cflib.crazyflie import Crazyflie
+from cflib.crtp.crtpstack import CRTPPacket, CRTPPort
 
 from cfclient.ui.widgets.ai import AttitudeIndicator
 
@@ -142,7 +144,6 @@ class FlightTab(Tab, flight_tab_class):
                                                             str(enabled)))
 
         self.LCMCheckBox.toggled.connect(self._lcm_mode_checkbox_changed)
-        self.VICONCheckBox.toggled.connect(self._vicon_bridge_checkbox_changed)
 
         self.helper.cf.param.add_update_callback(
                         group="flightmode", name="xmode",
@@ -225,17 +226,14 @@ class FlightTab(Tab, flight_tab_class):
     def _lcm_mode_checkbox_changed(self, checked):
         pass
 
-    def _vicon_bridge_checkbox_changed(self, checked):
-        pass
-
     def _lcmmode_data_received(self, enabled):
         if self.isVisible():
             self.LCMCheckBox.setChecked(enabled)
-            # disable all the other buttons
-            # change the firmware mode here...
-            # will have to change some of the callbacks?
-            # use the existing connection
-            
+            pk = CRTPPacket()
+            pk.port = CRTPPort.SUPERVISOR
+            pk.data = struct.pack('<H', int(enabled))
+            self.helper.cf.send_packet(pk)
+
     def _imu_data_received(self, timestamp, data, logconf):
         if self.isVisible():
             self.actualRoll.setText(("%.2f" % data["stabilizer.roll"]))
