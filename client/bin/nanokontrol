@@ -1,17 +1,12 @@
-import argparse
-import time
-import struct
-from threading import Thread
+#!/usr/bin/env python2
 
-import cflib
-from cflib.crazyflie import Crazyflie
-from cflib.crtp.crtpstack import CRTPPacket, CRTPPort
+import time
 
 import pygame
 import pygame.midi
 
-import logging
-logging.basicConfig(level=logging.ERROR)
+import lcm
+from crazyflie_t import crazyflie_thrust_t
 
 class Kon():
 
@@ -22,6 +17,7 @@ class Kon():
         self.midi_in = pygame.midi.Input(in_device_id)
         print "using input  id: %s" % in_device_id
         self.sliders = dict(zip(range(2,14), [0]*12))
+        self.lc = lcm.LCM()
 
     def find_nano_kontrol(self):
         print "ID: Device Info"
@@ -55,88 +51,35 @@ class Kon():
             for me in midi_evs:
                 self.sliders[me.data1] = me.data2
 
-class Com():
-    def __init__(self,link_uri):
-        self._cf = Crazyflie()
+    def send_lcm_thrusts(self,thrust1,thrust2,thrust3,thrust4):
+        msg = crazyflie_thrust_t()
+        msg.thrust1 = thrust1-32768
+        msg.thrust2 = thrust2-32768
+        msg.thrust3 = thrust3-32768
+        msg.thrust4 = thrust4-32768
+        self.lc.publish("crazyflie_input", msg.encode())
 
-        self._cf.connected.add_callback(self._connected)
-        self._cf.disconnected.add_callback(self._disconnected)
-        self._cf.connection_failed.add_callback(self._connection_failed)
-        self._cf.connection_lost.add_callback(self._connection_lost)
-
-        self._cf.open_link(link_uri)
-        self.is_connected = True
-        print "Connecting to %s" % link_uri
-
-    def _connected(self, link_uri):
-        Thread(target=self.main).start()
-
-    def _connection_failed(self, link_uri, msg):
-        print "Connection to %s failed: %s" % (link_uri, msg)
-        self.is_connected = False
-
-    def _connection_lost(self, link_uri, msg):
-        print "Connection to %s lost: %s" % (link_uri, msg)
-        self.is_connected = False
-
-    def _disconnected(self, link_uri):
-        print "Disconnected from %s" % link_uri
-        self.is_connected = False
-
-    def send_thrusts(self, thrust1, thrust2, thrust3, thrust4):
-        pk = CRTPPacket()
-        pk.port = CRTPPort.COMMANDER
-        USHRT_MAX = 2**16-1
-        if thrust1>USHRT_MAX:
-            thrust1 = USHRT_MAX
-        if thrust2>USHRT_MAX:
-            thrust2 = USHRT_MAX
-        if thrust3>USHRT_MAX:
-            thrust3 = USHRT_MAX
-        if thrust4>USHRT_MAX:
-            thrust4 = USHRT_MAX
-        print "Sending Thrust Packet: %s %s %s %s" % (str(thrust1),str(thrust2),str(thrust3),str(thrust4))
-        pk.data = struct.pack('<HHHH', thrust1, thrust2, thrust3, thrust4)
-        self._cf.send_packet(pk)
-
-    def main(self):
-        kon = Kon()
-        print "Now reading inputs..."
-        while True:
-            kon.read_input()
-            thrust1_input = 500*kon.sliders.get(2,0)
-            thrust2_input = 500*kon.sliders.get(3,0)
-            thrust3_input = 500*kon.sliders.get(4,0)
-            thrust4_input = 500*kon.sliders.get(5,0)
-            if thrust1_input>0:
-                thrust1_input += 10000
-            if thrust2_input>0:
-                thrust2_input += 10000
-            if thrust3_input>0:
-                thrust3_input += 10000
-            if thrust4_input>0:
-                thrust4_input += 10000
-            self.send_thrusts(thrust1_input,thrust2_input,thrust3_input,thrust4_input)
-            time.sleep(0.1)
+    def forward_kon_to_lcm(self):
+        self.read_input()
+        thrust1_input = 500*self.sliders.get(2,0)
+        thrust2_input = 500*self.sliders.get(3,0)
+        thrust3_input = 500*self.sliders.get(4,0)
+        thrust4_input = 500*self.sliders.get(5,0)
+        if thrust1_input>0:
+            thrust1_input += 10000
+        if thrust2_input>0:
+            thrust2_input += 10000
+        if thrust3_input>0:
+            thrust3_input += 10000
+        if thrust4_input>0:
+            thrust4_input += 10000
+        self.send_lcm_thrusts(thrust1_input,
+                              thrust2_input,
+                              thrust3_input,
+                              thrust4_input)
 
 if __name__=='__main__':
-    cflib.crtp.init_drivers(enable_debug_driver=False)
-
-    print "Scanning interfaces for Crazyflies..."
-    available = cflib.crtp.scan_interfaces()
-    print "Crazyflies found:"
-    for i in available:
-        print i[0]
-
-    if len(available) > 0:
-        com = Com(available[0][0])
-    else:
-        print "No Crazyflies found, cannot run."
-        exit(0)
-
-    while com.is_connected:
-        try:
-            time.sleep(1)
-        except KeyboardInterrupt:
-            com._cf.close_link()
-            exit(0)
+    kon = Kon()
+    while True:
+        kon.forward_kon_to_lcm()
+        time.sleep(0.1)
