@@ -9,7 +9,7 @@ Installation
     cd lcm
     sudo python setup.py install
 * TODO: install the jar?
-* install the client
+* install the client (THIS NEEDS TO BE REDONE EVERY TIME YOU MODIFY IT)
     cd client
     sudo python setup.py install
 * install the firmware (see instructions on cf website)

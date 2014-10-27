@@ -73,6 +73,14 @@ class Kon():
             thrust3_input += 10000
         if thrust4_input>0:
             thrust4_input += 10000
+        if thrust1_input>32767:
+            thrust1_input = 32767
+        if thrust2_input>32767:
+            thrust2_input = 32767
+        if thrust3_input>32767:
+            thrust3_input = 32767
+        if thrust4_input>32767:
+            thrust4_input = 32767
         self.send_lcm_thrusts(thrust1_input,
                               thrust2_input,
                               thrust3_input,

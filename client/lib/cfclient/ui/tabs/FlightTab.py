@@ -224,15 +224,13 @@ class FlightTab(Tab, flight_tab_class):
                 self.ai.setHover(0)
 
     def _lcm_mode_checkbox_changed(self, checked):
-        pass
+        pk = CRTPPacket()
+        pk.port = CRTPPort.SUPERVISOR
+        pk.data = struct.pack('<H', int(checked))
+        self.helper.cf.send_packet(pk)
 
     def _lcmmode_data_received(self, enabled):
-        if self.isVisible():
-            self.LCMCheckBox.setChecked(enabled)
-            pk = CRTPPacket()
-            pk.port = CRTPPort.SUPERVISOR
-            pk.data = struct.pack('<H', int(enabled))
-            self.helper.cf.send_packet(pk)
+        self.LCMCheckBox.setChecked(enabled)
 
     def _imu_data_received(self, timestamp, data, logconf):
         if self.isVisible():

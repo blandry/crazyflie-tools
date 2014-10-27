@@ -23,10 +23,6 @@ static bool isInit;
 static bool isInactive;
 static uint32_t lastUpdate;
 static struct ThrustCrtpValues thrustsCmd;
-static uint16_t thrust1;
-static uint16_t thrust2;
-static uint16_t thrust3;
-static uint16_t thrust4;
 
 static void offboardCtrlCrtpCB(CRTPPacket* pk);
 void offboardCtrlTask(void* param);
@@ -86,10 +82,10 @@ static void offboardCtrlWatchdogReset(void)
 static void updateThrusts(void)
 {
   offboardCtrlWatchdog();
-  motorsSetRatio(MOTOR_M1,(uint32_t) thrust1);
-  motorsSetRatio(MOTOR_M2,(uint32_t) thrust2);
-  motorsSetRatio(MOTOR_M3,(uint32_t) thrust3);
-  motorsSetRatio(MOTOR_M4,(uint32_t) thrust4);
+  motorsSetRatio(MOTOR_M1,(uint32_t) thrustsCmd.thrust1);
+  motorsSetRatio(MOTOR_M2,(uint32_t) thrustsCmd.thrust2);
+  motorsSetRatio(MOTOR_M3,(uint32_t) thrustsCmd.thrust3);
+  motorsSetRatio(MOTOR_M4,(uint32_t) thrustsCmd.thrust4);
 }
 
 void offboardCtrlTask(void* param)

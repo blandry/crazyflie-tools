@@ -16,7 +16,7 @@ struct SupervisorCrtpCommand
   uint16_t mode; // 0 = stabilizer, 1 = offboardctrl
 } __attribute__((packed));
 
-#define MODE_UPDATE_FREQ 500
+#define MODE_UPDATE_FREQ 50
 
 static struct SupervisorCrtpCommand* modeCmd;
 static uint16_t mode;
@@ -26,15 +26,13 @@ static xTaskHandle offboardCtrlTaskHandle;
 
 static void supervisorCrtpCB(CRTPPacket* pk);
 static void supervisorTask(void* param);
+static void startStabilizer(void);
+static void stopStabilizer(void);
 
 void supervisorInit(void)
 {
   if(isInit)
     return;
-
-  mode = 0;
-  modeCmd = pvPortMalloc(sizeof(struct SupervisorCrtpCommand));
-  modeCmd->mode = mode;
 
   crtpInit();
   offboardCtrlInit();
@@ -43,6 +41,14 @@ void supervisorInit(void)
   crtpRegisterPortCB(CRTP_PORT_SUPERVISOR, supervisorCrtpCB);
   xTaskCreate(supervisorTask, (const signed char * const)"SUPERVISOR",
               2*configMINIMAL_STACK_SIZE, NULL, /*Piority*/2, NULL);
+
+  mode = 0;
+  modeCmd = pvPortMalloc(sizeof(struct SupervisorCrtpCommand));
+  modeCmd->mode = mode;
+  xTaskCreate(offboardCtrlTask, (const signed char * const)"OFFBOARDCTRL",
+              2*configMINIMAL_STACK_SIZE, NULL, /*Piority*/2, &offboardCtrlTaskHandle);
+  vTaskSuspend(offboardCtrlTaskHandle);
+  startStabilizer();
 
   isInit = TRUE;
 }
@@ -60,6 +66,18 @@ bool supervisorTest(void)
 static void supervisorCrtpCB(CRTPPacket* pk)
 {
   *modeCmd = *((struct SupervisorCrtpCommand*)pk->data);
+  DEBUG_PRINT("Mode received: %d\n", modeCmd->mode);
+}
+
+static void startStabilizer(void)
+{
+  xTaskCreate(stabilizerTask, (const signed char * const)"STABILIZER",
+              2*configMINIMAL_STACK_SIZE, NULL, /*Piority*/2, &stabilizerTaskHandle);
+}
+
+static void stopStabilizer(void)
+{
+  vTaskDelete(stabilizerTaskHandle);
 }
 
 static void supervisorTask(void* param)
@@ -70,50 +88,16 @@ static void supervisorTask(void* param)
   while(1)
   {
     vTaskDelayUntil(&lastWakeTime, F2T(MODE_UPDATE_FREQ));
-
     if (mode==0&&modeCmd->mode==1)
     {
-
-      // stop stabilizer
-      if (stabilizerTaskHandle)
-      {
-        vTaskSuspend(stabilizerTaskHandle);
-      }
-
-      // start offboard
-      if (!offboardCtrlTaskHandle)
-      {
-        xTaskCreate(offboardCtrlTask, (const signed char * const)"OFFBOARDCTRL",
-                    2*configMINIMAL_STACK_SIZE, NULL, /*Piority*/2, &offboardCtrlTaskHandle);
-      }
-      else
-      {
-        vTaskResume(offboardCtrlTaskHandle);
-      }
-
+      stopStabilizer();
+      vTaskResume(offboardCtrlTaskHandle);
       mode=1;
-
     }
     else if (mode==1&&modeCmd->mode==0)
     {
-
-      // stop offboard
-      if (offboardCtrlTaskHandle)
-      {
-        vTaskSuspend(offboardCtrlTaskHandle);
-      }
-
-      // start stabilizer
-      if (!stabilizerTaskHandle)
-      {
-        xTaskCreate(stabilizerTask, (const signed char * const)"STABILIZER",
-                    2*configMINIMAL_STACK_SIZE, NULL, /*Piority*/2, &stabilizerTaskHandle);
-      }
-      else
-      {
-        vTaskResume(stabilizerTaskHandle);
-      }
-
+      vTaskSuspend(offboardCtrlTaskHandle);
+      startStabilizer();
       mode=0;
     }
   }
