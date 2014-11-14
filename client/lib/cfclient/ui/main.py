@@ -510,6 +510,5 @@ class MainUI(QtGui.QMainWindow, main_window_class):
         QDesktopServices.openUrl(QUrl("file:///" + QDir.toNativeSeparators(sys.path[1])))
 
     def closeAppRequest(self):
-        self.lcm_bridge.destroy()
         self.close()
         sys.exit(0)
