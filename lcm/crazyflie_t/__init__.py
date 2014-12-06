@@ -6,3 +6,4 @@ DO NOT MODIFY BY HAND!!!!
 from crazyflie_pos_t import crazyflie_pos_t
 from crazyflie_thrust_t import crazyflie_thrust_t
 from crazyflie_imu_t import crazyflie_imu_t
+from crazyflie_state_estimate_t import crazyflie_state_estimate_t

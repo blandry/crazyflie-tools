@@ -1,7 +1,7 @@
 classdef ViconLCMCoder < LCMCoder
 
     methods
-        function [x,t] = decode(obj.data)
+        function [x,t] = decode(obj,data)
             msg = vicon_t.vicon_pos_t(data);
             x = zeros(12,1);
             x(1:6) = msg.q;

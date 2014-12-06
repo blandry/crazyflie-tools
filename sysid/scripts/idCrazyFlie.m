@@ -1,12 +1,8 @@
 % Load sysid data
 load sysIdDataAll.mat
- 
-% Merge data we want to fit
-%z = merge(zNov05_11,zNov05_12);
-z = testNov05;
 
 % Shift data to take into account delay
-delay = 0*ones(1,4); % 2 time samples shift
+delay = 0*ones(1,4);
 z = nkshift(z,delay); % Shift to take into account delay 
 
 % Model
@@ -55,16 +51,15 @@ nlgr = idnlgrey(FileName, Order, Parameters, nlgr.InitialStates, Ts);
 % Make plots comparing simulations of fitted model with training data
 compare(z, nlgr);
 
-
-% Test on other data (set to true if we want this)
-test = false;
-
-if test
-    % Test on other data
-    ztest = merge(zJan14_00,zJan14_01);
-    ztest = nkshift(ztest,delay);
-    compare(ztest,nlgr);
-end
+% % Test on other data (set to true if we want this)
+% test = false;
+% 
+% if test
+%     % Test on other data
+%     ztest = merge(zJan14_00,zJan14_01);
+%     ztest = nkshift(ztest,delay);
+%     compare(ztest,nlgr);
+% end
 
 
 

@@ -27,3 +27,9 @@ struct crazyflie_imu_t
   double pitch;
   double yaw;
 }
+
+struct crazyflie_state_estimate_t
+{
+  int64_t timestamp;
+  double xhat[12];
+}
