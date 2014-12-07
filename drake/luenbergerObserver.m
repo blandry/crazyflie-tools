@@ -56,8 +56,8 @@ while true
     xhat = xhat + dt*p.dynamics(0,xhat,u) + L*(y-xhat);
     
     % if there is a delay, propagate the state estimate forward
-    %delay = 0.001;
-    %xhat = xhat + delay*p.dynamics(0,xhat,u);
+    delay = 0.041833;
+    xhat = xhat + delay*p.dynamics(0,xhat,u);
     
     estimate_msg = crazyflie_t.crazyflie_state_estimate_t();
     estimate_msg.xhat = xhat;

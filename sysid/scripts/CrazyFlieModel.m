@@ -1,4 +1,4 @@
-function [xdot,y] = CrazyFlieModel(t,x,u,Ixx,Iyy,Izz,Km,varargin)
+function [xdot,y] = CrazyFlieModel(t,x,u,Ixx,Izz,Km,varargin)
 % States
 % x
 % y
@@ -19,12 +19,12 @@ function [xdot,y] = CrazyFlieModel(t,x,u,Ixx,Iyy,Izz,Km,varargin)
 y = x(1:6); % These are things we directly measure (outputs)
 
 % Parameters from physical measurements
-m = 22.4/1000; % Mass in kg
-Ixx = 0.006*Ixx;
-Iyy = 0.006*Iyy;
-Izz = 0.01*Izz;
+m = 22.7/1000; % Mass in kg
+Ixx = 0.00006*Ixx; % 0.006
+Iyy = Ixx; % 0.006
+Izz = 0.00005*Izz; % 0.01
 
-Km = (10^-9)*Km;
+Km = (10^-12)*Km;
 
 I = diag([Ixx,Iyy,Izz]); % Inertia matrix
 invI = diag(1./[Ixx,Iyy,Izz]); % inverse of I

@@ -1,11 +1,14 @@
 classdef Crazyflie
   properties
     manip;
+    a = -1.499999942623626e+04;
     sensor_frame;
     state_estimator_frame;
     pos_estimator_frame;
     input_frame;
-    nominal_thrust;
+    input_frame_from_drake;
+    nominal_omega_square;
+    nominal_input;
     input_freq = 200;
   end
   
@@ -18,8 +21,14 @@ classdef Crazyflie
       obj.state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatorLCMCoder,'x');
       obj.pos_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',PosEstimatorLCMCoder,'x');
       obj.input_frame = LCMCoordinateFrame('crazyflie_input',CFInputLCMCoder,'u');
- 
-      obj.nominal_thrust = norm(getMass(obj.manip)*obj.manip.gravity)/(obj.manip.force{1}.scale_factor_moment*4);
+      obj.input_frame_from_drake = LCMCoordinateFrame('crazyflie_input',CFInputFromdDrakeCoder,'u');
+      
+      % the model for thrust is
+      % omega = u - a
+      % Thrust = kf*omega^2
+      % Drake's model input is omega^2
+      obj.nominal_omega_square = norm(getMass(obj.manip)*obj.manip.gravity)/(obj.manip.force{1}.scale_factor_moment*4);
+      obj.nominal_input = sqrt(obj.nominal_omega_square)+obj.a;
     end
     
     function run(obj, utraj, tspan)
@@ -43,16 +52,18 @@ classdef Crazyflie
     end
     
     function stabilize(obj,xd)
+      
       Q = eye(12);
       R = 10*eye(4);
-      ltisys = tilqr(obj.manip,xd,obj.nominal_thrust, Q,R);
+      
+      ltisys = tilqr(obj.manip,xd,obj.nominal_omega_square,Q,R);
       ltisys = setInputFrame(ltisys,obj.state_estimator_frame);
-      ltisys = steOutputFrame(ltisys,obj.input_frame);
+      ltisys = steOutputFrame(ltisys,obj.input_frame_from_drake);
       runLCM(ltisys,[]);
     end
     
     function runtvlqr(obj, xtraj, utraj)
-      display('no');
+      error('Not implemented yet...');
     end
   end
   

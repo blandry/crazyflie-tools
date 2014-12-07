@@ -1,5 +1,5 @@
 
-files = [5];
+files = [3 4];
 
 d = cell(1,numel(files));
 for i=1:numel(files)
@@ -35,4 +35,4 @@ for i=1:numel(files)
 end
 
 z = merge(d{:});
-save('sysid/data/1119/matlab/cleanutraj2/sysIdDataAll.mat','z')
+save('../datsysIdDataAll.mat','z')
