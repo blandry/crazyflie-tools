@@ -20,9 +20,9 @@ y = x(1:6); % These are things we directly measure (outputs)
 
 % Parameters from physical measurements
 m = 22.7/1000; % Mass in kg
-Ixx = 0.00006*Ixx; % 0.006
-Iyy = Ixx; % 0.006
-Izz = 0.00005*Izz; % 0.01
+Ixx = 0.00006*Ixx;
+Iyy = Ixx;
+Izz = 0.00005*Izz;
 
 Km = (10^-12)*Km;
 
