@@ -5,6 +5,7 @@ classdef Crazyflie
     pos_estimator_frame;
     input_frame;
     input_frame_from_drake;
+    input_frame_centered
     
     manip;
     nominal_omega_square;
@@ -25,6 +26,7 @@ classdef Crazyflie
       obj.pos_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',PosEstimatorLCMCoder,'x');
       obj.input_frame = LCMCoordinateFrame('crazyflie_input',CFInputLCMCoder,'u');
       obj.input_frame_from_drake = LCMCoordinateFrame('crazyflie_input',CFInputFromDrakeLCMCoder,'u');
+      obj.input_frame_centered = LCMCoordinateFrame('crazyflie_input',CFCenteredInputLCMCoder,'u');
       
       % the model for thrust is
       % omega = u - a
@@ -54,23 +56,41 @@ classdef Crazyflie
       runLCM(v,[]);
     end
     
-    function stabilize(obj,xd)
+    function tilqr(obj,xd)
       Q = eye(12);
       R = 1E-15*eye(4);
-      ltisys = tilqr(obj.manip,xd,obj.nominal_omega_square,Q,R);
-      ltisys = setInputFrame(ltisys,obj.state_estimator_frame);
-      ltisys = setOutputFrame(ltisys,obj.input_frame_from_drake);
-      runLCM(ltisys,[]);
+      controller = tilqr(obj.manip,xd,obj.nominal_omega_square,Q,R);
+      controller = setInputFrame(controller,obj.state_estimator_frame);
+      controller = setOutputFrame(controller,obj.input_frame_from_drake);
+      runLCM(controller,[]);
     end
     
-    function simulateStabilize(obj,x0,xd,tf)
+    function pd(obj,xd)
+      controller = pdcontroller();
+      controller = setInputFrame(controller,obj.state_estimator_frame);
+      controller = setOutputFrame(controller,obj.input_frame_centered);
+      runLCM(controller,[]);
+    end
+    
+    function simulatetilqr(obj,x0,xd,tf)
       if (nargin<4)
         tf = 2;
       end
       Q = 10000*eye(12);
       R = (1/obj.nominal_omega_square(1))*eye(4);
-      ltisys = tilqr(obj.manip,xd,obj.nominal_omega_square,Q,R);
-      sys = feedback(obj.manip,ltisys);
+      controller = tilqr(obj.manip,xd,obj.nominal_omega_square,Q,R);
+      sys = feedback(obj.manip,controller);
+      xtraj = sys.simulate([0 tf],x0);
+      v = obj.manip.constructVisualizer();
+      v.playback(xtraj,struct('slider',true));
+    end
+    
+    function simulatepd(obj,x0,xd,tf)
+      if (nargin<4)
+        tf = 2;
+      end
+      controller = pdcontroller(obj.manip,xd,obj.nominal_omega_square);
+      sys = feedback(obj.manip,controller);
       xtraj = sys.simulate([0 tf],x0);
       v = obj.manip.constructVisualizer();
       v.playback(xtraj,struct('slider',true));

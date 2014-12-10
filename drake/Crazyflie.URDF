@@ -7,7 +7,7 @@
     <inertial>
       <mass value="0.0227"/>
       <origin xyz="0 0 0"/>
-      <inertia ixx="8.5020E-6" ixy="0.0" ixz="0.0" iyy="8.5020E-6" iyz="0.0" izz="5.5805E-5"/>
+      <inertia ixx="8.5020E-12" ixy="0.0" ixz="0.0" iyy="8.5020E-12" iyz="0.0" izz="5.5805E-12"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -18,28 +18,28 @@
   </link>
 
   <force_element name="prop1">
-    <propellor lower_limit="0" upper_limit="5.625E9" scale_factor_thrust="1.398000504999045E-11" scale_factor_moment="-4.503E-13" visual_geometry="true">
+    <propellor lower_limit="0" upper_limit="5.625E9" scale_factor_thrust="1" scale_factor_moment="-1" visual_geometry="true">
       <parent link="base_link"/>
       <origin xyz="0.043 0 0"/>
       <axis xyz="0 0 1"/>
     </propellor>
   </force_element>
   <force_element name="prop2">
-    <propellor lower_limit="0" upper_limit="5.625E9" scale_factor_thrust="1.398000504999045E-11" scale_factor_moment="4.503E-13" visual_geometry="true">
+    <propellor lower_limit="0" upper_limit="5.625E9" scale_factor_thrust="1" scale_factor_moment="1" visual_geometry="true">
       <parent link="base_link"/>
       <origin xyz="0 -0.043 0 "/>
       <axis xyz="0 0 1"/>
     </propellor>
   </force_element>
   <force_element name="prop3">
-    <propellor lower_limit="0" upper_limit="5.625E9" scale_factor_thrust="1.398000504999045E-11" scale_factor_moment="-4.503E-13" visual_geometry="true">
+    <propellor lower_limit="0" upper_limit="5.625E9" scale_factor_thrust="1" scale_factor_moment="-1" visual_geometry="true">
       <parent link="base_link"/>
       <origin xyz="-0.043 0 0"/>
       <axis xyz="0 0 1"/>
     </propellor>
   </force_element>
   <force_element name="prop4">
-    <propellor lower_limit="0" upper_limit="5.625E9" scale_factor_thrust="1.398000504999045E-11" scale_factor_moment="4.503E-13" visual_geometry="true">
+    <propellor lower_limit="0" upper_limit="5.625E9" scale_factor_thrust="1" scale_factor_moment="1" visual_geometry="true">
       <parent link="base_link"/>
       <origin xyz="0 0.043 0"/>
       <axis xyz="0 0 1"/>
