@@ -6,7 +6,7 @@ FileName = 'CrazyflieModel';
 Order = [6, 4, 12]; % [Number of observed outputs, Number of inputs, Number of states] 
 
 % Initial parameters [Ixx,Iyy,Izz,Km]
-Parameters = [0 0 0 0];
+Parameters = [1 1 1 -1];
 
 InitialStates = randn(12,1);
 Ts = 0; % Continuous time model

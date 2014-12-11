@@ -25,10 +25,10 @@ L = 0.043; % Distance from rotor to COM (in m)
 Kf = 0.001826420485436; % Fit from experiments with digital scale
 
 % Unknown parameters
-Ixx = 1E-4*Ixx;
-Iyy = 1E-4*Iyy;
+Ixx = 1E-5*Ixx;
+Iyy = 1E-5*Iyy;
 Izz = 1E-4*Izz;
-Km = 1E-12*Km;
+Km = 5E-5*Km;
 
 I = diag([Ixx,Iyy,Izz]); % Inertia matrix
 invI = diag(1./[Ixx,Iyy,Izz]); % inverse of I

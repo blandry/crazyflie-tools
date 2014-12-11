@@ -1,16 +1,21 @@
 % The time intervals to use
 % Use plotlog to identify those
-T = [4.5 7;
-     5.5 8;
-     5 7.5;
-     3 5.5;
-     4.5 7;
-     4 6];
+T = [3.984 4.559;
+     3.367 3.883;
+     3.442 4.042;
+     3.767 4.267;
+     4.359 4.8;
+     4.017 4.65;
+     4.517 5.092;
+     3.125 3.615;
+     3.85 4.534;
+     3.35 3.834;
+     3.442 3.934];
 
 for i=1:size(T,1)
   t0 = T(i,1);
   tf = T(i,2);
-  rawdata = load(strcat(num2str(i),'.mat'));
+  rawdata = load([num2str(i) '.mat']);
 
   pos = rawdata.crazyflie_squ_ext;
   input = rawdata.crazyflie_input;
@@ -51,7 +56,8 @@ end
 
 % you can remove some experiments from the sysid here
 % ex: files = [1 3 4]
-files = 1:size(T,1);
+% files = 1:size(T,1);
+files = [5];
 
 d = cell(1,numel(files));
 for i=1:numel(files)

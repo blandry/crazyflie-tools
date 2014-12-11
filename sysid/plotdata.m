@@ -1,6 +1,6 @@
 function plotdata(file_num)
 
-file = load(strcat(num2str(file_num),'.mat'));
+file = load(['clean' num2str(file_num) '.mat']);
 
 t = file.data(:,1);
 u = file.data(:,2:5);
