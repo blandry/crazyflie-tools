@@ -1,4 +1,4 @@
-function [xdot,y] = CrazyFlieModel(t,x,u,Ixx,Izz,Km,varargin)
+function [xdot,y] = CrazyflieModel(t,x,u,Ixx,Iyy,Izz,Km,varargin)
 % States
 % x
 % y
@@ -18,19 +18,20 @@ function [xdot,y] = CrazyFlieModel(t,x,u,Ixx,Izz,Km,varargin)
 % Set outputs
 y = x(1:6); % These are things we directly measure (outputs)
 
-% Parameters from physical measurements
-m = 22.7/1000; % Mass in kg
-Ixx = 0.00006*Ixx;
-Iyy = Ixx;
-Izz = 0.00005*Izz;
+% Known parameters
+g = 9.81;
+m = 0.0227; % mass in Kg
+L = 0.043; % Distance from rotor to COM (in m)
+Kf = 0.001826420485436; % Fit from experiments with digital scale
 
-Km = (10^-12)*Km;
+% Unknown parameters
+Ixx = 1E-4*Ixx;
+Iyy = 1E-4*Iyy;
+Izz = 1E-4*Izz;
+Km = 1E-12*Km;
 
 I = diag([Ixx,Iyy,Izz]); % Inertia matrix
 invI = diag(1./[Ixx,Iyy,Izz]); % inverse of I
-g = 9.81;
-Kf = (1.426531127550046e-09)*g/1000; % Fit from experiments with digital scale
-L = 0.043; % Distance from rotor to COM (in m)
 
 % states
 phi = x(4);
@@ -42,7 +43,10 @@ thetadot = x(11);
 psidot = x(12);
 
 % Note the permutation here!!!
-w1 = u(1); % These are omega^2
+% This is because the crazyflie motor number increases
+% clockwise and Mellinger's model increases counterclockwise
+% These are omega^2
+w1 = u(1);
 w2 = u(4);
 w3 = u(3);
 w4 = u(2);
@@ -61,7 +65,6 @@ M1 = Km*w1;
 M2 = Km*w2;
 M3 = Km*w3;
 M4 = Km*w4;
-
 
 xyz_ddot = (1/m)*([0;0;-m*g] + R*[0;0;F1+F2+F3+F4]);
 
@@ -88,8 +91,4 @@ rpy_ddot = Phi*R*pqr_dot + reshape((dPhi*[phidot;thetadot;psidot]),3,3)*R*pqr + 
 
 xdot = [x(7:12);xyz_ddot;rpy_ddot];
 
-
 end
-
-
-
