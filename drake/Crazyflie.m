@@ -1,39 +1,35 @@
 classdef Crazyflie
   properties
-    sensor_frame;
-    state_estimator_frame;
-    pos_estimator_frame;
-    input_frame;
-    input_frame_from_drake;
-    input_frame_centered
-    
     manip;
+    
     nominal_omega_square;
     nominal_input;
+    input_freq = 120;
+    a = -1.208905335853438;
+
+    vicon_frame;
+    state_estimator_frame;
     
-    input_freq = 200;
-    a = -1.499999942623626e+04;
+    input_frame_u; % getting u, broadcasting 10000*u-32768
+    input_frame_u_offset; % getting u, broadcasting 10000*(u+offset)-32768
+    input_frame_omega_square_to_u; % getting omega^2, broadcasting 10000*u-32768
   end
   
   methods
     
     function obj = Crazyflie()
       options.floating = true;
-      obj.manip = RigidBodyManipulator('Crazyflie.URDF',options);
-      
-      obj.sensor_frame = LCMCoordinateFrame('crazyflie_squ_ext',ViconLCMCoder,'x');
-      obj.state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatorLCMCoder,'x');
-      obj.pos_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',PosEstimatorLCMCoder,'x');
-      obj.input_frame = LCMCoordinateFrame('crazyflie_input',CFInputLCMCoder,'u');
-      obj.input_frame_from_drake = LCMCoordinateFrame('crazyflie_input',CFInputFromDrakeLCMCoder,'u');
-      obj.input_frame_centered = LCMCoordinateFrame('crazyflie_input',CFCenteredInputLCMCoder,'u');
-      
-      % the model for thrust is
-      % omega = u - a
-      % Thrust = kf*omega^2
-      % Drake's model input is omega^2
+      obj.manip = RigidBodyManipulator('crazyflie.urdf',options);
+
       obj.nominal_omega_square = repmat(norm(getMass(obj.manip)*obj.manip.gravity)/(obj.manip.force{1}.scale_factor_thrust*4),4,1);
       obj.nominal_input = sqrt(obj.nominal_omega_square)+obj.a;
+            
+      obj.vicon_frame = LCMCoordinateFrame('crazyflie_squ_ext',ViconCoder,'x');
+      obj.state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatorCoder,'x');
+      
+      obj.input_frame_u = LCMCoordinateFrame('crazyflie_input',InputUCoder,'u');
+      obj.input_frame_u_offset = LCMCoordinateFrame('crazyflie_input',InputUOffsetCoder(obj.nominal_input),'u');
+      obj.input_frame_omega_square_to_u = LCMCoordinateFrame('crazyflie_input',InputOmegaSquareToUCoder(obj.a),'u');
     end
     
     function run(obj, utraj, tspan)
@@ -50,54 +46,43 @@ classdef Crazyflie
       runLCM(utraj,[],options);
     end
     
-    function visualizeEstimator(obj)
-      v = obj.manip.constructVisualizer();
-      v = setInputFrame(v,obj.pos_estimator_frame);
-      runLCM(v,[]);
-    end
-    
     function tilqr(obj,xd)
-      Q = eye(12);
-      R = 1E-15*eye(4);
+      Q = 1000*eye(12);
+      R = .1*eye(4);
       controller = tilqr(obj.manip,xd,obj.nominal_omega_square,Q,R);
       controller = setInputFrame(controller,obj.state_estimator_frame);
-      controller = setOutputFrame(controller,obj.input_frame_from_drake);
+      controller = setOutputFrame(controller,obj.input_frame_omega_square_to_u);
       runLCM(controller,[]);
     end
     
-    function pd(obj,xd)
+    function pd(obj)
       controller = pdcontroller();
       controller = setInputFrame(controller,obj.state_estimator_frame);
-      controller = setOutputFrame(controller,obj.input_frame_centered);
+      controller = setOutputFrame(controller,obj.input_frame_u_offset);
       runLCM(controller,[]);
     end
     
-    function simulatetilqr(obj,x0,xd,tf)
-      if (nargin<4)
-        tf = 2;
+    function simulatetilqr(obj,xd,x0,tf)
+      if (nargin<3)
+        x0 = zeros(12,1);
       end
-      Q = 10000*eye(12);
-      R = (1/obj.nominal_omega_square(1))*eye(4);
+      if (nargin<4)
+        tf = 1;
+      end
+      Q = 1000*eye(12);
+      R = .1*eye(4);
       controller = tilqr(obj.manip,xd,obj.nominal_omega_square,Q,R);
+      
       sys = feedback(obj.manip,controller);
       xtraj = sys.simulate([0 tf],x0);
       v = obj.manip.constructVisualizer();
       v.playback(xtraj,struct('slider',true));
     end
-    
-    function simulatepd(obj,x0,xd,tf)
-      if (nargin<4)
-        tf = 2;
-      end
-      controller = pdcontroller(obj.manip,xd,obj.nominal_omega_square);
-      sys = feedback(obj.manip,controller);
-      xtraj = sys.simulate([0 tf],x0);
+     
+    function visualizeVicon(obj)
       v = obj.manip.constructVisualizer();
-      v.playback(xtraj,struct('slider',true));
-    end
-    
-    function runtvlqr(obj, xtraj, utraj)
-      error('Not implemented yet...');
+      v = setInputFrame(v,obj.vicon_frame);
+      runLCM(v,[]);
     end
   end
   
