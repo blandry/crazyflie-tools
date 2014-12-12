@@ -1,5 +1,6 @@
 classdef InputUCoder < LCMCoder
-  
+   % getting u, broadcasting 10000*u-32768
+   
   methods
     function [u,t] = decode(obj,data)
       msg = crazyflie_t.crazyflie_thrust_t(data);
@@ -8,8 +9,8 @@ classdef InputUCoder < LCMCoder
     end
     function msg = encode(obj,t,u)
       msg = crazyflie_t.crazyflie_thrust_t();
-      thrust = min(65000,10000*u-32768);
-      thrust = max(0,thrust);
+      thrust = min(65000,10000*u);
+      thrust = max(0,thrust)-32768;
       msg.thrust1 = thrust(1);
       msg.thrust2 = thrust(2);
       msg.thrust3 = thrust(3);

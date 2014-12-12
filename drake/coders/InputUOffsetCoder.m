@@ -1,4 +1,5 @@
 classdef InputUOffsetCoder < LCMCoder
+  % getting u, broadcasting 10000*(u+offset)-32768
   
   properties
     offset;
@@ -16,8 +17,8 @@ classdef InputUOffsetCoder < LCMCoder
     end
     function msg = encode(obj,t,u)
       msg = crazyflie_t.crazyflie_thrust_t();
-      thrust = min(65000,10000*(u+obj.offset)-32768);
-      thrust = max(0,thrust);
+      thrust = min(65000,10000*(u+obj.offset));
+      thrust = max(0,thrust)-32768;
       msg.thrust1 = thrust(1);
       msg.thrust2 = thrust(2);
       msg.thrust3 = thrust(3);

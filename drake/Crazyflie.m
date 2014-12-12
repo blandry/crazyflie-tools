@@ -4,15 +4,14 @@ classdef Crazyflie
     
     nominal_omega_square;
     nominal_input;
-    input_freq = 120;
+    input_freq = 240;
     a = -1.208905335853438;
 
     vicon_frame;
     state_estimator_frame;
     
-    input_frame_u; % getting u, broadcasting 10000*u-32768
-    input_frame_u_offset; % getting u, broadcasting 10000*(u+offset)-32768
-    input_frame_omega_square_to_u; % getting omega^2, broadcasting 10000*u-32768
+    input_frame_u;
+    input_frame_omega_square_to_u;
   end
   
   methods
@@ -28,7 +27,6 @@ classdef Crazyflie
       obj.state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatorCoder,'x');
       
       obj.input_frame_u = LCMCoordinateFrame('crazyflie_input',InputUCoder,'u');
-      obj.input_frame_u_offset = LCMCoordinateFrame('crazyflie_input',InputUOffsetCoder(obj.nominal_input),'u');
       obj.input_frame_omega_square_to_u = LCMCoordinateFrame('crazyflie_input',InputOmegaSquareToUCoder(obj.a),'u');
     end
     
@@ -56,9 +54,23 @@ classdef Crazyflie
     end
     
     function pd(obj)
-      controller = pdcontroller();
+      % Reversed engineered from the Crazyflie firmware
+      Z_KP = 0.0;
+      ROLL_KP = 3.5;
+      PITCH_KP = 3.5;
+      YAW_KP = 0.0;
+      Z_RATE_KP = 1400;
+      ROLL_RATE_KP = 35;
+      PITCH_RATE_KP = 35;
+      YAW_RATE_KP = 30;
+      K = 1/10000 * [0 0 -Z_KP 0 PITCH_KP YAW_KP 0 0 -Z_RATE_KP 0 PITCH_RATE_KP YAW_RATE_KP;
+                     0 0 -Z_KP ROLL_KP 0 -YAW_KP 0 0 -Z_RATE_KP ROLL_RATE_KP 0 -YAW_RATE_KP;
+                     0 0 -Z_KP 0 -PITCH_KP YAW_KP 0 0 -Z_RATE_KP 0 -PITCH_RATE_KP YAW_RATE_KP;
+                     0 0 -Z_KP -ROLL_KP 0 -YAW_KP 0 0 -Z_RATE_KP -ROLL_RATE_KP 0 -YAW_RATE_KP];
+             
+      controller = LinearSystem([],[],[],[],[],K);
       controller = setInputFrame(controller,obj.state_estimator_frame);
-      controller = setOutputFrame(controller,obj.input_frame_u_offset);
+      controller = setOutputFrame(controller,LCMCoordinateFrame('crazyflie_input',InputUOffsetCoder(5),'u'));
       runLCM(controller,[]);
     end
     

@@ -1,4 +1,6 @@
 
+% Note that the state estimates are in degrees, not radians
+
 alpha = 0.8;
 xhat = zeros(12,1);
 
@@ -26,7 +28,7 @@ while true
     if (vicon_msg.q(1)<=-1000)
       vicon_msg.q = xhat(1:6); % vicon lost the crazyflie
     end
-    vicon_msg.q(4:6) = quat2rpy(angle2quat(vicon_msg.q(4),vicon_msg.q(5),vicon_msg.q(6),'XYZ'));
+    vicon_msg.q(4:6) = quat2rpy(angle2quat(vicon_msg.q(4),vicon_msg.q(5),vicon_msg.q(6),'XYZ'))*180/pi;
     
     if isinit
       qd_new = (vicon_msg.q-q_measured)/dt;

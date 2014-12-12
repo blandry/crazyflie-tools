@@ -1,5 +1,6 @@
 classdef InputOmegaSquareToUCoder < LCMCoder
-  
+   % getting omega^2, broadcasting 10000*u-32768
+   
   properties
     a;
   end
@@ -16,8 +17,8 @@ classdef InputOmegaSquareToUCoder < LCMCoder
     end
     function msg = encode(obj,t,omega_square)
       msg = crazyflie_t.crazyflie_thrust_t();
-      thrust = min(65000,10000*(sqrt(omega_square)+obj.a)-32768);
-      thrust = max(0,thrust);
+      thrust = min(65000,10000*(sqrt(omega_square)+obj.a));
+      thrust = max(0,thrust)-32768;
       msg.thrust1 = thrust(1);
       msg.thrust2 = thrust(2);
       msg.thrust3 = thrust(3);
