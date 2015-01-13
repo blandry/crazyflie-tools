@@ -1,0 +1,3 @@
+[submodule "vicon"]
+	path = vicon
+	url = git@github.com:blandry/vicon.git
