@@ -1,6 +1,6 @@
 % The time intervals to use
 % Use plotlog to identify those
-T = [3.984 5.017;%4.559;
+T = [3.984 5.017;
      3.367 3.883;
      3.442 4.042;
      3.767 4.267;
@@ -42,15 +42,15 @@ for i=1:size(T,1)
   % shift the input because of lcm, scale them for easy modeling
   inputdata = ([input1,input2,input3,input4]+32768)/10000;
 
-%   posdata = [pos(ipos:jpos,2:4),zeros(N,3)];
-%   ang = pos(ipos:jpos,5:7);
-%   for t=1:N
-%     % transform the euler angles because of vicon
-%     posdata(t,4:6) = quat2rpy(angle2quat(ang(t,1),ang(t,2),ang(t,3),'XYZ'));
-%   end
-%   % unwrap the angles for better idea of dynamics
+  posdata = [pos(ipos:jpos,2:4),zeros(N,3)];
+  ang = pos(ipos:jpos,5:7);
+  for t=1:N
+    % transform the euler angles because of vicon
+    posdata(t,4:6) = quat2rpy(angle2quat(ang(t,1),ang(t,2),ang(t,3),'XYZ'));
+  end
+  % unwrap the angles for better idea of dynamics
   posdata = pos(ipos:jpos,2:7);
-%   posdata(:,4:6) = unwrap(posdata(:,4:6));
+  posdata(:,4:6) = unwrap(posdata(:,4:6));
   
   data = [timestamps,inputdata,posdata];
   save(['clean' num2str(i) '.mat'],'data');

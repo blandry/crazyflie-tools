@@ -50,8 +50,8 @@ nlgr.Algorithm.Regularization.Nominal = 'model';
 RR = diag([ones(1,length(Parameters)) 0.01*ones(1,length(z.ExperimentName)*12)]);
 nlgr.Algorithm.Regularization.R = RR;
 
-% setinit(nlgr, 'Fixed', {true true true true true true false false false false false false});   % Estimate velocities initial states
-setinit(nlgr, 'Fixed', {false false false false false false false false false false false false}); % Estimate the initial state.
+setinit(nlgr, 'Fixed', {true true true true true true false false false false false false});   % Estimate velocities initial states
+% setinit(nlgr, 'Fixed', {false false false false false false false false false false false false}); % Estimate the initial state.
 
 % Set max/min limits for parameters
 nlgr.Parameters(1).Minimum = 0; nlgr.Parameters(1).Maximum = 1000; 
