@@ -1,16 +1,14 @@
 % The time intervals to use
 % Use plotlog to identify those
-T = [3.984 5.017;
-     3.367 3.883;
-     3.442 4.042;
-     3.767 4.267;
-     4.359 4.8;
-     4.017 4.65;
-     4.517 5.092;
-     3.125 3.615;
-     3.85 4.534;
-     3.35 3.834;
-     3.442 3.934];
+T = [5.075 5.384;
+     4.942 5.242;
+     5.351 5.868;
+     4.342 4.717;
+     3.483 4.167;
+     3.8 4.334;
+     4.275 4.792;
+     4.717 5.167;
+     3.634 4.192];
 
 for i=1:size(T,1)
   t0 = T(i,1);
@@ -49,7 +47,6 @@ for i=1:size(T,1)
     posdata(t,4:6) = quat2rpy(angle2quat(ang(t,1),ang(t,2),ang(t,3),'XYZ'));
   end
   % unwrap the angles for better idea of dynamics
-  posdata = pos(ipos:jpos,2:7);
   posdata(:,4:6) = unwrap(posdata(:,4:6));
   
   data = [timestamps,inputdata,posdata];
@@ -58,8 +55,12 @@ end
 
 % you can remove some experiments from the sysid here
 % ex: files = [1 3 4]
-% files = 1:size(T,1);
-files = [1];
+%files = 1:size(T,1);
+%files = [5];
+%files = [1 2 3 4 5 7 8 9];
+
+% for the inertia matrix
+files = [1 2 3];
 
 d = cell(1,numel(files));
 for i=1:numel(files)

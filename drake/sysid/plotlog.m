@@ -11,6 +11,7 @@ input = data.crazyflie_input(:,2:5);
 subplot(2,1,1);
 plot(tpos,pos);
 title('Position over time');
+ylim([-5 5]);
 
 subplot(2,1,2);
 plot(tinput,input);

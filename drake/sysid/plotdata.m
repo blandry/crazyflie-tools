@@ -9,6 +9,7 @@ q = file.data(:,6:11);
 subplot(2,1,2);
 plot(t,q);
 title('Position over time');
+legend('x','y','z','roll','pitch','yaw');
 
 subplot(2,1,1);
 plot(t,u);

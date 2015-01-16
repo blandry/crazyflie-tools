@@ -27,8 +27,8 @@ Kf = 0.001826420485436;
 % Unknown parameters
 Ixx = 1E-5*Ixx;
 Iyy = 1E-5*Iyy;
-Izz = 1E-4*Izz;
-Km = 5E-5*Km;
+Izz = 1E-5*Izz;
+Km = 1E-7*Km;
 
 I = diag([Ixx,Iyy,Izz]); % Inertia matrix
 invI = diag(1./[Ixx,Iyy,Izz]); % inverse of I
@@ -69,6 +69,10 @@ xyz_ddot = (1/m)*([0;0;-m*g] + R*[0;0;F1+F2+F3+F4]);
 % angular vel in base frame
 pqr = rpydot2angularvel([phi;theta;psi],[phidot;thetadot;psidot]); 
 
+% angular vel in body frame
+pqr = R'*pqr;
+
+% angular acceleration in body frame
 pqr_dot = invI*([L*(F4-F2);L*(F3-F1);(M2+M4-M1-M3)]-cross(pqr,I*pqr));
 
 % Now, convert pqr_dot to rpy_ddot

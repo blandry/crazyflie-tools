@@ -96,6 +96,12 @@ classdef Crazyflie
       v = setInputFrame(v,obj.vicon_frame);
       runLCM(v,[]);
     end
+    
+    function visualizeTraj(obj,xtraj)
+      v = obj.manip.constructVisualizer();
+      v = setInputFrame(v,getOutputFrame(xtraj));
+      v.playback(xtraj,struct('slider',true));
+    end
   end
   
 end
