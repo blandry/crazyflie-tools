@@ -56,11 +56,12 @@ end
 % you can remove some experiments from the sysid here
 % ex: files = [1 3 4]
 %files = 1:size(T,1);
-%files = [5];
-%files = [1 2 3 4 5 7 8 9];
 
 % for the inertia matrix
-files = [1 2 3];
+%files = [1 2 3];
+
+% for the km
+files = [4 5 7 8 9];
 
 d = cell(1,numel(files));
 for i=1:numel(files)

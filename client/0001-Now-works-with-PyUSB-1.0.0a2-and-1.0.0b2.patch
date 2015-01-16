@@ -1,0 +1,82 @@
+From dddd592612239e81b1816920f8d1b7db01eba120 Mon Sep 17 00:00:00 2001
+From: Marcus Eliasson <marcus@bitcraze.se>
+Date: Tue, 9 Dec 2014 13:29:37 +0100
+Subject: [PATCH] Now works with PyUSB 1.0.0a2 and 1.0.0b2
+
+---
+ lib/cflib/drivers/cfusb.py      | 10 +++++-----
+ lib/cflib/drivers/crazyradio.py |  9 ++++-----
+ 2 files changed, 9 insertions(+), 10 deletions(-)
+
+diff --git a/lib/cflib/drivers/cfusb.py b/lib/cflib/drivers/cfusb.py
+index b206d0b..bec8ef5 100644
+--- a/lib/cflib/drivers/cfusb.py
++++ b/lib/cflib/drivers/cfusb.py
+@@ -37,6 +37,7 @@ __all__ = ['CfUsb']
+ import os
+ import usb
+ import logging
++import sys
+ import time
+ import array
+ import binascii
+@@ -66,9 +67,8 @@ def _find_devices():
+     logger.info("Looking for devices....")
+ 
+     if pyusb1:
+-        dev = usb.core.find(idVendor=USB_VID, idProduct=USB_PID, find_all=1, backend=pyusb_backend)
+-        if dev is not None:
+-            ret = dev
++        for d in usb.core.find(idVendor=USB_VID, idProduct=USB_PID, find_all=1, backend=pyusb_backend):
++            ret.append(d)
+     else:
+         busses = usb.busses()
+         for bus in busses:
+@@ -147,7 +147,7 @@ class CfUsb:
+             if (pyusb1 is False):
+                 count = self.handle.bulkWrite(1, dataOut, 20)
+             else:
+-                count = self.handle.write(1, dataOut, 0, 20)
++                count = self.handle.write(endpoint=1, data=dataOut, timeout=20)
+         except usb.USBError as e:
+             pass
+ 
+@@ -158,7 +158,7 @@ class CfUsb:
+             if (pyusb1 is False):
+                 dataIn = self.handle.bulkRead(0x81, 64, 20)
+             else:
+-                dataIn = self.handle.read(0x81, 64, 0, 20)
++                dataIn = self.handle.read(0x81, 64, timeout=20)
+         except usb.USBError as e:
+             pass
+ 
+diff --git a/lib/cflib/drivers/crazyradio.py b/lib/cflib/drivers/crazyradio.py
+index 7627029..5e279ac 100644
+--- a/lib/cflib/drivers/crazyradio.py
++++ b/lib/cflib/drivers/crazyradio.py
+@@ -74,9 +74,8 @@ def _find_devices():
+     ret = []
+ 
+     if pyusb1:
+-        dev = usb.core.find(idVendor=0x1915, idProduct=0x7777, find_all=1, backend=pyusb_backend)
+-        if dev is not None:
+-            ret = dev
++        for d in usb.core.find(idVendor=0x1915, idProduct=0x7777, find_all=1, backend=pyusb_backend):
++            ret.append(d)
+     else:
+         busses = usb.busses()
+         for bus in busses:
+@@ -254,8 +253,8 @@ class Crazyradio:
+                 self.handle.bulkWrite(1, dataOut, 1000)
+                 data = self.handle.bulkRead(0x81, 64, 1000)
+             else:
+-                self.handle.write(1, dataOut, 0, 1000)
+-                data = self.handle.read(0x81, 64, 0, 1000)
++                self.handle.write(endpoint=1, data=dataOut, timeout=1000)
++                data = self.handle.read(0x81, 64, timeout=1000)
+         except usb.USBError:
+             pass
+ 
+-- 
+2.1.0
+

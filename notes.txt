@@ -1,0 +1,9 @@
+Vicon
+
+-System settings RLG-crazyflie
+-Calibration
+-Object: crazyflie_squ_ext
+-Red: X, Green: Y, Blue: Z
+-X toward the exit, Y toward the cabinet, Z upwards
+-Motor 1 toward X, Motor 4 toward Y
+

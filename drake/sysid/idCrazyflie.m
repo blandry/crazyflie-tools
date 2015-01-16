@@ -6,7 +6,8 @@ FileName = 'CrazyflieModel';
 Order = [6, 4, 12]; % [Number of observed outputs, Number of inputs, Number of states] 
 
 % Initial parameters [Ixx,Iyy,Izz,Km]
-Parameters = [1.20 0.81 2.22 1];
+%Parameters = [1.20 0.81 2.22 1];
+Parameters = [1];
 
 InitialStates = [-3 0 1.25 0 0 0 0 0 0 0 0 0]'; %randn(12,1);
 Ts = 0; % Continuous time model
@@ -45,18 +46,18 @@ Ts = 0; % Continuous time model
 nlgr = idnlgrey(FileName, Order, Parameters, InitialStates, Ts); 
 
 % Regularization
-nlgr.Algorithm.Regularization.Lambda = 0.01;
-nlgr.Algorithm.Regularization.Nominal = 'model';
-RR = diag([ones(1,length(Parameters)) 0.01*ones(1,length(z.ExperimentName)*12)]);
-nlgr.Algorithm.Regularization.R = RR;
+% nlgr.Algorithm.Regularization.Lambda = 0.01;
+% nlgr.Algorithm.Regularization.Nominal = 'model';
+% RR = diag([ones(1,length(Parameters)) 0.01*ones(1,length(z.ExperimentName)*12)]);
+% nlgr.Algorithm.Regularization.R = RR;
 
 % setinit(nlgr, 'Fixed', {true true true true true true false false false false false false});   % Estimate velocities initial states
 setinit(nlgr, 'Fixed', {false false false false false false false false false false false false}); % Estimate the initial state.
 
 % Set max/min limits for parameters
-nlgr.Parameters(1).Minimum = 0; nlgr.Parameters(1).Maximum = 1000; 
-nlgr.Parameters(2).Minimum = 0; nlgr.Parameters(2).Maximum = 1000; 
-nlgr.Parameters(3).Minimum = 0; nlgr.Parameters(3).Maximum = 1000; 
+%nlgr.Parameters(1).Minimum = 0; nlgr.Parameters(1).Maximum = 1000; 
+%nlgr.Parameters(2).Minimum = 0; nlgr.Parameters(2).Maximum = 1000; 
+%nlgr.Parameters(3).Minimum = 0; nlgr.Parameters(3).Maximum = 1000; 
 
 nlgr.InitialStates(1).Name = 'x';
 nlgr.InitialStates(2).Name = 'y';

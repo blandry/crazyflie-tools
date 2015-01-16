@@ -1,0 +1,29 @@
+From 1f037e53d07e756c04a3c2c46a4d4c18f9cd8ac6 Mon Sep 17 00:00:00 2001
+From: Marcus Eliasson <marcus@bitcraze.se>
+Date: Tue, 9 Dec 2014 12:59:51 +0100
+Subject: [PATCH] Added fix for PyUSB 1.x
+
+---
+ lib/cflib/drivers/cfusb.py | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/lib/cflib/drivers/cfusb.py b/lib/cflib/drivers/cfusb.py
+index daf497f..b206d0b 100644
+--- a/lib/cflib/drivers/cfusb.py
++++ b/lib/cflib/drivers/cfusb.py
+@@ -92,8 +92,11 @@ class CfUsb:
+ 
+         if device is None:
+             devices = _find_devices()
+-            if len(devices) > 0:
++            try:
+                 self.dev = devices[devid]
++            except Exception:
++                self.dev = None
++
+ 
+         if self.dev:
+             if (pyusb1 is True):
+-- 
+2.1.0
+
