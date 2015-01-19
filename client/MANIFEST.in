@@ -1,2 +1,0 @@
-recursive-include lib/cfclient/configs *.json
-recursive-include lib/cfclient/ui *.ui
