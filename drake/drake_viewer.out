@@ -1,0 +1,5 @@
+BOT_VIEWER_PRETTIER: 0
+Using X Visual 0x20
+loading new robot with 2 links
+Warning: Mesh /home/blandry/code/crazyflie-tools/drake/crazyflie.stl ignored because it does not have extension .obj (nor can I find a juxtaposed file with a .obj extension)
+successfully loaded model

@@ -8,9 +8,9 @@ Order = [6, 4, 12]; % [Number of observed outputs, Number of inputs, Number of s
 % Initial parameters [Ixx,Iyy,Izz,Km,Kf]
 %Parameters = [1.20 0.81 2.22 1];
 %Parameters = [1];
-Parameters = [0.56 0.62 2.46 0.27 1.826420485436];
+Parameters = [1.5474291 1.5474291 3.0743992 1];
 
-InitialStates = [-3 0 1.25 0 0 0 0 0 0 0 0 0]'; %randn(12,1);
+InitialStates = [-3 0 1.25 0 0 0 0 0 0 0 0 0]';
 Ts = 0; % Continuous time model
 
 % % extract inital state guesses from the data
@@ -56,9 +56,9 @@ nlgr.Algorithm.Regularization.R = RR;
 setinit(nlgr, 'Fixed', {false false false false false false false false false false false false}); % Estimate the initial state.
 
 % Set max/min limits for parameters
-%nlgr.Parameters(1).Minimum = 0; nlgr.Parameters(1).Maximum = 1000; 
-%nlgr.Parameters(2).Minimum = 0; nlgr.Parameters(2).Maximum = 1000; 
-%nlgr.Parameters(3).Minimum = 0; nlgr.Parameters(3).Maximum = 1000; 
+nlgr.Parameters(1).Minimum = 0; nlgr.Parameters(1).Maximum = 1000; 
+nlgr.Parameters(2).Minimum = 0; nlgr.Parameters(2).Maximum = 1000; 
+nlgr.Parameters(3).Minimum = 0; nlgr.Parameters(3).Maximum = 1000; 
 
 nlgr.InitialStates(1).Name = 'x';
 nlgr.InitialStates(2).Name = 'y';

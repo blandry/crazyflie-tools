@@ -14,7 +14,7 @@ classdef Crazyflie
     input_frame_omega_square_to_u;
     
     % LQR gains
-    Q = 1000*eye(12);
+    Q = 500*diag([1 1 1 100 100 10 100 100 100 100 100 100]);
     R = eye(4);
   end
   
@@ -57,15 +57,15 @@ classdef Crazyflie
     
     function pd(obj)
       % Reversed engineered from the Crazyflie firmware
-      u0 = 4.3;
+      u0 = 4.7;
       Z_KP = 0.0;
-      ROLL_KP = 3.5;
-      PITCH_KP = 3.5;
+      ROLL_KP = 3.5*180/pi;
+      PITCH_KP = 3.5*180/pi;
       YAW_KP = 0.0;
       Z_RATE_KP = 1400;
-      ROLL_RATE_KP = 35;
-      PITCH_RATE_KP = 35;
-      YAW_RATE_KP = 30;
+      ROLL_RATE_KP = 35*180/pi;
+      PITCH_RATE_KP = 35*180/pi;
+      YAW_RATE_KP = 30*180/pi;
       K = 1/10000 * [0 0 -Z_KP 0 PITCH_KP YAW_KP 0 0 -Z_RATE_KP 0 PITCH_RATE_KP YAW_RATE_KP;
                      0 0 -Z_KP ROLL_KP 0 -YAW_KP 0 0 -Z_RATE_KP ROLL_RATE_KP 0 -YAW_RATE_KP;
                      0 0 -Z_KP 0 -PITCH_KP YAW_KP 0 0 -Z_RATE_KP 0 -PITCH_RATE_KP YAW_RATE_KP;

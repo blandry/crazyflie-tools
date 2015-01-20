@@ -1,4 +1,6 @@
+
 L = 0.4;
+alpha = 0.8;
 
 vicon_object_channel = 'crazyflie_squ_ext';
 input_channel = 'crazyflie_input';
@@ -21,8 +23,8 @@ lc.subscribe(vicon_object_channel, vicon_aggregator);
 
 input_storage = LCMStorage(input_channel);
 
-%finite_diff_qd = [];
-%estimated_qd = [];
+finite_diff_qd = [];
+estimated_qd = [];
 
 xhat = zeros(12,1);
 isinit = false;
@@ -37,9 +39,9 @@ while true
     if (vicon_msg.q(1)<=-1000)
       % vicon lost the crazyflie
       vicon_msg.q = xhat(1:6);
+    else
+      vicon_msg.q(4:6) = quat2rpy(angle2quat(vicon_msg.q(4),vicon_msg.q(5),vicon_msg.q(6),'XYZ'));
     end
-    
-    vicon_msg.q(4:6) = quat2rpy(angle2quat(vicon_msg.q(4),vicon_msg.q(5),vicon_msg.q(6),'XYZ'));
     
     if isinit
       unwrapped_rpy = unwrap([y(4:6)';vicon_msg.q(4:6)']);
@@ -55,8 +57,9 @@ while true
     
     y = [vicon_msg.q;qd];
     
-    if (y(3)<0.65)
-      xhat = y;
+    if (y(3)<0.45)
+      xhat(1:6) = y(1:6);
+      xhat(7:12) = alpha*y(7:12) + (1-alpha)*xhat(7:12);
     else
       input_data = input_storage.GetLatestMessage();
       if ~isempty(input_data);
