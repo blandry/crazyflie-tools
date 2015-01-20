@@ -12,6 +12,10 @@ classdef Crazyflie
     
     input_frame_u;
     input_frame_omega_square_to_u;
+    
+    % LQR gains
+    Q = 1000*eye(12);
+    R = eye(4);
   end
   
   methods
@@ -31,7 +35,7 @@ classdef Crazyflie
     end
     
     function run(obj, utraj, tspan)
-      utraj = setOutputFrame(utraj,obj.input_frame);
+      utraj = setOutputFrame(utraj,obj.input_frame_u);
       if (nargin<3)
         options.tspan = utraj.tspan;
         if (options.tspan(1)<0)
@@ -45,9 +49,7 @@ classdef Crazyflie
     end
     
     function tilqr(obj,xd)
-      Q = 1000*eye(12);
-      R = .1*eye(4);
-      controller = tilqr(obj.manip,xd,obj.nominal_omega_square,Q,R);
+      controller = tilqr(obj.manip,xd,obj.nominal_omega_square,obj.Q,obj.R);
       controller = setInputFrame(controller,obj.state_estimator_frame);
       controller = setOutputFrame(controller,obj.input_frame_omega_square_to_u);
       runLCM(controller,[]);
@@ -55,6 +57,7 @@ classdef Crazyflie
     
     function pd(obj)
       % Reversed engineered from the Crazyflie firmware
+      u0 = 4.3;
       Z_KP = 0.0;
       ROLL_KP = 3.5;
       PITCH_KP = 3.5;
@@ -70,23 +73,16 @@ classdef Crazyflie
              
       controller = LinearSystem([],[],[],[],[],K);
       controller = setInputFrame(controller,obj.state_estimator_frame);
-      controller = setOutputFrame(controller,LCMCoordinateFrame('crazyflie_input',InputUOffsetCoder(5),'u'));
+      controller = setOutputFrame(controller,LCMCoordinateFrame('crazyflie_input',InputUOffsetCoder(u0),'u'));
       runLCM(controller,[]);
     end
     
-    function simulatetilqr(obj,xd,x0,tf)
-      if (nargin<3)
-        x0 = zeros(12,1);
-      end
-      if (nargin<4)
-        tf = 1;
-      end
-      Q = 1000*eye(12);
-      R = .1*eye(4);
-      controller = tilqr(obj.manip,xd,obj.nominal_omega_square,Q,R);
+    function simulatetilqr(obj)
+      xd = [0 0 1 0 0 0 0 0 0 0 0 0]';
+      controller = tilqr(obj.manip,xd,obj.nominal_omega_square,obj.Q,obj.R);
       
       sys = feedback(obj.manip,controller);
-      xtraj = sys.simulate([0 tf],x0);
+      xtraj = sys.simulate([0 5],xd+[rand(1,6) zeros(1,6)]');
       v = obj.manip.constructVisualizer();
       v.playback(xtraj,struct('slider',true));
     end
