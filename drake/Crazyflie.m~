@@ -14,7 +14,7 @@ classdef Crazyflie
     input_frame_omega_square_to_u;
     
     % LQR gains
-    Q = 0.1*diag([.0001 .0001 .0001 .01 .01 .01 .00001 .00001 .00001 .001 .001 .001]);
+    Q = 0.1*diag([.0001 .0001 .0001 1 1 1 .00001 .00001 .0001 1 1 1]);
     R = 0.1*eye(4);
   end
   

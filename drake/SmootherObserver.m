@@ -15,6 +15,7 @@ qd_raw_all = [];
 
 xhat = zeros(12,1);
 isinit = false;
+display('publishing estimates...');
 while true
   
   vicon_data = vicon_aggregator.getNextMessage(0);

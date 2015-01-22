@@ -4,7 +4,7 @@ Grid=true
 LCM GL=true
 
 [__libviewer_show_renderers]
-Grid=false
+Grid=true
 LCM GL=false
 
 [__libviewer_bookmarks]

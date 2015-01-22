@@ -28,11 +28,12 @@ estimated_qd = [];
 
 xhat = zeros(12,1);
 isinit = false;
+display('publishing estimates...');
 while true
   
-  vicon_data = vicon_aggregator.getNextMessage(10);
+  vicon_data = vicon_aggregator.getNextMessage(50);
 
-  if (length(vicon_data)>0)
+  if ~isempty(vicon_data)
     
     vicon_msg = vicon_t.vicon_pos_t(vicon_data.data);
     
