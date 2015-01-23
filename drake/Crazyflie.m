@@ -14,8 +14,10 @@ classdef Crazyflie
     input_frame_omega_square_to_u;
     
     % LQR gains
-    Q = 0.1*diag([.0001 .0001 .0001 .01 .01 .01 .00001 .00001 .00001 .001 .001 .001]);
-    R = 0.1*eye(4);
+    %Q = diag([100 100 300 50 50 50 1 1 1 1 1 1]);
+    %Q = diag([0.001 0.001 0.001 200 200 200 0.001 0.001 0.001 10 10 10]);
+    Q = 0.01*diag([30 30 200 100 100 100 30 30 30 1000 1000 1500]);
+    R = eye(4);
   end
   
   methods
@@ -31,7 +33,7 @@ classdef Crazyflie
       obj.state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatorCoder,'x');
       
       obj.input_frame_u = LCMCoordinateFrame('crazyflie_input',InputUCoder,'u');
-      obj.input_frame_omega_square_to_u = LCMCoordinateFrame('crazyflie_input_lqr',InputOmegaSquareToUCoder(obj.a),'u');
+      obj.input_frame_omega_square_to_u = LCMCoordinateFrame('crazyflie_input',InputOmegaSquareToUCoder(obj.a),'u');
     end
     
     function run(obj, utraj, tspan)
@@ -49,9 +51,15 @@ classdef Crazyflie
     end
     
     function tilqr(obj,xd)
-      controller = tilqr(obj.manip,xd,obj.nominal_omega_square,obj.Q,obj.R);
-      controller = setInputFrame(controller,obj.state_estimator_frame);
-      controller = setOutputFrame(controller,obj.input_frame_omega_square_to_u);
+      options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
+      controller = tilqr(obj.manip,xd,obj.nominal_omega_square,obj.Q,obj.R,options);
+      
+      obj.state_estimator_frame.addTransform(AffineTransform(obj.state_estimator_frame,controller.getInputFrame,eye(length(xd)),-xd));
+      controller = controller.inInputFrame(obj.state_estimator_frame);
+      
+      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,obj.input_frame_omega_square_to_u,eye(length(obj.nominal_omega_square)),repmat(38,4,1)));
+      controller = controller.inOutputFrame(obj.input_frame_omega_square_to_u);
+      
       runLCM(controller,[]);
     end
     
@@ -81,11 +89,11 @@ classdef Crazyflie
       xd = [0 0 1 0 0 0 0 0 0 0 0 0]';
       controller = tilqr(obj.manip,xd,obj.nominal_omega_square,obj.Q,obj.R);
       
-      noise_max = [0.1 0.1 0.1 .5 .5 .5 0 0 0 0 0 0]';
+      noise_max = [0.1 0.1 0.1 .5 .5 1 .1 .1 .1 .5 .5 .5]';
       noise = -noise_max+2*noise_max.*rand(12,1);
       
       sys = feedback(obj.manip,controller);
-      xtraj = sys.simulate([0 2],xd+noise);
+      xtraj = sys.simulate([0 3],xd+noise);
       v = obj.manip.constructVisualizer();
       v.playback(xtraj,struct('slider',true));
     end

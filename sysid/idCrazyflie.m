@@ -6,9 +6,9 @@ FileName = 'CrazyflieModel';
 Order = [6, 4, 12]; % [Number of observed outputs, Number of inputs, Number of states] 
 
 % Initial parameters [Ixx,Iyy,Izz,Km,Kf]
-%Parameters = [1.20 0.81 2.22 1];
-%Parameters = [1];
-Parameters = [1.5474291 1.5474291 3.0743992 1];
+%Parameters = [1.5474291 1.5474291 3.0743992 1]; % Solidwords
+%Parameters = [5.6 6.2 24.6 2.7]; % Initial run of sysid
+Parameters = [5 5 10 2.7];
 
 InitialStates = [-3 0 1.25 0 0 0 0 0 0 0 0 0]';
 Ts = 0; % Continuous time model
