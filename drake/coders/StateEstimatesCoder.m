@@ -1,4 +1,4 @@
-classdef StateEstimatorCoder < LCMCoder
+classdef StateEstimatesCoder < LCMCoder
 
   methods
     function [xhat,t] = decode(obj,data)

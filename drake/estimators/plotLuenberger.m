@@ -11,4 +11,4 @@ plot(estimates(7:9,:)','r');
 
 ylim([-15 15]);
 
-xtraj=PPTrajectory(spline(linspace(0,size(estimates,2)*(1/120),size(estimates,2)),estimates(1:6,:)))
+xtraj = PPTrajectory(spline(linspace(0,size(estimates,2)*(1/120),size(estimates,2)),estimates(1:6,:)));

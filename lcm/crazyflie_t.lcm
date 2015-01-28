@@ -11,21 +11,11 @@ struct crazyflie_pos_t
   double yaw;
 }
 
-struct crazyflie_thrust_t
+struct crazyflie_input_t
 {
   int64_t timestamp;
-  int16_t thrust1;
-  int16_t thrust2;
-  int16_t thrust3;
-  int16_t thrust4;
-}
-
-struct crazyflie_imu_t
-{
-  int64_t timestamp;
-  double roll;
-  double pitch;
-  double yaw;
+  double input[4];
+  string type;
 }
 
 struct crazyflie_state_estimate_t

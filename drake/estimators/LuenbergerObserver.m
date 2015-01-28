@@ -22,6 +22,7 @@ lc = lcm.lcm.LCM.getSingleton();
 vicon_aggregator = lcm.lcm.MessageAggregator();
 vicon_aggregator.setMaxMessages(1);
 lc.subscribe(vicon_object_channel, vicon_aggregator);
+
 input_storage = LCMStorage(input_channel);
 
 raw_pos = [];
@@ -30,7 +31,7 @@ estimates = [];
 isinit = false;
 display('publishing estimates...');
 while true
-  vicon_data = vicon_aggregator.getNextMessage(500);
+  vicon_data = vicon_aggregator.getNextMessage(0);
   if ~isempty(vicon_data)
     vicon_msg = vicon_t.vicon_pos_t(vicon_data.data);
     if (vicon_msg.q(1)>-1000)
@@ -44,17 +45,21 @@ while true
           if (y(3)>z_min)
             input_data = input_storage.GetLatestMessage();
             if ~isempty(input_data)
-              input_msg = crazyflie_t.crazyflie_thrust_t(input_data.data); 
-              omega_square = ((1/10000)*([input_msg.thrust1 input_msg.thrust2 input_msg.thrust3 input_msg.thrust4]'+32768)-cf.a).^2;
-              xhatmp = xhat + dt*cf.manip.dynamics(0,xhat,omega_square) + L*(y-xhat);
-              xhatmp(1:6) = alpha*y(1:6)+(1-alpha)*xhat(1:6);
-              %for i=1:numsteps
-              %  xhatmp = xhatmp + dtsim*cf.manip.dynamics(0,xhatmp,omega_square);
-              %end
-              if (any(isnan(xhatmp))||any(isinf(xhatmp))) 
-                xhat = alpha*y + (1-alpha)*xhat; 
+              input_msg = crazyflie_t.crazyflie_thrust_t(input_data.data);
+              if strcmp(input_msg.type,'omegasqu')
+                xhatmp = xhat + dt*cf.manip.dynamics(0,xhat,input_msg.input) + L*(y-xhat);
+                xhatmp(1:6) = alpha*y(1:6)+(1-alpha)*xhat(1:6);
+                % delay compensation
+                %for i=1:numsteps
+                %  xhatmp = xhatmp + dtsim*cf.manip.dynamics(0,xhatmp,input_msg.input);
+                %end
+                if (any(isnan(xhatmp))||any(isinf(xhatmp))) 
+                  xhat = alpha*y + (1-alpha)*xhat; 
+                else
+                  xhat = xhatmp;
+                end
               else
-                xhat = xhatmp;
+                xhat = alpha*y + (1-alpha)*xhat;
               end
             else
               xhat = alpha*y + (1-alpha)*xhat; 

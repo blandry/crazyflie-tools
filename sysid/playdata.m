@@ -8,6 +8,8 @@ q = file.data(:,6:11);
 xtraj = PPTrajectory(spline(t,q'));
 
 cf = Crazyflie();
-cf.visualizeTraj(xtraj);
+v = cf.manip.constructVisualizer();
+v = setInputFrame(v,getOutputFrame(xtraj));
+v.playback(xtraj,struct('slider',true));
 
 end
