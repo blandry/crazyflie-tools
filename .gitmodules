@@ -10,3 +10,6 @@
 [submodule "crazyflie-clients-python"]
 	path = crazyflie-clients-python
 	url = git@github.com:blandry/crazyflie-clients-python.git
+[submodule "crazyflie-firmware-2"]
+	path = crazyflie-firmware-2
+	url = https://github.com/peteflorence/crazyflie-firmware-2.git
