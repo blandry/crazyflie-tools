@@ -28,6 +28,7 @@ Installation
     cd vicon
     cp lib/libViconDataStreamSDK_CPP.so /usr/lib/libViconDataStreamSDK_CPP.so
     make
+```
 
 Main Usage
 =====
