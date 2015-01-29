@@ -23,3 +23,10 @@ struct crazyflie_state_estimate_t
   int64_t timestamp;
   double xhat[12];
 }
+
+struct crazyflie_imu_t
+{
+  double roll;
+  double pitch;
+  double yaw;
+}
