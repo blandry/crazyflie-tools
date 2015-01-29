@@ -1,5 +1,5 @@
 
-alpha = 0.8;
+alpha = 1;%0.8;
 
 vicon_object_channel = 'crazyflie_squ_ext';
 state_estimate_channel = 'crazyflie_state_estimate'; 
