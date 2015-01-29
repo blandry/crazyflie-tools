@@ -10,12 +10,16 @@ except ImportError:
 import struct
 
 class crazyflie_imu_t(object):
-    __slots__ = ["roll", "pitch", "yaw"]
+    __slots__ = ["timestamp", "roll", "pitch", "yaw", "rolld", "pitchd", "yawd"]
 
     def __init__(self):
+        self.timestamp = 0
         self.roll = 0.0
         self.pitch = 0.0
         self.yaw = 0.0
+        self.rolld = 0.0
+        self.pitchd = 0.0
+        self.yawd = 0.0
 
     def encode(self):
         buf = BytesIO()
@@ -24,7 +28,7 @@ class crazyflie_imu_t(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">ddd", self.roll, self.pitch, self.yaw))
+        buf.write(struct.pack(">qdddddd", self.timestamp, self.roll, self.pitch, self.yaw, self.rolld, self.pitchd, self.yawd))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -38,14 +42,14 @@ class crazyflie_imu_t(object):
 
     def _decode_one(buf):
         self = crazyflie_imu_t()
-        self.roll, self.pitch, self.yaw = struct.unpack(">ddd", buf.read(24))
+        self.timestamp, self.roll, self.pitch, self.yaw, self.rolld, self.pitchd, self.yawd = struct.unpack(">qdddddd", buf.read(56))
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if crazyflie_imu_t in parents: return 0
-        tmphash = (0x2afd21865df4a382) & 0xffffffffffffffff
+        tmphash = (0x5c661a8b7d8e4e71) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

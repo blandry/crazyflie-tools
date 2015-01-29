@@ -26,7 +26,11 @@ struct crazyflie_state_estimate_t
 
 struct crazyflie_imu_t
 {
+  int64_t timestamp;
   double roll;
   double pitch;
   double yaw;
+  double rolld;
+  double pitchd;
+  double yawd;
 }
