@@ -15,8 +15,13 @@ classdef InputCoder < LCMCoder
     end
     function msg = encode(obj,t,input)
       msg = crazyflie_t.crazyflie_input_t();
-      input = max(input,1.461452111054914);
-      input = min(input,59.427221477149608);
+      if (strcmp(obj.input_type,'omegasqu'))
+        input = max(input,1.461452111054914);
+        input = min(input,59.427221477149608);
+      elseif (strcmp(obj.input_type,'32bits'))
+        input = max(input,0);
+        input = min(input,65000);
+      end
       msg.input = input;
       msg.type = obj.input_type;
       msg.timestamp = t;

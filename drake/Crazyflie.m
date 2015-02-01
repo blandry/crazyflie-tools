@@ -5,14 +5,11 @@ classdef Crazyflie
     nominal_input;
     input_freq = 120;
     
-    % LQR gains
-    
     %Q = diag([.3 .3 10 1 1 1 .3 .3 .3 10 10 15]);
     %Q = diag([.3 .3 .001 1 1 1 .3 .3 .001 10 10 15]);
     %Q = diag([1 1 100 .075 .075 .075 .3 .3 .3 10 10 25]);
-    
-    Q = diag([5 5 100 300 300 300 1 1 1 .1 .1 .1]);
-    
+    %Q = diag([5 5 100 300 300 300 1 1 1 .1 .1 .1]);
+    Q = diag([1 1 1 10 10 10 1 1 1 10 10 10]);
     R = eye(4);
   end
   
@@ -77,17 +74,17 @@ classdef Crazyflie
     function pd(obj)
       % Reversed engineered from the Crazyflie firmware
       
-      u0 = [43000 43000 43000 43000]';
+      u0 = [43000 43000 43000 43000]'+10000;
       
       Z_KP = 0.0;
       ROLL_KP = 3.5*180/pi;
       PITCH_KP = 3.5*180/pi;
       YAW_KP = 0.0;
       
-      Z_RATE_KP = 1400*180/pi;
-      ROLL_RATE_KP = 35*180/pi;
-      PITCH_RATE_KP = 35*180/pi;
-      YAW_RATE_KP = 35*180/pi;
+      Z_RATE_KP = 0.0;
+      ROLL_RATE_KP = .5*70*180/pi;
+      PITCH_RATE_KP = .5*70*180/pi; 
+      YAW_RATE_KP = .5*50*180/pi;
       
       K = [0 0 -Z_KP 0 PITCH_KP YAW_KP 0 0 -Z_RATE_KP 0 PITCH_RATE_KP YAW_RATE_KP;
            0 0 -Z_KP ROLL_KP 0 -YAW_KP 0 0 -Z_RATE_KP ROLL_RATE_KP 0 -YAW_RATE_KP;
