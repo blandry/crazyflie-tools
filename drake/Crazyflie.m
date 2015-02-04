@@ -9,7 +9,7 @@ classdef Crazyflie
     %Q = diag([.3 .3 .001 1 1 1 .3 .3 .001 10 10 15]);
     %Q = diag([1 1 100 .075 .075 .075 .3 .3 .3 10 10 25]);
     %Q = diag([5 5 100 300 300 300 1 1 1 .1 .1 .1]);
-    Q = diag([1 1 1 10 10 10 1 1 1 10 10 10]);
+    Q = diag([1 1 1 50 50 50 1 1 1 .5 .5 .5]);
     R = eye(4);
   end
   
@@ -44,6 +44,7 @@ classdef Crazyflie
     
     function xtraj = simulatetilqr(obj)
       xd = [0 0 1 0 0 0 0 0 0 0 0 0]';
+      options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
       controller = tilqr(obj.manip,xd,obj.nominal_input,obj.Q,obj.R,options);
       
       noise_max = [0.1 0.1 0.1 .5 .5 1 .1 .1 .1 .5 .5 .5]';

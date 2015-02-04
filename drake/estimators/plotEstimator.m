@@ -6,8 +6,8 @@ hold on
 
 plot(raw(3,:)','g');
 
-plot(raw(4,:)','b');
-plot(estimates(4,:)','r');
+plot(raw(7:9,:)','b');
+plot(estimates(7:9,:)','r');
 
 %ylim([-15 15]);
 
