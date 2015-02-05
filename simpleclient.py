@@ -48,7 +48,7 @@ class SimpleClient:
         data = struct.unpack('<6f',packet.data)
         msg = crazyflie_imu_t()
         msg.roll = data[0]
-        msg.pitch = -data[1] # note the negative sign here
+        msg.pitch = data[1]
         msg.yaw = data[2]
         msg.rolld = data[3]
         msg.pitchd = data[4]

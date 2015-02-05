@@ -19,15 +19,19 @@ estimates = [];
 xhat = zeros(12,1);
 xyz_isinit = false;
 display('publishing estimates...');
+R = rotz(pi/4);
 while true
   
-  imu_data = imu_aggregator.getNextMessage(0);
+  imu_data = imu_aggregator.getNextMessage();
 
   if ~isempty(imu_data)
       
     imu_msg = crazyflie_t.crazyflie_imu_t(imu_data.data); 
-    rpy = [imu_msg.roll imu_msg.pitch imu_msg.yaw]'*(pi/180);
-    drpy = [imu_msg.rolld imu_msg.pitchd imu_msg.yawd]'*(pi/180);
+    rpy = [imu_msg.roll imu_msg.pitch imu_msg.yaw]';
+    drpy = [imu_msg.rolld imu_msg.pitchd imu_msg.yawd]';
+    
+    rpy = rotmat2rpy(rpy2rotmat(rpy)* R);
+    rpy(2) = -rpy(2);
     
 %     vicon_data = vicon_storage.GetLatestMessage();
 %     vicon_msg = vicon_t.vicon_pos_t(vicon_data.data);
