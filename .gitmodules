@@ -13,3 +13,6 @@
 [submodule "crazyflie-firmware-2"]
 	path = crazyflie-firmware-2
 	url = https://github.com/peteflorence/crazyflie-firmware-2.git
+[submodule "FlightCAD"]
+	path = FlightCAD
+	url = git@github.com:peteflorence/FlightCAD.git
