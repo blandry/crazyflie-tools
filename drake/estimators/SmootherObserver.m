@@ -30,9 +30,6 @@ while true
     rpy = [imu_msg.roll imu_msg.pitch imu_msg.yaw]';
     drpy = [imu_msg.rolld imu_msg.pitchd imu_msg.yawd]';
     
-    rpy = rotmat2rpy(rpy2rotmat(rpy)* R);
-    rpy(2) = -rpy(2);
-    
 %     vicon_data = vicon_storage.GetLatestMessage();
 %     vicon_msg = vicon_t.vicon_pos_t(vicon_data.data);
 %     

@@ -1,24 +1,28 @@
 #!/usr/bin/env python2
 
 import time
-
 import pygame
 import pygame.midi
-
 import lcm
 from crazyflie_t import crazyflie_input_t
 
-INPUT_MIN = 0
-INPUT_MAX = 65000
-INPUT_TYPE = '32bits'
 
+# INPUT_TYPE = '32bits'
+# INPUT_MIN = 0
+# INPUT_MAX = 65000
+
+# INPUT_TYPE = 'omegasqu'
 # INPUT_MIN = 1.461452111054914
 # INPUT_MAX = 59.427221477149608
-# INPUT_TYPE = 'omegasqu'
+
+INPUT_TYPE = 'onboardpd'
+INPUT_MIN = 0
+INPUT_MAX = 65000
+
 
 INPUT_FREQ = 120.0; #Hz
+LCM_CHANNEL_INPUT = 'crazyflie_input'
 
-LCM_CHANNEL_INPUT = "crazyflie_input"
 
 class Kon():
 
@@ -70,8 +74,10 @@ class Kon():
         msg.input[1] = (self.sliders.get(3,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
         msg.input[2] = (self.sliders.get(4,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
         msg.input[3] = (self.sliders.get(5,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
+        msg.offset = (self.sliders.get(6,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
         msg.type = INPUT_TYPE
         self.lc.publish(LCM_CHANNEL_INPUT, msg.encode())
+
 
 if __name__=='__main__':
     kon = Kon()

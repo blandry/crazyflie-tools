@@ -10,11 +10,12 @@ except ImportError:
 import struct
 
 class crazyflie_input_t(object):
-    __slots__ = ["timestamp", "input", "type"]
+    __slots__ = ["timestamp", "input", "offset", "type"]
 
     def __init__(self):
         self.timestamp = 0
         self.input = [ 0.0 for dim0 in range(4) ]
+        self.offset = 0.0
         self.type = ""
 
     def encode(self):
@@ -26,6 +27,7 @@ class crazyflie_input_t(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">q", self.timestamp))
         buf.write(struct.pack('>4d', *self.input[:4]))
+        buf.write(struct.pack(">d", self.offset))
         __type_encoded = self.type.encode('utf-8')
         buf.write(struct.pack('>I', len(__type_encoded)+1))
         buf.write(__type_encoded)
@@ -45,6 +47,7 @@ class crazyflie_input_t(object):
         self = crazyflie_input_t()
         self.timestamp = struct.unpack(">q", buf.read(8))[0]
         self.input = struct.unpack('>4d', buf.read(32))
+        self.offset = struct.unpack(">d", buf.read(8))[0]
         __type_len = struct.unpack('>I', buf.read(4))[0]
         self.type = buf.read(__type_len)[:-1].decode('utf-8', 'replace')
         return self
@@ -53,7 +56,7 @@ class crazyflie_input_t(object):
     _hash = None
     def _get_hash_recursive(parents):
         if crazyflie_input_t in parents: return 0
-        tmphash = (0xf4c7cc77eef0b338) & 0xffffffffffffffff
+        tmphash = (0x856c925134afc6c8) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

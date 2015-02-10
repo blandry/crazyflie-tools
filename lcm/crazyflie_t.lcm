@@ -15,6 +15,7 @@ struct crazyflie_input_t
 {
   int64_t timestamp;
   double input[4];
+  double offset;
   string type;
 }
 
