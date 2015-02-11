@@ -16,3 +16,6 @@
 [submodule "FlightCAD"]
 	path = FlightCAD
 	url = git@github.com:peteflorence/FlightCAD.git
+[submodule "crazyflie-CAD"]
+	path = crazyflie-CAD
+	url = https://github.com/peteflorence/crazyflie-CAD
