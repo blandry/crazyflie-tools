@@ -45,22 +45,22 @@ while true
           if (y(3)>z_min)
             input_data = input_storage.GetLatestMessage();
             if ~isempty(input_data)
-              input_msg = crazyflie_t.crazyflie_thrust_t(input_data.data);
-              if strcmp(input_msg.type,'omegasqu')
-                xhatmp = xhat + dt*cf.manip.dynamics(0,xhat,input_msg.input) + L*(y-xhat);
-                xhatmp(1:6) = alpha*y(1:6)+(1-alpha)*xhat(1:6);
-                % delay compensation
-                %for i=1:numsteps
-                %  xhatmp = xhatmp + dtsim*cf.manip.dynamics(0,xhatmp,input_msg.input);
-                %end
-                if (any(isnan(xhatmp))||any(isinf(xhatmp))) 
-                  xhat = alpha*y + (1-alpha)*xhat; 
-                else
-                  xhat = xhatmp;
-                end
+              input_msg = crazyflie_t.crazyflie_input_t(input_data.data);
+              %if strcmp(input_msg.type,'omegasqu')
+              xhatmp = xhat + dt*cf.manip.dynamics(0,xhat,input_msg.input) + L*(y-xhat);
+              xhatmp(1:6) = alpha*y(1:6)+(1-alpha)*xhat(1:6);
+              % delay compensation
+              %for i=1:numsteps
+              %  xhatmp = xhatmp + dtsim*cf.manip.dynamics(0,xhatmp,input_msg.input);
+              %end
+              if (any(isnan(xhatmp))||any(isinf(xhatmp))) 
+                xhat = alpha*y + (1-alpha)*xhat; 
               else
-                xhat = alpha*y + (1-alpha)*xhat;
+                xhat = xhatmp;
               end
+              %else
+              %  xhat = alpha*y + (1-alpha)*xhat;
+              %end
             else
               xhat = alpha*y + (1-alpha)*xhat; 
             end
