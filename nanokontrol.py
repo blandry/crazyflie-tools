@@ -19,20 +19,19 @@ INPUT_TYPE = 'onboardpd'
 INPUT_MIN = 0
 INPUT_MAX = 65000
 
-
-INPUT_FREQ = 120.0; #Hz
+INPUT_FREQ = 200.0; #Hz
 LCM_CHANNEL_INPUT = 'crazyflie_input'
 
 
 class Kon():
 
     def __init__(self):
-        pygame.init()
-        pygame.midi.init()
-        (in_device_id, out_device_id) = self.find_nano_kontrol()
-        self.midi_in = pygame.midi.Input(in_device_id)
-        print "using input  id: %s" % in_device_id
-        self.sliders = dict(zip(range(2,14), [0]*12))
+        # pygame.init()
+        # pygame.midi.init()
+        # (in_device_id, out_device_id) = self.find_nano_kontrol()
+        # self.midi_in = pygame.midi.Input(in_device_id)
+        # print "using input  id: %s" % in_device_id
+        # self.sliders = dict(zip(range(2,14), [0]*12))
         self.lc = lcm.LCM()
 
     def find_nano_kontrol(self):
@@ -68,13 +67,13 @@ class Kon():
                 self.sliders[me.data1] = me.data2
 
     def forward_kon_to_lcm(self):
-        self.read_input()        
+        #self.read_input()        
         msg = crazyflie_input_t()
-        msg.input[0] = (self.sliders.get(2,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
-        msg.input[1] = (self.sliders.get(3,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
-        msg.input[2] = (self.sliders.get(4,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
-        msg.input[3] = (self.sliders.get(5,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
-        msg.offset = (self.sliders.get(6,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
+        msg.input[0] = 0#(self.sliders.get(2,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
+        msg.input[1] = 0#(self.sliders.get(3,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
+        msg.input[2] = 0#(self.sliders.get(4,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
+        msg.input[3] = 0#(self.sliders.get(5,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
+        msg.offset = 41000#(self.sliders.get(6,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
         msg.type = INPUT_TYPE
         self.lc.publish(LCM_CHANNEL_INPUT, msg.encode())
 

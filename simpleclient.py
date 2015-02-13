@@ -3,6 +3,9 @@
 import struct
 import math
 import numpy
+import array
+import usb
+import os
 from threading import Thread
 
 import cflib
@@ -12,6 +15,16 @@ from cflib.crtp.crtpstack import CRTPPacket, CRTPPort
 import lcm
 from crazyflie_t import crazyflie_imu_t, crazyflie_input_t
 
+try:
+    import usb.core
+    pyusb_backend = None
+    if os.name == "nt":
+        import usb.backend.libusb0 as libusb0
+        pyusb_backend = libusb0.get_backend()
+    pyusb1 = True
+except:
+    pyusb1 = False
+
 
 MODES = {
 '32bits':       1,
@@ -19,10 +32,16 @@ MODES = {
 'onboardpd':    3,
 }
 
+class LCMChannels:
+    IMU = 'crazyflie_imu'
+    INPUT = 'crazyflie_input'
+
+
 RUN_CONTROLLER = False
 
-ROLL_KP = 3.5*180/math.pi;
-PITCH_KP = 3.5*180/math.pi;
+# NOTE I ZERO THE PROP GAIN
+ROLL_KP = 0*3.5*180/math.pi;
+PITCH_KP = 0*3.5*180/math.pi;
 YAW_KP = 0.0;
 ROLL_RATE_KP = 70*180/math.pi;
 PITCH_RATE_KP = 70*180/math.pi; 
@@ -32,15 +51,11 @@ K = numpy.matrix([[0,0,0,0,PITCH_KP,YAW_KP,0,0,0,0,PITCH_RATE_KP,YAW_RATE_KP],
                   [0,0,0,0,-PITCH_KP,YAW_KP,0,0,0,0,-PITCH_RATE_KP,YAW_RATE_KP],
                   [0,0,0,-ROLL_KP,0,-YAW_KP,0,0,0,-ROLL_RATE_KP,0,-YAW_RATE_KP]])
 
-class LCMChannels:
-    IMU = 'crazyflie_imu'
-    INPUT = 'crazyflie_input'
-
 
 class SimpleClient:
 
     def __init__(self, link_uri):
-        self.offset = 0;
+        self.xhat = numpy.array([0,0,0,0,0,0,0,0,0,0,0,0]).transpose()
 
         self._cf = Crazyflie()
         self._cf.connected.add_callback(self._connected)
@@ -50,55 +65,132 @@ class SimpleClient:
         self._cf.open_link(link_uri)
         print "Connecting to %s" % link_uri
 
-    def _connected(self, link_uri):
+    def _connected(self, link_uri):        
+        self._cf.link.device_flag.clear()
+        self._dev_handle = self._cf.link.cradio.handle
+        # self._sensors_lc = lcm.LCM()
+        Thread(target=self._raw_radio_out).start()
+        Thread(target=self._raw_radio_in).start()
 
-        self._sensors_lc = lcm.LCM()
-        self._cf.add_port_callback(CRTPPort.SENSORS, self._new_sensor_data)
-        
-        Thread(target=self._forward_inputs).start()
-
-    def _new_sensor_data(self, packet):
-        data = struct.unpack('<6f',packet.data)
-        if RUN_CONTROLLER:
-            x = [0,0,0,data[0],data[1],data[2],0,0,0,data[3],data[4],data[5]]
-            u = self._get_pd_control_input(x)
-            u0 = self._get_control_offset()
-            pk = CRTPPacket()
-            pk.port = CRTPPort.OFFBOARDCTRL
-            pk.data = struct.pack('<5fi',u[0],u[1],u[2],u[3],u0,MODES.get('32bits',1))
-            self._cf.send_packet(pk)
-        msg = crazyflie_imu_t()
-        msg.roll = data[0]
-        msg.pitch = data[1]
-        msg.yaw = data[2]
-        msg.rolld = data[3]
-        msg.pitchd = data[4]
-        msg.yawd = data[5]
-        self._sensors_lc.publish(LCMChannels.IMU, msg.encode())
-
-    def _get_control_offset(self):
-        return self.offset
-
-    def _forward_inputs(self):
+    def _raw_radio_out(self):
         _input_lc = lcm.LCM()
-        _input_lc.subscribe(LCMChannels.INPUT,self._handle_input)
+        _input_lc.subscribe(LCMChannels.INPUT,self._lcm_to_radio_out)
         while True:
             _input_lc.handle()
 
-    def _handle_input(self, channel, data):
+    def _lcm_to_radio_out(self, channel, data):
         msg = crazyflie_input_t.decode(data)
         if RUN_CONTROLLER:
-            # just get the offset, the controller is running here
-            self.offset = float(msg.offset)
+            # running the python controller, only use the offset from lcm
+            cf_input = self._get_pd_control_input()
+            cf_input_offset = msg.offset
+            cf_input_type = '32bits'
         else:
-            # controller must be (hopefully) running offboard
-            pk = CRTPPacket()
-            pk.port = CRTPPort.OFFBOARDCTRL
-            pk.data = struct.pack('<5fi',float(msg.input[0]),float(msg.input[1]),float(msg.input[2]),float(msg.input[3]),float(msg.offset),MODES.get(msg.type,1))
-            self._cf.send_packet(pk)
+            # a controller is hopefully running somewhere else...
+            cf_input = msg.input
+            cf_input_offset = msg.offset
+            cf_input_type = msg.type
 
-    def _get_pd_control_input(self, x):
-        return (numpy.array(numpy.dot(K,numpy.array(x).transpose()))[0]).tolist()
+        pk = CRTPPacket()
+        pk.port = CRTPPort.OFFBOARDCTRL
+        pk.data = struct.pack('<5fi',float(cf_input[0]),float(cf_input[1]),float(cf_input[2]),float(cf_input[3]),float(cf_input_offset),MODES.get(cf_input_type,1))
+        
+        dataOut = array.array('B')
+        dataOut.append(pk.header)
+        for X in pk.data:
+            if type(X) == int:
+                dataOut.append(X)
+            else:
+                dataOut.append(ord(X))
+        
+        try:
+            if (pyusb1 is False):
+                self._dev_handle.bulkWrite(1, dataOut, 1)
+            else:
+                self._dev_handle.write(endpoint=1, data=dataOut, timeout=1)
+        except usb.USBError:
+            return
+
+        print "-> " + pk.__str__()
+
+        # dataIn = None
+        # try:
+        #     if (pyusb1 is False):
+        #         dataIn = self._dev_handle.bulkRead(0x81, 64, 1)
+        #     else:
+        #         dataIn = self._dev_handle.read(0x81, 64, timeout=1)
+        # except usb.USBError:
+        #     return
+        # if dataIn is None:
+        #     return
+        # if dataIn[0] != 0:
+        #     data = dataIn[1:]
+        # else:
+        #     return
+        # if (len(data) > 0):
+        #     packet = CRTPPacket(data[0], list(data[1:]))
+        # else:
+        #     return
+        # # print "<- " + packet.__str__()
+        # sensor_readings = struct.unpack('<6f',packet.data)
+
+        # self._set_sensor_reading(sensor_readings)
+
+        # msg = crazyflie_imu_t()
+        # msg.roll = sensor_readings[0]
+        # msg.pitch = sensor_readings[1]
+        # msg.yaw = sensor_readings[2]
+        # msg.rolld = sensor_readings[3]
+        # msg.pitchd = sensor_readings[4]
+        # msg.yawd = sensor_readings[5]
+        # self._sensors_lc.publish(LCMChannels.IMU, msg.encode())
+
+    def _raw_radio_in(self):
+        _sensors_lc = lcm.LCM()
+        
+        while True:
+            dataIn = None
+            try:
+                if (pyusb1 is False):
+                    dataIn = self._dev_handle.bulkRead(0x81, 64, 1)
+                else:
+                    dataIn = self._dev_handle.read(0x81, 64, timeout=1000)
+            except usb.USBError:
+                continue
+            if dataIn is None:
+                continue
+            if dataIn[0] != 0:
+                data = dataIn[1:]
+            else:
+                continue
+            if (len(data) > 0):
+                packet = CRTPPacket(data[0], list(data[1:]))
+            else:
+                continue
+            sensor_readings = struct.unpack('<6f',packet.data)
+            
+            self._set_sensor_reading(sensor_readings)
+
+            print "<- " + packet.__str__()
+
+            msg = crazyflie_imu_t()
+            msg.roll = sensor_readings[0]
+            msg.pitch = sensor_readings[1]
+            msg.yaw = sensor_readings[2]
+            msg.rolld = sensor_readings[3]
+            msg.pitchd = sensor_readings[4]
+            msg.yawd = sensor_readings[5]
+            _sensors_lc.publish(LCMChannels.IMU, msg.encode())
+
+    def _set_sensor_reading(self, y):
+        """ STATE ESTIMATOR """
+        # could do some smoothing here
+        alpha = 1
+        self.xhat = numpy.dot(1-alpha,self.xhat) + numpy.dot(alpha,numpy.array([0,0,0,y[0],y[1],y[2],0,0,0,y[3],y[4],y[5]]).transpose())
+
+    def _get_pd_control_input(self):
+        """ CONTROLLER """
+        return (numpy.array(numpy.dot(K,self.xhat))[0]).tolist()
 
     def _connection_failed(self, link_uri, msg):
         print "Connection to %s failed: %s" % (link_uri, msg)
