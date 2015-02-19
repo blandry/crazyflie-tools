@@ -17,7 +17,7 @@ classdef Crazyflie
     
     function obj = Crazyflie()
       options.floating = true;
-      obj.manip = RigidBodyManipulator('crazyflie.urdf',options);
+      obj.manip = RigidBodyManipulator('crazyflie2.urdf',options);
       obj.nominal_input = .25*norm(getMass(obj.manip)*obj.manip.gravity)./ ...
           [obj.manip.force{1}.scale_factor_thrust obj.manip.force{2}.scale_factor_thrust ...
           obj.manip.force{3}.scale_factor_thrust obj.manip.force{4}.scale_factor_thrust]';
@@ -75,22 +75,20 @@ classdef Crazyflie
     function pd(obj)
       % Reversed engineered from the Crazyflie firmware
       
-      u0 = [43000 43000 43000 43000]'-5000;
+      u0 = [43000 43000 43000 43000]'*0;
       
-      Z_KP = 0.0;
-      ROLL_KP = .2*3.5*180/pi;
-      PITCH_KP = .2*3.5*180/pi;
+      ROLL_KP = 3.5*180/pi;
+      PITCH_KP = 3.5*180/pi;
       YAW_KP = 0.0;
       
-      Z_RATE_KP = 0.0;
-      ROLL_RATE_KP = 1*70*180/pi;
-      PITCH_RATE_KP = 1*70*180/pi; 
-      YAW_RATE_KP = 0*50*180/pi;
+      ROLL_RATE_KP = 70*180/pi;
+      PITCH_RATE_KP = 70*180/pi; 
+      YAW_RATE_KP = 50*180/pi;
       
-      K = [0 0 -Z_KP 0 PITCH_KP YAW_KP 0 0 -Z_RATE_KP 0 PITCH_RATE_KP YAW_RATE_KP;
-           0 0 -Z_KP ROLL_KP 0 -YAW_KP 0 0 -Z_RATE_KP ROLL_RATE_KP 0 -YAW_RATE_KP;
-           0 0 -Z_KP 0 -PITCH_KP YAW_KP 0 0 -Z_RATE_KP 0 -PITCH_RATE_KP YAW_RATE_KP;
-           0 0 -Z_KP -ROLL_KP 0 -YAW_KP 0 0 -Z_RATE_KP -ROLL_RATE_KP 0 -YAW_RATE_KP];
+      K = [0 0 0 0 PITCH_KP YAW_KP 0 0 0 0 PITCH_RATE_KP YAW_RATE_KP;
+           0 0 0 ROLL_KP 0 -YAW_KP 0 0 0 ROLL_RATE_KP 0 -YAW_RATE_KP;
+           0 0 0 0 -PITCH_KP YAW_KP 0 0 0 0 -PITCH_RATE_KP YAW_RATE_KP;
+           0 0 0 -ROLL_KP 0 -YAW_KP 0 0 0 -ROLL_RATE_KP 0 -YAW_RATE_KP];
              
       controller = LinearSystem([],[],[],[],[],K);
       

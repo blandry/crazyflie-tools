@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+<robot xmlns="http://drake.mit.edu"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ name="crazyflie">
+  <link name="base_link">
+    <inertial>
+      <mass value="0.0234"/>
+      <origin xyz="0 0 0"/>
+      <!--First run of sys id:--> <inertia ixx="5.6E-6" ixy="0" ixz="0" iyy="6.2E-6" iyz="0" izz="24.6E-6"/>
+      <!--Second run of sys id: <inertia ixx="9.74E-6" ixy="0" ixz="0" iyy="10.02E-6" iyz="0" izz="0.02E-6"/>-->
+      <!--Guess that just works well: <inertia ixx="5E-5" ixy="0" ixz="0" iyy="5E-5" iyz="0" izz="10E-5"/>-->
+      <!--Solidworks: <inertia ixx="1.5474291e-006" ixy="1.300365e-008" ixz="3.2996326e-008" iyy="1.5474291e-006" iyz="3.2996326e-008" izz="3.0743992e-006"/>-->
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="mesh/crazyflie.obj" scale=".001"/>
+      </geometry>
+    </visual>
+  </link>
+  <force_element name="prop1">
+    <propellor lower_limit="1.461452111054914" upper_limit="59.427221477149608" scale_factor_thrust="0.001826420485436" scale_factor_moment="-2.7E-7" visual_geometry="false">
+      <parent link="base_link"/>
+      <origin xyz="0.043 0 0"/>
+      <axis xyz="0 0 1"/>
+    </propellor>
+  </force_element>
+  <force_element name="prop2">
+    <propellor lower_limit="1.461452111054914" upper_limit="59.427221477149608" scale_factor_thrust="0.001826420485436" scale_factor_moment="2.7E-7" visual_geometry="false">
+      <parent link="base_link"/>
+      <origin xyz="0 -0.043 0"/>
+      <axis xyz="0 0 1"/>
+    </propellor>
+  </force_element>
+  <force_element name="prop3">
+    <propellor lower_limit="1.461452111054914" upper_limit="59.427221477149608" scale_factor_thrust="0.001826420485436" scale_factor_moment="-2.7E-7" visual_geometry="false">
+      <parent link="base_link"/>
+      <origin xyz="-0.043 0 0"/>
+      <axis xyz="0 0 1"/>
+    </propellor>
+  </force_element>
+  <force_element name="prop4">
+    <propellor lower_limit="1.461452111054914" upper_limit="59.427221477149608" scale_factor_thrust="0.001826420485436" scale_factor_moment="2.7E-7" visual_geometry="false">
+      <parent link="base_link"/>
+      <origin xyz="0 0.043 0"/>
+      <axis xyz="0 0 1"/>
+    </propellor>
+  </force_element>
+</robot>
