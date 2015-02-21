@@ -19,7 +19,7 @@ Installation
 
 * flash the firmware
 ```    
-    cd crazyflie-firmware
+    cd crazyflie-firmware-2
     make cload
 ```
 
@@ -34,23 +34,20 @@ Main Usage
 =====
 * run the vicon client to get sensor data
 ```
-    vicon/bin/viocn_lcm_client <object_name>
+    vicon/bin/viocn_lcm_client objectname
 ```
 
-* run the craziflie client, and switch to lcm mode if needed
+* run the craziflie client
 ```
-    crazyflie-clients-python/bin/cfclient
+    ./simpleclient
 ```
 
 * You can send lcm commands from the nanokontrol board
 ```
-    client/bin/nanokontrol
+    ./nanokontrol
 ```
 
-Other Usage
-===========
-* You can also use drake to send these commands ("crazyflie_input" channel)
-* You can log the vicon data using lcm-logger
+* You can also use drake to send commands ("crazyflie_input" channel), and therefore build pretty sophisticated controllers. See Drake's documentation for more details.
 
 LCM Types
 =========
@@ -71,5 +68,5 @@ How to use LCM logging with MATLAB:
 in the directory you want your log files.  This will produce a file that contains all your LCM messages.
 * Export to .mat format
 ```
-    $ python log_to_mat.py -f -l <lcm types>,<another lcm type> <lcm log file>
+    $ python log_to_mat.py -f -l lcmtypesmodule,anotherlcmtypemodule lcmlogfile
 ```

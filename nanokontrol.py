@@ -6,7 +6,6 @@ import pygame.midi
 import lcm
 from crazyflie_t import crazyflie_input_t
 
-
 INPUT_TYPE = '32bits'
 INPUT_MIN = 0
 INPUT_MAX = 65000
@@ -22,10 +21,11 @@ INPUT_MAX = 65000
 # INPUT_TYPE = 'offsetonly'
 # INPUT_MIN = 0
 # INPUT_MAX = 65000
-# LCM_CHANNEL_OFFSET = 'crazyflie_extra_offset'
 
-INPUT_FREQ = 200.0; #Hz
-LCM_CHANNEL_INPUT = 'crazyflie_input'
+INPUT_FREQ = 200.0;
+class LCMChannels:
+    INPUT = 'crazyflie_input'
+    OFFSET = 'crazyflie_extra_offset'
 
 
 class Kon():
@@ -81,9 +81,9 @@ class Kon():
         msg.offset = (self.sliders.get(6,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
         msg.type = INPUT_TYPE
         if INPUT_TYPE=='offsetonly':
-            self.lc.publish(LCM_CHANNEL_OFFSET, msg.encode())
+            self.lc.publish(LCMChannels.OFFSET, msg.encode())
         else:
-            self.lc.publish(LCM_CHANNEL_INPUT, msg.encode())
+            self.lc.publish(LCMChannels.INPUT, msg.encode())
 
 
 if __name__=='__main__':

@@ -42,19 +42,23 @@ class LCMChannels:
     ESTIMATES = 'crazyflie_state_estimate'
 
 
-RUN_CONTROLLER = True
-HAS_VICON = False
+RUN_CONTROLLER = False
+HAS_VICON = True
 
-ROLL_KP = 3.5*180/math.pi;
-PITCH_KP = 3.5*180/math.pi;
-YAW_KP = 0.0;
-ROLL_RATE_KP = .5*70*180/math.pi;
-PITCH_RATE_KP = .5*70*180/math.pi; 
-YAW_RATE_KP = .5*50*180/math.pi;
-K = np.matrix([[0,0,0,0,PITCH_KP,YAW_KP,0,0,0,0,PITCH_RATE_KP,YAW_RATE_KP],
-                  [0,0,0,ROLL_KP,0,-YAW_KP,0,0,0,ROLL_RATE_KP,0,-YAW_RATE_KP],
-                  [0,0,0,0,-PITCH_KP,YAW_KP,0,0,0,0,-PITCH_RATE_KP,YAW_RATE_KP],
-                  [0,0,0,-ROLL_KP,0,-YAW_KP,0,0,0,-ROLL_RATE_KP,0,-YAW_RATE_KP]])
+ROLL_KP = .5*3.5*180/math.pi
+PITCH_KP = .5*3.5*180/math.pi
+YAW_KP = .5*3.5*180/math.pi
+ROLL_RATE_KP = .5*70*180/math.pi
+PITCH_RATE_KP = .5*70*180/math.pi
+YAW_RATE_KP = .5*50*180/math.pi
+
+Z_KP = 0
+Z_RATE_KP = 10000
+
+K = np.matrix([[0,0,-Z_KP,0,PITCH_KP,YAW_KP,0,0,-Z_RATE_KP,0,PITCH_RATE_KP,YAW_RATE_KP],
+               [0,0,-Z_KP,ROLL_KP,0,-YAW_KP,0,0,-Z_RATE_KP,ROLL_RATE_KP,0,-YAW_RATE_KP],
+               [0,0,-Z_KP,0,-PITCH_KP,YAW_KP,0,0,-Z_RATE_KP,0,-PITCH_RATE_KP,YAW_RATE_KP],
+               [0,0,-Z_KP,-ROLL_KP,0,-YAW_KP,0,0,-Z_RATE_KP,-ROLL_RATE_KP,0,-YAW_RATE_KP]])
 
 
 class SimpleClient:
@@ -83,7 +87,6 @@ class SimpleClient:
         Thread(target=self._raw_radio_out).start()
 
         # gets the imu data back
-        self.acc_bias = None
         Thread(target=self._raw_radio_in).start()
 
         if HAS_VICON:
@@ -162,13 +165,7 @@ class SimpleClient:
             except:
                 continue
 
-            # self._add_sensor_reading([0,0,0,imu_readings[0],imu_readings[1],imu_readings[2],
-            #                           0,0,0,imu_readings[3],imu_readings[4],imu_readings[5]],
-            #                           'imu')
-
             self._add_sensor_reading(imu_readings,'imu')
-
-            # print "<- " + packet.__str__()
 
             msg = crazyflie_imu_t()
             msg.roll = imu_readings[0]
@@ -179,23 +176,38 @@ class SimpleClient:
             msg.yawd = imu_readings[5]
             _sensors_lc.publish(LCMChannels.IMU, msg.encode())
 
+            # print "<- " + packet.__str__()
+
     def _vicon_in(self):
         _vicon_lc = lcm.LCM()
         _vicon_lc.subscribe(LCMChannels.VICON,self._vicon_to_state)
         self._last_vicon_q = None
+        self._last_timestamp = None
         while True:
             _vicon_lc.handle()
 
     def _vicon_to_state(self, channel, data):
         msg = vicon_pos_t.decode(data)
+        if msg.q[0] < -999:
+            self._last_vicon_q = None
+            return
+
         y = list(msg.q)
         
+        # nominal z is 1 meter above ground
+        y[2] -= 1
+
         if self._last_vicon_q:
             # could use the timestamp instead of vicon's frequency
-            y.extend(np.dot(120,np.array(msg.q)-np.array(self._last_vicon_q)).tolist())
+            dt = 1.0/120.0
+            dt_measured = (msg.timestamp-self._last_timestamp)/1000.0
+            if (dt_measured>1.2*dt):
+                dt = dt_measured
+            y.extend(np.dot(1.0/dt,np.array(msg.q)-np.array(self._last_vicon_q)).tolist())
         else:
             y.extend([0,0,0,0,0,0])
         self._last_vicon_q = list(msg.q)
+        self._last_timestamp = msg.timestamp
 
         self._add_sensor_reading(y, 'vicon')
 
@@ -211,49 +223,51 @@ class SimpleClient:
 
     def _add_sensor_reading(self, y, type):
         """ STATE ESTIMATOR """
-
         self._state_lock.acquire()
         
         if type=='imu':
-
-            dt = y[6]/1000
-
-            #acc = body2world(y[3:6],self.xhat[3:6])
-            acc = [0,0,0]
-            
-            y = [
-                self.xhat[0]+self.xhat[6]*dt,
-                self.xhat[1]+self.xhat[7]*dt,
-                self.xhat[2]+self.xhat[8]*dt,
-                self.xhat[3]+self.xhat[9]*dt,
-                self.xhat[4]+self.xhat[10]*dt,
-                self.xhat[5]+self.xhat[11]*dt,
-                self.xhat[6]+acc[0]*dt,
-                self.xhat[7]+acc[1]*dt,
-                self.xhat[8]+acc[2]*dt,
-                y[0],
-                y[1],
-                y[2],
-                ]
-
+            dt = y[6]/1000.0            
+            y = [self.xhat[0],
+                 self.xhat[1],
+                 self.xhat[2],
+                 self.xhat[3]+self.xhat[9]*dt,
+                 self.xhat[4]+self.xhat[10]*dt,
+                 self.xhat[5]+self.xhat[11]*dt,
+                 self.xhat[6],
+                 self.xhat[7],
+                 self.xhat[8],
+                 y[0],
+                 y[1],
+                 y[2]]
             alpha = 0.8
             self.xhat = np.dot(1-alpha,self.xhat) + np.dot(alpha,np.array(y).transpose())
         
         elif type=='vicon':
-            pass
+            y = [y[0],
+                 y[1],
+                 y[2],
+                 self.xhat[3],
+                 self.xhat[4],
+                 self.xhat[5],
+                 y[6],
+                 y[7],
+                 y[8],
+                 self.xhat[9],
+                 self.xhat[10],
+                 self.xhat[11]]
+            alpha = 0.8
+            self.xhat = np.dot(1-alpha,self.xhat) + np.dot(alpha,np.array(y).transpose())
         
         else:
             pass
         
         self._state_lock.release()
-        
         msg = crazyflie_state_estimate_t()
         msg.xhat = self.xhat.tolist()
         self._state_lc.publish(LCMChannels.ESTIMATES, msg.encode())
 
     def _get_pd_control_input(self):
         """ CONTROLLER """
-
         return (np.array(np.dot(K,self.xhat))[0]).tolist()
 
     def _connection_failed(self, link_uri, msg):
@@ -295,12 +309,6 @@ def body2world(xyz, rpy):
 
 
 if __name__ == '__main__':
-    
-    # xyz = [1,2,3]
-    # rpy = [0,.1,-.7]
-    # xyz_world = body2world(xyz,rpy)
-    # print(xyz_world)
-
     cflib.crtp.init_drivers(enable_debug_driver=False)
     print "Scanning interfaces for Crazyflies..."
     available = cflib.crtp.scan_interfaces()
