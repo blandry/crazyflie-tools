@@ -52,8 +52,8 @@ ROLL_RATE_KP = .5*70*180/math.pi
 PITCH_RATE_KP = .5*70*180/math.pi
 YAW_RATE_KP = .5*50*180/math.pi
 
-Z_KP = 0
-Z_RATE_KP = 10000
+Z_KP = 0.0
+Z_RATE_KP = 10000.0
 
 K = np.matrix([[0,0,-Z_KP,0,PITCH_KP,YAW_KP,0,0,-Z_RATE_KP,0,PITCH_RATE_KP,YAW_RATE_KP],
                [0,0,-Z_KP,ROLL_KP,0,-YAW_KP,0,0,-Z_RATE_KP,ROLL_RATE_KP,0,-YAW_RATE_KP],
@@ -191,11 +191,7 @@ class SimpleClient:
         if msg.q[0] < -999:
             self._last_vicon_q = None
             return
-
         y = list(msg.q)
-        
-        # nominal z is 1 meter above ground
-        y[2] -= 1
 
         if self._last_vicon_q:
             # could use the timestamp instead of vicon's frequency

@@ -3,7 +3,7 @@ classdef Crazyflie
     manip;
     
     nominal_input;
-    input_freq = 120;
+    input_freq = 200;
 
     Q = diag([1 1 1 50 50 50 1 1 1 .5 .5 .5]);
     R = eye(4);
@@ -21,10 +21,9 @@ classdef Crazyflie
     
     function run(obj, utraj, input_type, tspan)
       if (nargin<3)
-        input_frame = LCMCoordinateFrame('crazyflie_input',InputCoder('32bits'),'u');
-      else
-        input_frame = LCMCoordinateFrame('crazyflie_input',InputCoder(input_type),'u');
+        input_type = '32bits';
       end
+      input_frame = LCMCoordinateFrame('crazyflie_input',InputCoder(input_type),'u');
       utraj = setOutputFrame(utraj,input_frame);
       if (nargin<4)
         options.tspan = utraj.tspan;
@@ -36,6 +35,61 @@ classdef Crazyflie
       end
       options.input_sample_time = 1/obj.input_freq;
       runLCM(utraj,[],options);
+    end
+    
+    function tilqr(obj, xd)
+      if (nargin<2)
+        xd = zeros(12,1);
+      end
+       
+      options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
+      controller = tilqr(obj.manip,xd,obj.nominal_input,obj.Q,obj.R,options);
+      
+      state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
+      state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,controller.getInputFrame,eye(length(xd)),-xd));
+      controller = controller.inInputFrame(state_estimator_frame);
+      
+      input_frame = LCMCoordinateFrame('crazyflie_input',InputCoder('omegasqu'),'u');
+      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(length(obj.nominal_input)),obj.nominal_input));
+      controller = controller.inOutputFrame(input_frame);
+      
+      runLCM(controller,[]);
+    end
+    
+    function pd(obj, xd)
+      if (nargin<2)
+        xd = zeros(12,1);
+      end
+          
+      u0 = [43000 43000 43000 43000]';
+      
+      ROLL_KP = .5*3.5*180/pi;
+      PITCH_KP = .5*3.5*180/pi;
+      YAW_KP = 0.0;
+      
+      ROLL_RATE_KP = .5*70*180/pi;
+      PITCH_RATE_KP = .5*70*180/pi; 
+      YAW_RATE_KP = .5*50*180/pi;
+      
+      Z_KP = 0.0;
+      Z_RATE_KP = 10000.0;
+      
+      K = [0 0 -Z_KP 0 PITCH_KP YAW_KP 0 0 -Z_RATE_KP 0 PITCH_RATE_KP YAW_RATE_KP;
+           0 0 -Z_KP ROLL_KP 0 -YAW_KP 0 0 -Z_RATE_KP ROLL_RATE_KP 0 -YAW_RATE_KP;
+           0 0 -Z_KP 0 -PITCH_KP YAW_KP 0 0 -Z_RATE_KP 0 -PITCH_RATE_KP YAW_RATE_KP;
+           0 0 -Z_KP -ROLL_KP 0 -YAW_KP 0 0 -Z_RATE_KP -ROLL_RATE_KP 0 -YAW_RATE_KP];
+             
+      controller = LinearSystem([],[],[],[],[],K);
+      
+      state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
+      state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,controller.getInputFrame,eye(length(xd)),-xd));
+      controller = controller.inInputFrame(state_estimator_frame);
+      
+      input_frame = LCMCoordinateFrame('crazyflie_input',InputCoder('32bits'),'u');
+      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(length(u0)),u0));
+      controller = controller.inOutputFrame(input_frame);
+      
+      runLCM(controller,[]);
     end
     
     function xtraj = simulatetilqr(obj)
@@ -51,53 +105,6 @@ classdef Crazyflie
       
       v = obj.manip.constructVisualizer();
       v.playback(xtraj,struct('slider',true));
-    end
-    
-    function tilqr(obj, xd)      
-      options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
-      controller = tilqr(obj.manip,xd,obj.nominal_input,obj.Q,obj.R,options);
-      
-      state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
-      state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,controller.getInputFrame,eye(length(xd)),-xd));
-      controller = controller.inInputFrame(state_estimator_frame);
-      
-      input_frame = LCMCoordinateFrame('crazyflie_input',InputCoder('omegasqu'),'u');
-      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(length(obj.nominal_input)),obj.nominal_input));
-      controller = controller.inOutputFrame(input_frame);
-      
-      runLCM(controller,[]);
-    end
-    
-    function pd(obj)
-      % Reversed engineered from the Crazyflie firmware
-      
-      u0 = [43000 43000 43000 43000]'*0;
-      
-      ROLL_KP = 3.5*180/pi;
-      PITCH_KP = 3.5*180/pi;
-      YAW_KP = 0.0;
-      
-      ROLL_RATE_KP = 70*180/pi;
-      PITCH_RATE_KP = 70*180/pi; 
-      YAW_RATE_KP = 50*180/pi;
-      
-      K = [0 0 0 0 PITCH_KP YAW_KP 0 0 0 0 PITCH_RATE_KP YAW_RATE_KP;
-           0 0 0 ROLL_KP 0 -YAW_KP 0 0 0 ROLL_RATE_KP 0 -YAW_RATE_KP;
-           0 0 0 0 -PITCH_KP YAW_KP 0 0 0 0 -PITCH_RATE_KP YAW_RATE_KP;
-           0 0 0 -ROLL_KP 0 -YAW_KP 0 0 0 -ROLL_RATE_KP 0 -YAW_RATE_KP];
-             
-      controller = LinearSystem([],[],[],[],[],K);
-      
-      xd = zeros(12,1);
-      state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
-      state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,controller.getInputFrame,eye(length(xd)),-xd));
-      controller = controller.inInputFrame(state_estimator_frame);
-      
-      input_frame = LCMCoordinateFrame('crazyflie_input',InputCoder('32bits'),'u');
-      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(length(u0)),u0));
-      controller = controller.inOutputFrame(input_frame);
-      
-      runLCM(controller,[]);
     end
 
   end
