@@ -16,3 +16,6 @@
 [submodule "crazyflie-CAD"]
 	path = crazyflie-CAD
 	url = https://github.com/peteflorence/crazyflie-CAD
+[submodule "crazyflie-firmware-1"]
+	path = crazyflie-firmware-1
+	url = git@github.com:blandry/crazyflie-firmware-1.git
