@@ -2,8 +2,8 @@ function plotlog(file_num)
 
 data = load(strcat(num2str(file_num),'.mat'));
 
-tpos = data.crazyflie_squ_ext(:,8);
-pos = data.crazyflie_squ_ext(:,2:7);
+tpos = data.crazyflie_state_estimate(:,14);
+pos = data.crazyflie_state_estimate(:,2:7);
 
 tinput = data.crazyflie_input(:,6);
 input = data.crazyflie_input(:,2:5);

@@ -1,21 +1,13 @@
 % The time intervals to use
 % Use plotlog to identify those
-T = [5.075 5.384;
-     4.942 5.242;
-     5.351 5.868;
-     4.342 4.717;
-     3.483 4.167;
-     3.8 4.334;
-     4.275 4.792;
-     4.717 5.167;
-     3.634 4.192];
+T = [];
 
 for i=1:size(T,1)
   t0 = T(i,1);
   tf = T(i,2);
   rawdata = load([num2str(i) '.mat']);
 
-  pos = rawdata.crazyflie_squ_ext;
+  pos = [rawdata.crazyflie_state_estimate(:,1:7),rawdata.crazyflie_state_estimate(:,14)];
   input = rawdata.crazyflie_input;
 
   [~,ipos]=min(abs(pos(:,8)-t0));
@@ -34,18 +26,11 @@ for i=1:size(T,1)
   input3 = ppval(input3foh,pos(ipos:jpos,8));
   input4 = ppval(input4foh,pos(ipos:jpos,8));
 
-  % Transform of input and states here
   timestamps = pos(ipos:jpos,8);
   N = numel(timestamps);
-  % shift the input because of lcm, scale them for easy modeling
-  inputdata = ([input1,input2,input3,input4]+32768)/10000;
+  inputdata = [input1,input2,input3,input4];
 
-  posdata = [pos(ipos:jpos,2:4),zeros(N,3)];
-  ang = pos(ipos:jpos,5:7);
-  for t=1:N
-    % transform the euler angles because of vicon
-    posdata(t,4:6) = quat2rpy(angle2quat(ang(t,1),ang(t,2),ang(t,3),'XYZ'));
-  end
+  posdata = pos(ipos:jpos,2:7)
   % unwrap the angles for better idea of dynamics
   posdata(:,4:6) = unwrap(posdata(:,4:6));
   
@@ -55,16 +40,7 @@ end
 
 % you can remove some experiments from the sysid here
 % ex: files = [1 3 4]
-%files = 1:size(T,1);
-
-% for the inertia matrix
-%files = [1 2 3];
-
-% for the km
-% files = [4 5 7 8 9];
-
-% for inertia and Km (and Kf)
-files = [1 2 3 4 5 7 8 9];
+files = 1:size(T,1);
 
 d = cell(1,numel(files));
 for i=1:numel(files)
@@ -74,12 +50,6 @@ for i=1:numel(files)
   t = data(:,1);
   udata = data(:,2:5);
   xdata = data(:,6:11);
-
-  % omega = u - a
-  % model expects omega^2 as input
-  a = -1.208905335853438;
-  omega = udata - a;
-  udata = omega.^2;
 
   % Fit PPtrajectory 
   xdata = PPTrajectory(spline(t,xdata'));
@@ -99,7 +69,7 @@ end
 z = merge(d{:});
 
 % Shift data to take into account delay
-% (delay is 42ms, and sample rate 120Hz)
+% (delay is ?ms, and sample rate 120Hz)
 delay = 5*ones(1,4);
 z = nkshift(z,delay); 
 
