@@ -18,7 +18,7 @@ function [xdot,y] = CrazyflieModel(t,x,u,Ixx,Iyy,Izz,Ixy,Km,varargin)
 % omega^2 for each rotor
 
 % Set outputs
-y = x(1:6); % These are things we directly measure (outputs)
+y = [x(1:3);x(10:12)]; % These are things we directly measure (vicon position and gyro rates)
 
 % Known parameters
 g = 9.81;
@@ -33,8 +33,7 @@ Izz = 1E-6*Izz;
 Ixy = 1E-7*Ixy;
 Km = 1E-7*Km;
 
-I = [Ixx Ixy 0; Ixy Iyy 0; 0 0 Izz] % Inertia matrix
-invI = inv(I); % inverse of I
+I = [Ixx Ixy 0; Ixy Iyy 0; 0 0 Izz]; % Inertia matrix
 
 % states
 phi = x(4);
@@ -76,7 +75,7 @@ pqr = rpydot2angularvel([phi;theta;psi],[phidot;thetadot;psidot]);
 pqr = R'*pqr;
 
 % angular acceleration in body frame
-pqr_dot = invI*([L*(F4-F2);L*(F3-F1);(M2+M4-M1-M3)]-cross(pqr,I*pqr));
+pqr_dot = I\([L*(F4-F2);L*(F3-F1);(M2+M4-M1-M3)]-cross(pqr,I*pqr));
 
 % Now, convert pqr_dot to rpy_ddot
 [Phi, dPhi] = angularvel2rpydotMatrix([phi;theta;psi]);

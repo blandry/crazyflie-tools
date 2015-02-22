@@ -7,30 +7,30 @@ for i=1:size(T,1)
   tf = T(i,2);
   rawdata = load([num2str(i) '.mat']);
 
-  pos = [rawdata.crazyflie_state_estimate(:,1:7),rawdata.crazyflie_state_estimate(:,14)];
-  input = rawdata.crazyflie_input;
+  pos = [data.crazyflie_state_estimate(:,2:4),data.crazyflie_state_estimate(:,11:13),rawdata.crazyflie_state_estimate(:,14)];
+  input = [rawdata.crazyflie_input(:,2:5),rawdata.crazyflie_input(:,7)];
 
-  [~,ipos]=min(abs(pos(:,8)-t0));
-  [~,jpos]=min(abs(pos(:,8)-tf));
-  t0pos = pos(ipos,8);
-  tfpos = pos(jpos,8);
+  [~,ipos]=min(abs(pos(:,7)-t0));
+  [~,jpos]=min(abs(pos(:,7)-tf));
+  t0pos = pos(ipos,7);
+  tfpos = pos(jpos,7);
 
-  [~,iinput]=min(abs(input(:,6)-(t0pos-.5)));
-  [~,jinput]=min(abs(input(:,6)-(tfpos+.5)));
-  input1foh = foh(input(iinput:jinput,6)',input(iinput:jinput,2)');
-  input2foh = foh(input(iinput:jinput,6)',input(iinput:jinput,3)');
-  input3foh = foh(input(iinput:jinput,6)',input(iinput:jinput,4)');
-  input4foh = foh(input(iinput:jinput,6)',input(iinput:jinput,5)');
-  input1 = ppval(input1foh,pos(ipos:jpos,8));
-  input2 = ppval(input2foh,pos(ipos:jpos,8));
-  input3 = ppval(input3foh,pos(ipos:jpos,8));
-  input4 = ppval(input4foh,pos(ipos:jpos,8));
+  [~,iinput]=min(abs(input(:,5)-(t0pos-.5)));
+  [~,jinput]=min(abs(input(:,5)-(tfpos+.5)));
+  input1foh = foh(input(iinput:jinput,5)',input(iinput:jinput,1)');
+  input2foh = foh(input(iinput:jinput,5)',input(iinput:jinput,2)');
+  input3foh = foh(input(iinput:jinput,5)',input(iinput:jinput,3)');
+  input4foh = foh(input(iinput:jinput,5)',input(iinput:jinput,4)');
+  input1 = ppval(input1foh,pos(ipos:jpos,7));
+  input2 = ppval(input2foh,pos(ipos:jpos,7));
+  input3 = ppval(input3foh,pos(ipos:jpos,7));
+  input4 = ppval(input4foh,pos(ipos:jpos,7));
 
-  timestamps = pos(ipos:jpos,8);
+  timestamps = pos(ipos:jpos,7);
   N = numel(timestamps);
+ 
   inputdata = [input1,input2,input3,input4];
-
-  posdata = pos(ipos:jpos,2:7)
+  posdata = pos(ipos:jpos,1:6)
   % unwrap the angles for better idea of dynamics
   posdata(:,4:6) = unwrap(posdata(:,4:6));
   
@@ -53,7 +53,7 @@ for i=1:numel(files)
 
   % Fit PPtrajectory 
   xdata = PPTrajectory(spline(t,xdata'));
-  udata = PPTrajectory(spline(t,udata'));
+  udata = PPTrajectory(foh(t,udata'));
 
   % Sample at uniform rate
   dt = 1/120;
@@ -61,7 +61,7 @@ for i=1:numel(files)
   inputs = udata.eval(t_sample); % Control inputs
   outputs = xdata.eval(t_sample); % Configuration space variables
   sysiddata = iddata(outputs',inputs',dt);
-  set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'x','y','z','roll','pitch','yaw'});
+  set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'x','y','z','rolldot','pitchdot','yawdot'});
 
   d{i} = sysiddata;
 end
