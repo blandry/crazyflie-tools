@@ -16,6 +16,7 @@ from cflib.crtp.crtpstack import CRTPPacket, CRTPPort
 import lcm
 from crazyflie_t import crazyflie_imu_t, crazyflie_input_t, crazyflie_state_estimate_t
 from vicon_t import vicon_pos_t
+from sensorfusion import SensorFusion
 
 try:
     import usb.core
@@ -67,6 +68,7 @@ class SimpleClient:
         self.xhat = np.array([0,0,0,0,0,0,0,0,0,0,0,0]).transpose()
         self._state_lock = Lock()
         self._state_lc = lcm.LCM()
+        self._sensor_fusion = SensorFusion()
 
         self._extra_offset = 0
 
@@ -167,6 +169,8 @@ class SimpleClient:
 
             self._add_sensor_reading(imu_readings,'imu')
 
+            # TODO: The lcm message need to be changed so that it takes
+            # gyro, acc and dt
             msg = crazyflie_imu_t()
             msg.roll = imu_readings[0]
             msg.pitch = imu_readings[1]
@@ -225,19 +229,23 @@ class SimpleClient:
 
             # THE ACC MIGHT NEED TO BE ROTATED IN THE FIRMWARE
 
-            dt = y[6]/1000.0            
+            (gx,gy,gz) = y[0:3]
+            (ax,ay,az) = y[3:6]
+            dt = y[6]/1000.0       
+            self._sensor_fusion.update_q(gx,gy,gz,ax,ay,az,dt)
+            [roll,pitch,yaw] = self._sensor_fusion.get_rpy()
             y = [self.xhat[0],
                  self.xhat[1],
                  self.xhat[2],
-                 self.xhat[3]+self.xhat[9]*dt,
-                 self.xhat[4]+self.xhat[10]*dt,
-                 self.xhat[5]+self.xhat[11]*dt,
+                 roll,
+                 pitch,
+                 yaw,
                  self.xhat[6],
                  self.xhat[7],
                  self.xhat[8],
-                 y[0],
-                 y[1],
-                 y[2]]
+                 gx,
+                 gy,
+                 gz]
             alpha = 0.8
             self.xhat = np.dot(1-alpha,self.xhat) + np.dot(alpha,np.array(y).transpose())
         
