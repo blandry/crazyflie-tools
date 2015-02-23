@@ -222,6 +222,9 @@ class SimpleClient:
         self._state_lock.acquire()
         
         if type=='imu':
+
+            # THE ACC MIGHT NEED TO BE ROTATED IN THE FIRMWARE
+
             dt = y[6]/1000.0            
             y = [self.xhat[0],
                  self.xhat[1],

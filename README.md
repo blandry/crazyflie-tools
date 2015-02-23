@@ -34,7 +34,7 @@ Main Usage
 =====
 * run the vicon client to get sensor data
 ```
-    vicon/bin/viocn_lcm_client objectname
+    vicon/bin/vicon_lcm_client objectname
 ```
 
 * run the craziflie client
