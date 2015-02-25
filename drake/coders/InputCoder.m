@@ -16,20 +16,7 @@ classdef InputCoder < LCMCoder
     end
     
     function msg = encode(obj,t,input)
-      msg = crazyflie_t.crazyflie_input_t();
-      
-      % the firmware has input limits,
-      % but this is useful for sysid so
-      % that the lcm logs match the commands sent
-      % to the motors
-      if (strcmp(obj.input_type,'omegasqu'))
-        input = max(input,1.461452111054914);
-        input = min(input,59.427221477149608);
-      elseif (strcmp(obj.input_type,'32bits')||strcmp(obj.input_type,'onboardpd'))
-        input = max(input,0);
-        input = min(input,65000);
-      end
-      
+      msg = crazyflie_t.crazyflie_input_t();   
       msg.input = input;
       msg.type = obj.input_type;
       msg.timestamp = t;

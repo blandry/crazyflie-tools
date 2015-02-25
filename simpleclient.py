@@ -44,11 +44,11 @@ class LCMChannels:
 
 
 RUN_CONTROLLER = False
-HAS_VICON = False
+HAS_VICON = True
 
 ROLL_KP = .5*3.5*180/math.pi
 PITCH_KP = .5*3.5*180/math.pi
-YAW_KP = .5*3.5*180/math.pi
+YAW_KP = 0.0*180/math.pi
 ROLL_RATE_KP = .5*70*180/math.pi
 PITCH_RATE_KP = .5*70*180/math.pi
 YAW_RATE_KP = .5*50*180/math.pi
