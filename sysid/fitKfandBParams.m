@@ -1,8 +1,58 @@
-function [Kf,KfSigma] = fitKfParams()
+function [Kf,b,KfSigma,bSigma] = fitKfandBParams()
 % finds Kf from the model
-% omega^2 = u
+% omega^2 = u+b
 % thrust = Kf*omega^2
-% weight(grams) = (1000/g)*Kf*u
+% weight(grams) = (1000/g)*Kf*(u+b)
+
+r1 = [
+5.118 15.7;
+10.236 24.6;
+15.354 33.8;
+20.078 45.0;
+];
+
+r2 = [
+0 0.4;
+0.5905 5.2;
+1.5748 8.4;
+3.1496 12.0;
+4.5275 14.45;
+6.299 17.5;
+8.0709 20.1;
+9.055 22.0;
+10.039 23.7;
+12.2047 27.2;
+14.1732 30.9;
+16.1417 35.1;
+18.1102 39.3;
+20.07 45.0;
+];
+
+r3 = [
+0 0.35;
+0.3937 4.72;
+1.5748 8.00;
+2.9527 11.18;
+4.527 14.3;
+8.2677 20.6;
+9.8425 23.0;
+11.4173 25.48;
+13.1889 29.5;
+15.9448 34.5;
+19.2913 41.5;
+];
+
+r4 = [
+0 0.37;
+5.3149 15.9;
+7.874 20.1;
+9.6457 23.0;
+12.0079 27.0;
+14.1732 30.7;
+16.338 35.1;
+18.1102 39.0;
+20.0787 43.2;
+];
 
 % 5 and 6 had a B_OFFSET of about 2 (onboard)
 r5 = [
@@ -27,7 +77,7 @@ r6 = [
 18.8976 36.45;
 ];
 
-% 7 and 8 had a B_OFFSET of about 3 (onboard)
+% 7 and 8 had a B_OFFSET of 3 (onboard)
 r7 = [
 13.18897 23.3;
 15.3593 27.4;
@@ -65,18 +115,20 @@ r9 = [
 22.2441 41.9;
 ];
 
+exp = {r1,r2,r3,r4};
 exp = {r5,r6};
 exp = {r7,r8};
 exp = {r9};
 
 Kfs = zeros(1,numel(exp));
+bs = zeros(1,numel(exp));
 
-x0 = 1;
+x0 = [1,1];
 for i=1:numel(exp);
   data = exp{i};
   
   w = warning('off','optim:fminunc:SwitchingMethod');
-  params = fmincon(@(x)modelfit(x,data),x0,-1,0,[],[],[],[],[],struct('Display','off'));
+  params = fmincon(@(x)modelfit(x,data),x0,[-1 0],0,[],[],[],[],[],struct('Display','off'));
   warning(w);
   
   figure(1);
@@ -86,10 +138,14 @@ for i=1:numel(exp);
   title(sprintf('Experiment #%d',i));
   
   Kfs(i) = params(1);
+  bs(i) = params(2);
 end
 
 Kf = mean(Kfs);
 KfSigma = std(Kfs);
+
+b = mean(bs);
+bSigma = std(bs);
 
 % plot the final model
 figure(2)
@@ -99,7 +155,7 @@ for i=1:numel(exp)
   plot(data(:,1),data(:,2),'bo');
 end
 % uses the sample points of the last exp
-plot([0;data(:,1);25],evalparams(Kf,[0;data(:,1);25]),'r');
+plot([0;data(:,1);25],evalparams([Kf,b],[0;data(:,1);25]),'r');
 title('Final model predictions');
 xlim([0 25]);
 ylim([0,45]);
@@ -115,5 +171,6 @@ end
 function w = evalparams(params,u)
   g = 9.8;
   Kf = params(1);
-  w = (1000/g)*Kf*u;
+  b = params(2);
+  w = (1000/g)*Kf*(u+b);
 end

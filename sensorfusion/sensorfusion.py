@@ -8,6 +8,7 @@ class SensorFusion():
 	def __init__(self):
 		self.q = [1.0, 0.0, 0.0, 0.0] # quaternion of sensor frame relative to auxiliary frame
 		self.integralFB = [0.0, 0.0, 0.0] # integral error terms scaled by Ki
+		self._rpy = [0.0, 0.0, 0.0]
 
 	def update_q(self, gx, gy, gz, ax, ay, az, dt):
 		new_vals = MahonyAHRS.MahonyAHRSupdateIMU(gx,gy,gz,ax,ay,az,dt,
@@ -17,7 +18,13 @@ class SensorFusion():
 		self.integralFB = new_vals[4:]
 
 	def get_rpy(self):
-		return quat2rpy(self.q)
+		try:
+			new_rpy = quat2rpy(self.q)
+		except ValueError:
+			new_rpy = self._rpy
+
+		self._rpy = new_rpy
+		return self._rpy
 
 
 def quat2rpy(q):

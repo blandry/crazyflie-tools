@@ -44,7 +44,7 @@ class LCMChannels:
 
 
 RUN_CONTROLLER = False
-HAS_VICON = True
+HAS_VICON = False
 
 ROLL_KP = .5*3.5*180/math.pi
 PITCH_KP = .5*3.5*180/math.pi
@@ -54,7 +54,7 @@ PITCH_RATE_KP = .5*70*180/math.pi
 YAW_RATE_KP = .5*50*180/math.pi
 
 Z_KP = 0.0
-Z_RATE_KP = 10000.0
+Z_RATE_KP = 0.0
 
 K = np.matrix([[0,0,-Z_KP,0,PITCH_KP,YAW_KP,0,0,-Z_RATE_KP,0,PITCH_RATE_KP,YAW_RATE_KP],
                [0,0,-Z_KP,ROLL_KP,0,-YAW_KP,0,0,-Z_RATE_KP,ROLL_RATE_KP,0,-YAW_RATE_KP],
@@ -169,15 +169,14 @@ class SimpleClient:
 
             self._add_sensor_reading(imu_readings,'imu')
 
-            # TODO: The lcm message need to be changed so that it takes
-            # gyro, acc and dt
             msg = crazyflie_imu_t()
-            msg.roll = imu_readings[0]
-            msg.pitch = imu_readings[1]
-            msg.yaw = imu_readings[2]
-            msg.rolld = imu_readings[3]
-            msg.pitchd = imu_readings[4]
-            msg.yawd = imu_readings[5]
+            msg.omegax = imu_readings[0]
+            msg.omegay = imu_readings[1]
+            msg.omegaz = imu_readings[2]
+            msg.alphax = imu_readings[3]
+            msg.alphay = imu_readings[4]
+            msg.alphaz = imu_readings[5]
+            msg.dt = imu_readings[6]
             _sensors_lc.publish(LCMChannels.IMU, msg.encode())
 
             # print "<- " + packet.__str__()
@@ -198,10 +197,10 @@ class SimpleClient:
         y = list(msg.q)
 
         if self._last_vicon_q:
-            # could use the timestamp instead of vicon's frequency
             dt = 1.0/120.0
             dt_measured = (msg.timestamp-self._last_timestamp)/1000.0
             if (dt_measured>1.2*dt):
+                # we skipped one or more messages
                 dt = dt_measured
             y.extend(np.dot(1.0/dt,np.array(msg.q)-np.array(self._last_vicon_q)).tolist())
         else:
@@ -226,28 +225,26 @@ class SimpleClient:
         self._state_lock.acquire()
         
         if type=='imu':
-
-            # THE ACC MIGHT NEED TO BE ROTATED IN THE FIRMWARE
-
             (gx,gy,gz) = y[0:3]
             (ax,ay,az) = y[3:6]
-            dt = y[6]/1000.0       
-            self._sensor_fusion.update_q(gx,gy,gz,ax,ay,az,dt)
-            [roll,pitch,yaw] = self._sensor_fusion.get_rpy()
-            y = [self.xhat[0],
-                 self.xhat[1],
-                 self.xhat[2],
-                 roll,
-                 pitch,
-                 yaw,
-                 self.xhat[6],
-                 self.xhat[7],
-                 self.xhat[8],
-                 gx,
-                 gy,
-                 gz]
-            alpha = 0.8
-            self.xhat = np.dot(1-alpha,self.xhat) + np.dot(alpha,np.array(y).transpose())
+            dt = y[6]/1000.0  
+            if dt>0:     
+                self._sensor_fusion.update_q(gx,gy,gz,ax,ay,az,dt)
+                [roll,pitch,yaw] = self._sensor_fusion.get_rpy()
+                y = [self.xhat[0],
+                     self.xhat[1],
+                     self.xhat[2],
+                     roll,
+                     pitch,
+                     yaw,
+                     self.xhat[6],
+                     self.xhat[7],
+                     self.xhat[8],
+                     gx,
+                     gy,
+                     gz]
+                alpha = 0.8
+                self.xhat = np.dot(1-alpha,self.xhat) + np.dot(alpha,np.array(y).transpose())
         
         elif type=='vicon':
             y = [y[0],
