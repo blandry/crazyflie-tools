@@ -7,7 +7,7 @@ Order = [6, 4, 12]; % [Number of observed outputs, Number of inputs, Number of s
 
 Parameters = [2.15 2.15 4.29 2.37 1];
 
-InitialStates = [0 0 0 0 0 0 0 0 0 0 0 0]';
+InitialStates = [-.4 -.05 0.65 0 0 0 0 0 0 0 0 0]';
 Ts = 0; % Continuous time model
 
 nlgr = idnlgrey(FileName, Order, Parameters, InitialStates, Ts); 

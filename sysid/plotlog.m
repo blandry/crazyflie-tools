@@ -9,8 +9,9 @@ tinput = data.crazyflie_input(:,7);
 input = data.crazyflie_input(:,2:5);
 
 subplot(2,1,1);
-plot(tpos,pos);
+plot(tpos,pos(:,1:3));
 title('Position and gyro rates over time');
+%legend('x','y','z','rolld','pitchd','yawd');
 ylim([-5 5]);
 
 subplot(2,1,2);

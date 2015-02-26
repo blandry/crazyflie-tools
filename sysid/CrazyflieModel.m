@@ -24,7 +24,7 @@ y = [x(1:3);x(10:12)]; % These are things we directly measure (vicon position an
 g = 9.81;
 m = 0.03337; % mass in Kg
 L = 0.046; % Distance from rotor to COM (in m)
-Kf = 0.0;
+Kf = 0.018089574353113;
 
 % Unknown parameters
 Ixx = 1E-6*Ixx;

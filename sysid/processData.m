@@ -1,13 +1,24 @@
 % The time intervals to use
 % Use plotlog to identify those
-T = [];
+T = [
+10.46 11.04;
+18.18 18.45;
+33.88 34.42;
+21.39 21.67;
+24.73 25.08;
+19.19 19.64;
+19.72 20.3;
+20.72 21.24;
+18.06 18.52;
+22.73 23.29;
+];
 
 for i=1:size(T,1)
   t0 = T(i,1);
   tf = T(i,2);
   rawdata = load([num2str(i) '.mat']);
 
-  pos = [data.crazyflie_state_estimate(:,2:4),data.crazyflie_state_estimate(:,11:13),rawdata.crazyflie_state_estimate(:,14)];
+  pos = [rawdata.crazyflie_state_estimate(:,2:4),rawdata.crazyflie_state_estimate(:,11:13),rawdata.crazyflie_state_estimate(:,14)];
   input = [rawdata.crazyflie_input(:,2:5),rawdata.crazyflie_input(:,7)];
 
   [~,ipos]=min(abs(pos(:,7)-t0));
@@ -30,7 +41,7 @@ for i=1:size(T,1)
   N = numel(timestamps);
  
   inputdata = [input1,input2,input3,input4];
-  posdata = pos(ipos:jpos,1:6)
+  posdata = pos(ipos:jpos,1:6);
   % unwrap the angles for better idea of dynamics
   posdata(:,4:6) = unwrap(posdata(:,4:6));
   
@@ -40,7 +51,8 @@ end
 
 % you can remove some experiments from the sysid here
 % ex: files = [1 3 4]
-files = 1:size(T,1);
+%files = 1:size(T,1);
+files = [1];
 
 d = cell(1,numel(files));
 for i=1:numel(files)
@@ -69,8 +81,8 @@ end
 z = merge(d{:});
 
 % Shift data to take into account delay
-% (delay is ?ms, and sample rate 120Hz)
+% (delay is 42ms, and sample rate 120Hz)
 delay = 5*ones(1,4);
-z = nkshift(z,delay); 
+z = nkshift(z,delay);
 
 save('sysidData.mat','z');
