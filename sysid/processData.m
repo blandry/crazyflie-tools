@@ -38,12 +38,8 @@ for i=1:size(T,1)
   input4 = ppval(input4foh,pos(ipos:jpos,7));
 
   timestamps = pos(ipos:jpos,7);
-  N = numel(timestamps);
- 
-  inputdata = [input1,input2,input3,input4];
   posdata = pos(ipos:jpos,1:6);
-  % unwrap the angles for better idea of dynamics
-  posdata(:,4:6) = unwrap(posdata(:,4:6));
+  inputdata = [input1,input2,input3,input4];
   
   data = [timestamps,inputdata,posdata];
   save(['clean' num2str(i) '.mat'],'data');
@@ -52,7 +48,7 @@ end
 % you can remove some experiments from the sysid here
 % ex: files = [1 3 4]
 %files = 1:size(T,1);
-files = [1];
+files = [1 2 4 8];
 
 d = cell(1,numel(files));
 for i=1:numel(files)
@@ -64,16 +60,24 @@ for i=1:numel(files)
   xdata = data(:,6:11);
 
   % Fit PPtrajectory 
-  xdata = PPTrajectory(spline(t,xdata'));
+  xdata = PPTrajectory(foh(t,xdata'));
   udata = PPTrajectory(foh(t,udata'));
 
   % Sample at uniform rate
-  dt = 1/120;
+  dt = 1/100;
   t_sample = t(1):dt:t(end); 
-  inputs = udata.eval(t_sample); % Control inputs
-  outputs = xdata.eval(t_sample); % Configuration space variables
+
+  inputs = udata.eval(t_sample);
+  
+  xyzoutputs = xdata.eval(t_sample);
+  xyzoutputs = xyzoutputs(1:3,:);
+  % the gyro is shifted from vicon
+  gyrooutputs = xdata.eval(t_sample+.15);
+  gyrooutputs = gyrooutputs(4:6,:);
+  outputs = [xyzoutputs;gyrooutputs];  
+  
   sysiddata = iddata(outputs',inputs',dt);
-  set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'x','y','z','rolldot','pitchdot','yawdot'});
+  set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'x','y','z','gyrox','gyroy','gyroz'});
 
   d{i} = sysiddata;
 end
@@ -81,8 +85,8 @@ end
 z = merge(d{:});
 
 % Shift data to take into account delay
-% (delay is 42ms, and sample rate 120Hz)
-delay = 5*ones(1,4);
-z = nkshift(z,delay);
+% (delay is 42ms)
+delay = round(0.042/dt);
+z = nkshift(z,delay*ones(1,4));
 
 save('sysidData.mat','z');

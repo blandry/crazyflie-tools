@@ -6,13 +6,13 @@ import pygame.midi
 import lcm
 from crazyflie_t import crazyflie_input_t
 
-INPUT_TYPE = '32bits'
-INPUT_MIN = 0
-INPUT_MAX = 65000
-
-# INPUT_TYPE = 'omegasqu'
+# INPUT_TYPE = '32bits'
 # INPUT_MIN = 0
-# INPUT_MAX = 25
+# INPUT_MAX = 65000
+
+INPUT_TYPE = 'omegasqu'
+INPUT_MIN = 0
+INPUT_MAX = 25
 
 # INPUT_TYPE = 'onboardpd'
 # INPUT_MIN = 0
