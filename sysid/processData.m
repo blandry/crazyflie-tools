@@ -3,14 +3,14 @@
 T = [
 10.46 11.04;
 18.18 18.45;
-33.88 34.42;
-21.39 21.67;
+34.0 34.42;%%33.88 34.42;
+21.5 21.67;%21.39 21.67;
 24.73 25.08;
-19.19 19.64;
-19.72 20.3;
+19.3 19.64;%19.19 19.64;
+19.8 20.3;%19.72 20.3;
 20.72 21.24;
 18.06 18.52;
-22.73 23.29;
+22.9 23.29;%22.73 23.29;
 ];
 
 for i=1:size(T,1)
@@ -18,7 +18,8 @@ for i=1:size(T,1)
   tf = T(i,2);
   rawdata = load([num2str(i) '.mat']);
 
-  pos = [rawdata.crazyflie_state_estimate(:,2:4),rawdata.crazyflie_state_estimate(:,11:13),rawdata.crazyflie_state_estimate(:,14)];
+  %pos = [rawdata.crazyflie_state_estimate(:,2:4),rawdata.crazyflie_state_estimate(:,11:13),rawdata.crazyflie_state_estimate(:,14)];
+  pos = [rawdata.crazyflie_state_estimate(:,2:4),rawdata.crazyflie_state_estimate(:,5:7),rawdata.crazyflie_state_estimate(:,14)];
   input = [rawdata.crazyflie_input(:,2:5),rawdata.crazyflie_input(:,7)];
 
   [~,ipos]=min(abs(pos(:,7)-t0));
@@ -39,6 +40,8 @@ for i=1:size(T,1)
 
   timestamps = pos(ipos:jpos,7);
   posdata = pos(ipos:jpos,1:6);
+  posdata(:,4:6) = unwrap(posdata(:,4:6));
+  
   inputdata = [input1,input2,input3,input4];
   
   data = [timestamps,inputdata,posdata];
@@ -48,7 +51,7 @@ end
 % you can remove some experiments from the sysid here
 % ex: files = [1 3 4]
 %files = 1:size(T,1);
-files = [1 2 4 8];
+files = [3];
 
 d = cell(1,numel(files));
 for i=1:numel(files)
@@ -71,13 +74,20 @@ for i=1:numel(files)
   
   xyzoutputs = xdata.eval(t_sample);
   xyzoutputs = xyzoutputs(1:3,:);
+  
   % the gyro is shifted from vicon
-  gyrooutputs = xdata.eval(t_sample+.15);
-  gyrooutputs = gyrooutputs(4:6,:);
-  outputs = [xyzoutputs;gyrooutputs];  
+  %gyrooutputs = xdata.eval(t_sample+.05);
+  %gyrooutputs = gyrooutputs(4:6,:);
+  
+  rpyoutputs = xdata.eval(t_sample+.05);
+  rpyoutputs = rpyoutputs(4:6,:);
+
+  outputs = [xyzoutputs;rpyoutputs];
   
   sysiddata = iddata(outputs',inputs',dt);
-  set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'x','y','z','gyrox','gyroy','gyroz'});
+  %set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'x','y','z','gyrox','gyroy','gyroz'});
+  %set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'x','y','z'});
+  set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'x','y','z','roll','pitch','yaw'});
 
   d{i} = sysiddata;
 end

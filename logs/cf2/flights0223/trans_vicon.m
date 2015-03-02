@@ -32,26 +32,26 @@ estimates = PPTrajectory(foh(crazyflie_state_estimate(:,14),estimates'));
 
 t = crazyflie_state_estimate(:,14);
 vicon_samples = vicon.eval(t);
-estimates_samples = estimates.eval(t+.05);
+estimates_samples = estimates.eval(t+.15);
 
-t0 = 22.73;
-tf = 23.29;
+t0 = 21.39;
+tf = 21.67;
 
 figure(1)
 hold on
 plot(t,vicon_samples(10,:),'bx-');
 plot(t,estimates_samples(10,:),'rx-');
 ylim([-10 10]);
-xlim([t0-1 tf+1])
+xlim([t0 tf])
 figure(2)
 hold on
 plot(t,vicon_samples(11,:),'bx-');
 plot(t,estimates_samples(11,:),'rx-');
 ylim([-10 10]);
-xlim([t0-1 tf+1])
+xlim([t0 tf])
 figure(3)
 hold on
 plot(t,vicon_samples(12,:),'bx-');
 plot(t,estimates_samples(12,:),'rx-');
 ylim([-10 10]);
-xlim([t0-1 tf+1])
+xlim([t0 tf])

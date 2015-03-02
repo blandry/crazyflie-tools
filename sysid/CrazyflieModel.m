@@ -1,4 +1,4 @@
-function [xdot,y] = CrazyflieModel(t,x,u,Ixx,Iyy,Izz,Km,varargin)
+function [xdot,y] = CrazyflieModel(t,x,u,Ixx,Iyy,Izz,Kf,Km,varargin)
 
 % States:
 % x
@@ -17,20 +17,19 @@ function [xdot,y] = CrazyflieModel(t,x,u,Ixx,Iyy,Izz,Km,varargin)
 % Inputs:
 % omega^2 for each rotor
 
-% Set outputs
-
 % Known parameters
 g = 9.81;
 m = 0.03337; % mass in Kg
 L = 0.046; % Distance from rotor to COM (in m)
-Kf = 0.004522393588278;
+
+Kf = 0.004522393588278*Kf*1E-2;
 
 % Unknown parameters
 Ixx = 1E-5*Ixx;
 Iyy = 1E-5*Iyy;
 Izz = 1E-5*Izz;
-Ixy = 0; %1E-7*Ixy;
-Km = 1E-7*Km;
+Ixy = 0;
+Km = 1E-2*Km;
 
 I = [Ixx Ixy 0; Ixy Iyy 0; 0 0 Izz]; % Inertia matrix
 invI = inv(I);
@@ -85,6 +84,8 @@ rpy_ddot = Phidot*R*pqr + Phi*Rdot*pqr + Phi*R*pqr_dot;
 
 xdot = [x(7:12);xyz_ddot;rpy_ddot];
 
-y = [x(1:3);pqr];
+%y = [x(1:3);pqr];
+%y = x(1:3);
+y = x(1:6);
 
 end

@@ -10,17 +10,17 @@ from crazyflie_t import crazyflie_input_t
 # INPUT_MIN = 0
 # INPUT_MAX = 65000
 
-INPUT_TYPE = 'omegasqu'
-INPUT_MIN = 0
-INPUT_MAX = 25
+# INPUT_TYPE = 'omegasqu'
+# INPUT_MIN = 0
+# INPUT_MAX = 25
 
 # INPUT_TYPE = 'onboardpd'
 # INPUT_MIN = 0
 # INPUT_MAX = 65000
 
-# INPUT_TYPE = 'offsetonly'
-# INPUT_MIN = 0
-# INPUT_MAX = 25
+INPUT_TYPE = 'offsetonly'
+INPUT_MIN = 0
+INPUT_MAX = 65000
 
 INPUT_FREQ = 200.0;
 class LCMChannels:

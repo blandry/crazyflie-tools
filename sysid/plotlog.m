@@ -6,12 +6,14 @@ tpos = data.crazyflie_state_estimate(:,14);
 pos = [data.crazyflie_state_estimate(:,2:4),data.crazyflie_state_estimate(:,5:7)];
 
 tinput = data.crazyflie_input(:,7);
-input = data.crazyflie_input(:,2:5);
+input = data.crazyflie_input(:,6);
 
 subplot(2,1,1);
 
-f = PPTrajectory(spline(tpos,pos(:,1:3)'));
+pos(:,4:6) = unwrap(pos(:,4:6));
+f = PPTrajectory(spline(tpos,pos(:,1:6)'));
 plot(tpos,f.eval(tpos));
+legend('x','y','z','r','p','y');
 
 %plot(tpos,pos(:,1:3));
 %title('Position and gyro rates over time');
