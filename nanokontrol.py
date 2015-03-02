@@ -10,22 +10,16 @@ from crazyflie_t import crazyflie_input_t
 # INPUT_MIN = 0
 # INPUT_MAX = 65000
 
-# INPUT_TYPE = 'omegasqu'
-# INPUT_MIN = 0
-# INPUT_MAX = 25
+INPUT_TYPE = 'omegasqu'
+INPUT_MIN = 0
+INPUT_MAX = 25
 
 # INPUT_TYPE = 'onboardpd'
 # INPUT_MIN = 0
 # INPUT_MAX = 65000
 
-INPUT_TYPE = 'offsetonly'
-INPUT_MIN = 0
-INPUT_MAX = 65000
-
-INPUT_FREQ = 200.0;
-class LCMChannels:
-    INPUT = 'crazyflie_input'
-    OFFSET = 'crazyflie_extra_offset'
+IS_EXTRA_INPUT = True
+INPUT_FREQ = 100.0;
 
 
 class Kon():
@@ -80,10 +74,10 @@ class Kon():
         msg.input[3] = (self.sliders.get(5,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
         msg.offset = (self.sliders.get(6,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
         msg.type = INPUT_TYPE
-        if INPUT_TYPE=='offsetonly':
-            self.lc.publish(LCMChannels.OFFSET, msg.encode())
+        if IS_EXTRA_INPUT:
+            self.lc.publish('crazyflie_extra_input', msg.encode())
         else:
-            self.lc.publish(LCMChannels.INPUT, msg.encode())
+            self.lc.publish('crazyflie_input', msg.encode())
 
 
 if __name__=='__main__':
