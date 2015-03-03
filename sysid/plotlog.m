@@ -6,7 +6,7 @@ tpos = data.crazyflie_state_estimate(:,14);
 pos = [data.crazyflie_state_estimate(:,2:4),data.crazyflie_state_estimate(:,5:7)];
 
 tinput = data.crazyflie_input(:,7);
-input = data.crazyflie_input(:,6);
+input = data.crazyflie_input(:,2:6);
 
 subplot(2,1,1);
 
@@ -18,7 +18,7 @@ legend('x','y','z','r','p','y');
 %plot(tpos,pos(:,1:3));
 %title('Position and gyro rates over time');
 %legend('x','y','z','rolld','pitchd','yawd');
-ylim([-5 5]);
+ylim([-5 20]);
 
 subplot(2,1,2);
 plot(tinput,input);

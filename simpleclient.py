@@ -11,7 +11,7 @@ import array
 import usb
 import os
 import time
-from threading import Thread, Lock
+from threading import Thread, Lock, Event
 
 import cflib
 from cflib.crazyflie import Crazyflie
@@ -48,10 +48,13 @@ class SimpleClient:
                                              publish_to_lcm=True)
 
         # controller
-        self._controller = Controller(control_input_type='omegasqu',
-                                      listen_to_lcm=False,
+        self._drake_controller = True
+        self._control_input_updated_flag = Event()
+        self._controller = Controller(control_input_type='32bits',
+                                      listen_to_lcm=self._drake_controller,
+                                      control_input_updated_flag=self._control_input_updated_flag,
                                       listen_to_extra_input=True,
-                                      publish_to_lcm=True)
+                                      publish_to_lcm=not(self._drake_controller))
         
         # Transmitter thread (handles all comm with the crazyflie)
         Thread(target=self._transmitter_thread).start()
@@ -84,7 +87,11 @@ class SimpleClient:
             except:
                 continue
             self._state_estimator.add_imu_reading(imu_reading)
+            self._control_input_updated_flag.clear()
             xhat = self._state_estimator.get_xhat()
+            if self._drake_controller:
+                # wait for Drake to give us the control input...
+                self._control_input_updated_flag.wait(0.01)
 
             control_input = self._controller.get_control_input(xhat=xhat)
             control_input_pk.data = struct.pack('<5fi',*control_input)

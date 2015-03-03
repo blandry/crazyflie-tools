@@ -61,18 +61,18 @@ classdef Crazyflie
         xd = zeros(12,1);
       end
           
-      u0 = [43000 43000 43000 43000]';
+      u0 = 0*[43000 43000 43000 43000]';
       
-      ROLL_KP = .5*3.5*180/pi;
-      PITCH_KP = .5*3.5*180/pi;
+      ROLL_KP = 1.2*3.5*180/pi;
+      PITCH_KP = 1.2*3.5*180/pi;
       YAW_KP = 0.0;
       
-      ROLL_RATE_KP = .5*70*180/pi;
-      PITCH_RATE_KP = .5*70*180/pi; 
-      YAW_RATE_KP = .5*50*180/pi;
+      ROLL_RATE_KP = .8*70*180/pi;
+      PITCH_RATE_KP = .8*70*180/pi; 
+      YAW_RATE_KP = .8*50*180/pi;
       
       Z_KP = 0.0;
-      Z_RATE_KP = 10000.0;
+      Z_RATE_KP = 0.0;
       
       K = [0 0 -Z_KP 0 PITCH_KP YAW_KP 0 0 -Z_RATE_KP 0 PITCH_RATE_KP YAW_RATE_KP;
            0 0 -Z_KP ROLL_KP 0 -YAW_KP 0 0 -Z_RATE_KP ROLL_RATE_KP 0 -YAW_RATE_KP;

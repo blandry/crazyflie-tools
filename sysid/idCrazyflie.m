@@ -3,9 +3,9 @@ load sysidData.mat
 
 % Model
 FileName = 'CrazyflieModel';
-Order = [6, 4, 12]; % [Number of observed outputs, Number of inputs, Number of states] 
+Order = [3, 4, 12]; % [Number of observed outputs, Number of inputs, Number of states] 
 
-Parameters = [2.15 2.15 4.29 1 1];
+Parameters = [2.15 2.15 4.29 2.37 1 1];
 
 Ts = 0; % Continuous time model
 
@@ -31,24 +31,12 @@ InitialStates{10} = [];
 InitialStates{11} = [];
 InitialStates{12} = [];
 for i = 1 : length(x0_dat)
-% InitialStates{1} = [ InitialStates{1} x0_dat{i}(1) ];
-% InitialStates{2} = [ InitialStates{2} x0_dat{i}(2) ];
-% InitialStates{3} = [ InitialStates{3} x0_dat{i}(3) ];
-% InitialStates{4} = [ InitialStates{4} 0 ];
-% InitialStates{5} = [ InitialStates{5} 0 ];
-% InitialStates{6} = [ InitialStates{6} 0 ];
-% InitialStates{7} = [ InitialStates{7} 0 ];
-% InitialStates{8} = [ InitialStates{8} 0 ];
-% InitialStates{9} = [ InitialStates{9} 0 ];
-% InitialStates{10} = [ InitialStates{10} 0 ];
-% InitialStates{11} = [ InitialStates{11} 0 ];
-% InitialStates{12} = [ InitialStates{12} 0 ];
 InitialStates{1} = [ InitialStates{1} x0_dat{i}(1) ];
 InitialStates{2} = [ InitialStates{2} x0_dat{i}(2) ];
 InitialStates{3} = [ InitialStates{3} x0_dat{i}(3) ];
-InitialStates{4} = [ InitialStates{4} x0_dat{i}(4) ];
-InitialStates{5} = [ InitialStates{5} x0_dat{i}(5) ];
-InitialStates{6} = [ InitialStates{6} x0_dat{i}(6) ];
+InitialStates{4} = [ InitialStates{4} 0 ];
+InitialStates{5} = [ InitialStates{5} 0 ];
+InitialStates{6} = [ InitialStates{6} 0 ];
 InitialStates{7} = [ InitialStates{7} 0 ];
 InitialStates{8} = [ InitialStates{8} 0 ];
 InitialStates{9} = [ InitialStates{9} 0 ];
@@ -62,10 +50,10 @@ nlgr = idnlgrey(FileName, Order, Parameters, InitialStates, Ts);
 % Regularization
 nlgr.Algorithm.Regularization.Lambda = 0.01;
 nlgr.Algorithm.Regularization.Nominal = 'model';
-RR = diag([.1 .1 .1 .1 0 0.01*ones(1,length(z.ExperimentName)*6)]);
+RR = diag([.1 .1 .1 .1 0 1 0.01*ones(1,length(z.ExperimentName)*9)]);
 nlgr.Algorithm.Regularization.R = RR;
 
-setinit(nlgr, 'Fixed', {true true true true true true false false false false false false});
+setinit(nlgr, 'Fixed', {true true true false false false false false false false false false});
 
 % Set max/min limits for parameters
 nlgr.Parameters(1).Minimum = 0;
@@ -73,6 +61,7 @@ nlgr.Parameters(2).Minimum = 0;
 nlgr.Parameters(3).Minimum = 0;
 nlgr.Parameters(4).Minimum = 0; 
 nlgr.Parameters(5).Minimum = 0;
+nlgr.Parameters(6).Minimum = 0;
 
 nlgr.InitialStates(1).Name = 'x';
 nlgr.InitialStates(2).Name = 'y';

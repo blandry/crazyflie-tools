@@ -36,7 +36,7 @@ MODES = {
 
 class Controller():
 	
-	def __init__(self, control_input_type='32bits', listen_to_lcm=False, 
+	def __init__(self, control_input_type='32bits', listen_to_lcm=False, control_input_updated_flag=None,
 				 listen_to_extra_input=False, publish_to_lcm=False):
 
 		self._K = {'32bits': K32bits, 'omegasqu': Komegasqu}
@@ -57,6 +57,8 @@ class Controller():
 			self._extra_control_input = [0.0, 0.0, 0.0, 0.0, 0.0, MODES.get(self._control_input_type,1)]
 			Thread(target=self._extra_input_thread).start()
 
+		self._control_input_updated_flag = control_input_updated_flag
+
 	def get_control_input(self, xhat=None):
 		if self._listen_to_lcm or not xhat:
 			control_input = self._latest_control_input
@@ -65,7 +67,7 @@ class Controller():
 			control_input = thrust_input + [0.0, MODES.get(self._control_input_type,1)]
 
 		if self._listen_to_extra_input:
-			assert control_input[5]==self._extra_control_input[5], 'The extra input is not of the right type'
+			assert control_input[5] == self._extra_control_input[5], 'The extra input is not of the right type'
 			control_input[0] += self._extra_control_input[0]
 			control_input[1] += self._extra_control_input[1]
 			control_input[2] += self._extra_control_input[2]
@@ -91,6 +93,8 @@ class Controller():
 		msg = crazyflie_input_t.decode(data)
 		self._latest_control_input = list(msg.input) + [msg.offset, MODES.get(msg.type,1)]
 		self._control_input_type = msg.type
+		if self._control_input_updated_flag:
+			self._control_input_updated_flag.set()
 
 	def _extra_input_thread(self):
 		_extra_input_lc = lcm.LCM()
