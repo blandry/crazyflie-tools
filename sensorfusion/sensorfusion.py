@@ -2,7 +2,8 @@
 import time
 import lcm
 import MahonyAHRS
-from math import atan2, asin
+import numpy as np
+from math import atan2, asin, cos, sin
 from threading import Thread
 from crazyflie_t import crazyflie_state_estimate_t
 from vicon_t import vicon_pos_t
@@ -10,7 +11,7 @@ from vicon_t import vicon_pos_t
 
 class SensorFusion():
 
-	def __init__(self, listen_to_vicon=False, publish_to_lcm=False):
+	def __init__(self, listen_to_vicon=False, publish_to_lcm=False, use_rpydot=False):
 		
 		self.q = [1.0, 0.0, 0.0, 0.0] # quaternion of sensor frame relative to auxiliary frame
 		self.integralFB = [0.0, 0.0, 0.0] # integral error terms scaled by Ki	
@@ -24,6 +25,7 @@ class SensorFusion():
 		self._valid_vicon = False
 		self._vicon_alpha = .8
 
+		self._use_rpydot = use_rpydot
 		self._publish_to_lcm = publish_to_lcm
 		if publish_to_lcm:
 			self._xhat_lc = lcm.LCM()
@@ -81,12 +83,20 @@ class SensorFusion():
 		self._valid_vicon = True
 
 	def get_xhat(self):
+		# should maybe put a lock on those variables before accessing them
 
-		# should probably lock those variables before accessing them
+		if self._use_rpydot:
+			try:
+				angular_rate = angularvel2rpydot(self._last_rpy, body2world(self._last_rpy, self._last_gyro))
+			except ValueError:
+				angular_rate = [0.0, 0.0, 0.0]
+		else:
+			angular_rate = self._last_gyro
+
 		xhat = [self._last_xyz[0],self._last_xyz[1],self._last_xyz[2],
 				self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],
 				self._last_dxyz[0],self._last_dxyz[1],self._last_dxyz[2],
-				self._last_gyro[0],self._last_gyro[1],self._last_gyro[2]]
+				angular_rate[0],angular_rate[1],angular_rate[2]]
 
 		if self._publish_to_lcm:
 			msg = crazyflie_state_estimate_t()
@@ -107,3 +117,42 @@ def quat2rpy(q):
   		   asin(2*(w*y - z*x)),
            atan2(2*(w*z + x*y), w*w + x*x - (y*y + z*z))]
 	return rpy
+
+def rotx(theta):
+    c = cos(theta)
+    s = sin(theta)
+    M = np.matrix([[1,0,0],[0,c,-s],[0,s,c]])
+    return M
+
+def roty(theta):
+    c = cos(-theta)
+    s = sin(-theta)
+    M = np.matrix([[c,0,-s],[0,1,0],[s,0,c]])
+    return M
+
+def rotz(theta):
+    c = cos(theta)
+    s = sin(theta)
+    M = np.matrix([[c,-s,0],[s,c,0],[0,0,1]])
+    return M
+
+def rpy2rotmat(rpy):
+    R = np.dot(rotz(rpy[2]),np.dot(roty(rpy[1]),rotx(rpy[0])))
+    return R
+
+def body2world(rpy, xyz):
+    R = rpy2rotmat(rpy)
+    xyz_world = np.dot(np.linalg.inv(R),np.array(xyz).transpose())
+    return (np.array(xyz_world)[0]).tolist()
+
+def angularvel2rpydot(rpy, omega):
+	p = rpy[1]
+	y = rpy[2]
+	sy = sin(y)
+	cy = cos(y)
+	sp = sin(p)
+	cp = cos(p)
+	tp = sp/cp
+	Phi = np.matrix([[cy/cp, sy/cp, 0],[-sy, cy, 0],[cy*tp, tp*sy, 1]])
+	rpydot = np.dot(Phi,np.array(omega).transpose())
+	return (np.array(rpydot)[0]).tolist()

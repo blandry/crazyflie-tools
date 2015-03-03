@@ -43,18 +43,20 @@ class SimpleClient:
         self._dev_handle = self._cf.link.cradio.handle
         self._send_vendor_setup(SET_RADIO_ARC, 0, 0, ())
 
+        self._drake_controller = True
+
         # state estimator
         self._state_estimator = SensorFusion(listen_to_vicon=True,
-                                             publish_to_lcm=True)
+                                             publish_to_lcm=True,
+                                             use_rpydot=False)
 
         # controller
-        self._drake_controller = True
         self._control_input_updated_flag = Event()
-        self._controller = Controller(control_input_type='32bits',
-                                      listen_to_lcm=self._drake_controller,
+        self._controller = Controller(control_input_type='omegasqu',
+                                      listen_to_lcm=True,
                                       control_input_updated_flag=self._control_input_updated_flag,
                                       listen_to_extra_input=True,
-                                      publish_to_lcm=not(self._drake_controller))
+                                      publish_to_lcm=False)
         
         # Transmitter thread (handles all comm with the crazyflie)
         Thread(target=self._transmitter_thread).start()

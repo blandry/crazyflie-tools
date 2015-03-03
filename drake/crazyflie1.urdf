@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <robot xmlns="http://drake.mit.edu"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- name="crazyflie">
+ name="crazyflie1">
   <link name="base_link">
     <inertial>
       <mass value="0.0234"/>

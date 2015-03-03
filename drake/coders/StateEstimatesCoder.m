@@ -3,7 +3,8 @@ classdef StateEstimatesCoder < LCMCoder
   methods
     function [xhat,t] = decode(obj,data)
       msg = crazyflie_t.crazyflie_state_estimate_t(data);
-      xhat = msg.xhat;
+      R = rpy2rotmat(msg.xhat(4:6));
+      xhat = [msg.xhat(1:9);angularvel2rpydot(msg.xhat(4:6),R*msg.xhat(10:12))];
       t = msg.timestamp;
     end
     

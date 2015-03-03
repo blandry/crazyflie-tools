@@ -3,9 +3,12 @@ classdef Crazyflie
     manip;
     
     nominal_input;
+    
+    % only used with open loop trajectories
     input_freq = 200;
 
-    Q = diag([1 1 1 50 50 50 1 1 1 .5 .5 .5]);
+    % only used with LQR
+    Q = diag([.5 .5 .5 .1 .1 1 .5 .5 .5 1 1 1]);
     R = eye(4);
   end
   
@@ -50,7 +53,7 @@ classdef Crazyflie
       controller = controller.inInputFrame(state_estimator_frame);
       
       input_frame = LCMCoordinateFrame('crazyflie_input',InputCoder('omegasqu'),'u');
-      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(length(obj.nominal_input)),obj.nominal_input));
+      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(length(obj.nominal_input)),obj.nominal_input-10));
       controller = controller.inOutputFrame(input_frame);
       
       runLCM(controller,[]);
@@ -60,24 +63,28 @@ classdef Crazyflie
       if (nargin<2)
         xd = zeros(12,1);
       end
-          
-      u0 = 0*[43000 43000 43000 43000]';
       
-      ROLL_KP = 1.2*3.5*180/pi;
-      PITCH_KP = 1.2*3.5*180/pi;
-      YAW_KP = 0.0;
-      
-      ROLL_RATE_KP = .8*70*180/pi;
-      PITCH_RATE_KP = .8*70*180/pi; 
-      YAW_RATE_KP = .8*50*180/pi;
-      
-      Z_KP = 0.0;
-      Z_RATE_KP = 0.0;
-      
-      K = [0 0 -Z_KP 0 PITCH_KP YAW_KP 0 0 -Z_RATE_KP 0 PITCH_RATE_KP YAW_RATE_KP;
-           0 0 -Z_KP ROLL_KP 0 -YAW_KP 0 0 -Z_RATE_KP ROLL_RATE_KP 0 -YAW_RATE_KP;
-           0 0 -Z_KP 0 -PITCH_KP YAW_KP 0 0 -Z_RATE_KP 0 -PITCH_RATE_KP YAW_RATE_KP;
-           0 0 -Z_KP -ROLL_KP 0 -YAW_KP 0 0 -Z_RATE_KP -ROLL_RATE_KP 0 -YAW_RATE_KP];
+%       input_type = '32bits';
+%       u0 = zeros(4,1);
+%       ROLL_KP = 1.2*3.5*180/pi;
+%       PITCH_KP = 1.2*3.5*180/pi;
+%       YAW_KP = 0.0;
+%       ROLL_RATE_KP = .8*70*180/pi;
+%       PITCH_RATE_KP = .8*70*180/pi; 
+%       YAW_RATE_KP = .8*50*180/pi;
+
+      input_type = 'omegasqu';
+      u0 = zeros(4,1);
+      ROLL_KP = 1.2*.7;
+      PITCH_KP = 1.2*.7;
+      YAW_KP = 0;
+      ROLL_RATE_KP = .8*.8;
+      PITCH_RATE_KP = .8*.8;
+      YAW_RATE_KP = .8*.6;
+      K = [0 0 0 0 PITCH_KP YAW_KP 0 0 0 0 PITCH_RATE_KP YAW_RATE_KP;
+           0 0 0 ROLL_KP 0 -YAW_KP 0 0 0 ROLL_RATE_KP 0 -YAW_RATE_KP;
+           0 0 0 0 -PITCH_KP YAW_KP 0 0 0 0 -PITCH_RATE_KP YAW_RATE_KP;
+           0 0 0 -ROLL_KP 0 -YAW_KP 0 0 0 -ROLL_RATE_KP 0 -YAW_RATE_KP];
              
       controller = LinearSystem([],[],[],[],[],K);
       
@@ -85,7 +92,7 @@ classdef Crazyflie
       state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,controller.getInputFrame,eye(length(xd)),-xd));
       controller = controller.inInputFrame(state_estimator_frame);
       
-      input_frame = LCMCoordinateFrame('crazyflie_input',InputCoder('32bits'),'u');
+      input_frame = LCMCoordinateFrame('crazyflie_input',InputCoder(input_type),'u');
       controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(length(u0)),u0));
       controller = controller.inOutputFrame(input_frame);
       
