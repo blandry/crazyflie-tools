@@ -1,7 +1,7 @@
 % The time intervals to use
 % Use plotlog to identify those
 T = [
-32.55 33;%35 35.5;%34 36.75;
+35 35.5;%32.55 33;%34 36.75;
 ];
 
 for i=1:size(T,1)
@@ -68,12 +68,14 @@ for i=1:numel(files)
   gyrooutputs = gyrooutputs(4:6,:);
 
   %outputs = [xyzoutputs;gyrooutputs];
-  outputs = gyrooutputs;
+  outputs = gyrooutputs(1:2,:);
   
   sysiddata = iddata(outputs',inputs',dt);
   %set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'x','y','z','gyrox','gyroy','gyroz'});
-  set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'gyrox','gyroy','gyroz'});
-
+  %set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'gyrox','gyroy','gyroz'});
+  %set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'gyroz'});
+  set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'gyrox','gyroy'});
+  
   d{i} = sysiddata;
 end
 

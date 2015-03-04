@@ -12,13 +12,13 @@ from crazyflie_t import crazyflie_input_t
 
 INPUT_TYPE = 'omegasqu'
 INPUT_MIN = 0
-INPUT_MAX = 25
+INPUT_MAX = 30
 
 # INPUT_TYPE = 'onboardpd'
 # INPUT_MIN = 0
 # INPUT_MAX = 65000
 
-IS_EXTRA_INPUT = True
+IS_EXTRA_INPUT = False
 INPUT_FREQ = 100.0;
 
 
