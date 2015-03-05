@@ -14,7 +14,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="mesh/crazyflie.obj" scale=".001"/>
+        <mesh filename="mesh/cf1/crazyflie.obj" scale=".001"/>
       </geometry>
     </visual>
   </link>

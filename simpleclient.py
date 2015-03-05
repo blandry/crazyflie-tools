@@ -17,7 +17,7 @@ import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crtp.crtpstack import CRTPPacket, CRTPPort
 
-from sensorfusion import SensorFusion
+from estimation import StateEstimator
 from controller import Controller
 
 # Crazyradio options
@@ -43,20 +43,21 @@ class SimpleClient:
         self._dev_handle = self._cf.link.cradio.handle
         self._send_vendor_setup(SET_RADIO_ARC, 0, 0, ())
 
-        self._drake_controller = False
+        self._use_drake_controller = False
 
         # state estimator
-        self._state_estimator = SensorFusion(listen_to_vicon=False,
-                                             publish_to_lcm=True,
-                                             use_rpydot=False)
+        self._state_estimator = StateEstimator(listen_to_vicon=False,
+                                               publish_to_lcm=True,
+                                               use_rpydot=False,
+                                               use_ukf=False)
 
         # controller
         self._control_input_updated_flag = Event()
         self._controller = Controller(control_input_type='omegasqu',
-                                      listen_to_lcm=True,
+                                      listen_to_lcm=False,
                                       control_input_updated_flag=self._control_input_updated_flag,
-                                      listen_to_extra_input=False,
-                                      publish_to_lcm=False)
+                                      listen_to_extra_input=True,
+                                      publish_to_lcm=True)
         
         # Transmitter thread (handles all comm with the crazyflie)
         Thread(target=self._transmitter_thread).start()
@@ -88,10 +89,15 @@ class SimpleClient:
                 imu_reading = struct.unpack('<7f',sensor_packet.data)
             except:
                 continue
+
             self._state_estimator.add_imu_reading(imu_reading)
+
             self._control_input_updated_flag.clear()
             xhat = self._state_estimator.get_xhat()
-            if self._drake_controller:
+
+            print xhat
+
+            if self._use_drake_controller:
                 # wait for Drake to give us the control input...
                 self._control_input_updated_flag.wait(0.01)
 
@@ -99,6 +105,8 @@ class SimpleClient:
             control_input_pk.data = struct.pack('<5fi',*control_input)
             control_input_dataout = self._pk_to_dataout(control_input_pk) 
             self._write_usb(control_input_dataout)
+
+            self._state_estimator.add_input(control_input[0:4])
 
             tf = time.time()
             time.sleep(max(0.0,(1.0/TXRX_FREQUENCY)-float(tf-t0)))

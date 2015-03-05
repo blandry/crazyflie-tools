@@ -1,22 +1,25 @@
 
 import time
 import lcm
-import MahonyAHRS
 import numpy as np
-from math import atan2, asin, cos, sin
+import MahonyAHRS
 from threading import Thread
 from crazyflie_t import crazyflie_state_estimate_t
 from vicon_t import vicon_pos_t
+from ukf import UnscentedKalmanFilter
+from models import Crazyflie2Model
+from transforms import angularvel2rpydot, body2world, quat2rpy
 
 
-class SensorFusion():
+class StateEstimator():
 
-	def __init__(self, listen_to_vicon=False, publish_to_lcm=False, use_rpydot=False):
+	def __init__(self, listen_to_vicon=False, publish_to_lcm=False, use_rpydot=False, use_ukf=False):
 		
 		self.q = [1.0, 0.0, 0.0, 0.0] # quaternion of sensor frame relative to auxiliary frame
 		self.integralFB = [0.0, 0.0, 0.0] # integral error terms scaled by Ki	
 		self._last_rpy = [0.0, 0.0, 0.0]
 		self._last_gyro = [0.0, 0.0, 0.0]
+		self._last_acc = [0.0, 0.0, 0.0]
 		self._last_imu_update = time.time()	
 
 		self._last_xyz = [0.0, 0.0, 0.0]
@@ -32,6 +35,16 @@ class SensorFusion():
 
 		if listen_to_vicon:
 			Thread(target=self._vicon_listener).start()
+
+		self._last_input = [0.0, 0.0, 0.0, 0.0]
+		self._use_ukf = use_ukf
+		if use_ukf:
+			# states: x y z roll pitch yaw dx dy dz angvelx angvely angvelz
+			# observations: x y z dx dy dz gyrox gyroy gyroz
+			# inputs: omegasqu1 omegasqu2 omegasqu3 omegasqu4 accx accy accz
+			self._plant = Crazyflie2Model()
+			self._ukf = UnscentedKalmanFilter(dim_x=12, dim_z=9, plant=self._plant)
+			self._last_ukf_update = time.time()
 
 	def add_imu_reading(self, imu_reading):
 		(gx, gy, gz, ax, ay, az, dt_imu) = imu_reading
@@ -49,6 +62,10 @@ class SensorFusion():
 		except ValueError:
 			pass
 		self._last_gyro = [gx,gy,gz]
+		self._last_acc = [ax,ay,az]
+
+	def add_input(self, input_sent):
+		self._last_input = input_sent
 
 	def _vicon_listener(self):
 		_vicon_listener_lc = lcm.LCM()
@@ -85,18 +102,23 @@ class SensorFusion():
 	def get_xhat(self):
 		# should maybe put a lock on those variables before accessing them
 
+		if self._use_ukf:
+			dt = time.time() - self._last_ukf_update 
+			self._ukf.predict(np.array(self._last_input + self._last_acc),dt)
+			self._ukf.update(np.array(self._last_xyz + self._last_dxyz + self._last_gyro))
+			self._last_ukf_update = time.time()
+			xhat = self._ukf.x.tolist()
+		else:
+			xhat = [self._last_xyz[0],self._last_xyz[1],self._last_xyz[2],
+					self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],
+					self._last_dxyz[0],self._last_dxyz[1],self._last_dxyz[2],
+					self._last_gyro[0],self._last_gyro[1],self._last_gyro[2]]
+
 		if self._use_rpydot:
 			try:
-				angular_rate = angularvel2rpydot(self._last_rpy, body2world(self._last_rpy, self._last_gyro))
+				xhat[9:12] = angularvel2rpydot(self._last_rpy, body2world(self._last_rpy, self._last_gyro))
 			except ValueError:
-				angular_rate = [0.0, 0.0, 0.0]
-		else:
-			angular_rate = self._last_gyro
-
-		xhat = [self._last_xyz[0],self._last_xyz[1],self._last_xyz[2],
-				self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],
-				self._last_dxyz[0],self._last_dxyz[1],self._last_dxyz[2],
-				angular_rate[0],angular_rate[1],angular_rate[2]]
+				xhat[9:12] = [0.0, 0.0, 0.0]
 
 		if self._publish_to_lcm:
 			msg = crazyflie_state_estimate_t()
@@ -104,55 +126,3 @@ class SensorFusion():
 			self._xhat_lc.publish("crazyflie_state_estimate", msg.encode())
 
 		return xhat
-
-
-def quat2rpy(q):
-	q_norm = (q[0]**2+q[1]**2+q[2]**2+q[3]**2)
-	q = [q_i/q_norm for q_i in q]
-	w = q[0]
-	x = q[1]
-	y = q[2]
-	z = q[3]
-	rpy = [atan2(2*(w*x + y*z), w*w + z*z - (x*x + y*y)),
-  		   asin(2*(w*y - z*x)),
-           atan2(2*(w*z + x*y), w*w + x*x - (y*y + z*z))]
-	return rpy
-
-def rotx(theta):
-    c = cos(theta)
-    s = sin(theta)
-    M = np.matrix([[1,0,0],[0,c,-s],[0,s,c]])
-    return M
-
-def roty(theta):
-    c = cos(-theta)
-    s = sin(-theta)
-    M = np.matrix([[c,0,-s],[0,1,0],[s,0,c]])
-    return M
-
-def rotz(theta):
-    c = cos(theta)
-    s = sin(theta)
-    M = np.matrix([[c,-s,0],[s,c,0],[0,0,1]])
-    return M
-
-def rpy2rotmat(rpy):
-    R = np.dot(rotz(rpy[2]),np.dot(roty(rpy[1]),rotx(rpy[0])))
-    return R
-
-def body2world(rpy, xyz):
-    R = rpy2rotmat(rpy)
-    xyz_world = np.dot(R,np.array(xyz).transpose())
-    return (np.array(xyz_world)[0]).tolist()
-
-def angularvel2rpydot(rpy, omega):
-	p = rpy[1]
-	y = rpy[2]
-	sy = sin(y)
-	cy = cos(y)
-	sp = sin(p)
-	cp = cos(p)
-	tp = sp/cp
-	Phi = np.matrix([[cy/cp, sy/cp, 0],[-sy, cy, 0],[cy*tp, tp*sy, 1]])
-	rpydot = np.dot(Phi,np.array(omega).transpose())
-	return (np.array(rpydot)[0]).tolist()

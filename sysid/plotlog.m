@@ -15,11 +15,6 @@ f = PPTrajectory(spline(tpos,pos(:,1:6)'));
 plot(tpos,f.eval(tpos));
 legend('x','y','z','r','p','y');
 
-%plot(tpos,pos(:,1:3));
-%title('Position and gyro rates over time');
-%legend('x','y','z','rolld','pitchd','yawd');
-ylim([-5 5]);
-
 subplot(2,1,2);
 plot(tinput,input);
 title('Input over time');
