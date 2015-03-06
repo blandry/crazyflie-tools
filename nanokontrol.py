@@ -11,8 +11,8 @@ from crazyflie_t import crazyflie_input_t
 # INPUT_MAX = 65000
 
 INPUT_TYPE = 'omegasqu'
-INPUT_MIN = 2.8
-INPUT_MAX = 40
+INPUT_MIN = 0.0
+INPUT_MAX = 15.0
 
 # INPUT_TYPE = 'onboardpd'
 # INPUT_MIN = 0

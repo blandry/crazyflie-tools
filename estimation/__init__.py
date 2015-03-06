@@ -26,24 +26,26 @@ class StateEstimator():
 		self._last_dxyz = [0.0, 0.0, 0.0]
 		self._last_vicon_update = time.time()
 		self._valid_vicon = False
-		self._vicon_alpha = .8
+		self._vicon_alpha_pos = .7
+		self._vicon_alpha_vel = .7
 
 		self._use_rpydot = use_rpydot
 		self._publish_to_lcm = publish_to_lcm
 		if publish_to_lcm:
 			self._xhat_lc = lcm.LCM()
 
+		self._listen_to_vicon = listen_to_vicon
 		if listen_to_vicon:
 			Thread(target=self._vicon_listener).start()
 
 		self._last_input = [0.0, 0.0, 0.0, 0.0]
 		self._use_ukf = use_ukf
 		if use_ukf:
-			# states: x y z roll pitch yaw dx dy dz angvelx angvely angvelz
-			# observations: x y z dx dy dz gyrox gyroy gyroz
-			# inputs: omegasqu1 omegasqu2 omegasqu3 omegasqu4 accx accy accz
+			# states: x y z dx dy dz
+			# inputs: roll pitch yaw accx accy accz
+			# observations: x y z dx dy dz
 			self._plant = Crazyflie2Model()
-			self._ukf = UnscentedKalmanFilter(dim_x=12, dim_z=9, plant=self._plant)
+			self._ukf = UnscentedKalmanFilter(dim_x=6, dim_z=6, plant=self._plant)
 			self._last_ukf_update = time.time()
 
 	def add_imu_reading(self, imu_reading):
@@ -92,10 +94,12 @@ class StateEstimator():
 			dxyz[1] = (1.0/dt)*(xyz[1]-self._last_xyz[1])
 			dxyz[2] = (1.0/dt)*(xyz[2]-self._last_xyz[2])
 		
-		self._last_xyz = xyz
-		self._last_dxyz[0] = self._vicon_alpha*dxyz[0]+(1-self._vicon_alpha)*self._last_dxyz[0]
-		self._last_dxyz[1] = self._vicon_alpha*dxyz[1]+(1-self._vicon_alpha)*self._last_dxyz[1]
-		self._last_dxyz[2] = self._vicon_alpha*dxyz[2]+(1-self._vicon_alpha)*self._last_dxyz[2]
+		self._last_xyz[0] = self._vicon_alpha_pos*xyz[0]+(1-self._vicon_alpha_pos)*self._last_xyz[0]
+		self._last_xyz[1] = self._vicon_alpha_pos*xyz[1]+(1-self._vicon_alpha_pos)*self._last_xyz[1]
+		self._last_xyz[2] = self._vicon_alpha_pos*xyz[2]+(1-self._vicon_alpha_pos)*self._last_xyz[2]
+		self._last_dxyz[0] = self._vicon_alpha_vel*dxyz[0]+(1-self._vicon_alpha_vel)*self._last_dxyz[0]
+		self._last_dxyz[1] = self._vicon_alpha_vel*dxyz[1]+(1-self._vicon_alpha_vel)*self._last_dxyz[1]
+		self._last_dxyz[2] = self._vicon_alpha_vel*dxyz[2]+(1-self._vicon_alpha_vel)*self._last_dxyz[2]
 		self._last_vicon_update = msg.timestamp
 		self._valid_vicon = True
 
@@ -104,10 +108,14 @@ class StateEstimator():
 
 		if self._use_ukf:
 			dt = time.time() - self._last_ukf_update 
-			self._ukf.predict(np.array(self._last_input + self._last_acc),dt)
-			self._ukf.update(np.array(self._last_xyz + self._last_dxyz + self._last_gyro))
+			self._ukf.predict(np.array(self._last_rpy + self._last_acc), dt)
+			self._ukf.update(np.array(self._last_xyz + self._last_dxyz))
 			self._last_ukf_update = time.time()
-			xhat = self._ukf.x.tolist()
+			ukf_xhat = self._ukf.x.tolist()
+			xhat = [ukf_xhat[0],ukf_xhat[1],ukf_xhat[2],
+					self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],
+					ukf_xhat[3],ukf_xhat[4],ukf_xhat[5],
+					self._last_gyro[0],self._last_gyro[1],self._last_gyro[2]]
 		else:
 			xhat = [self._last_xyz[0],self._last_xyz[1],self._last_xyz[2],
 					self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],

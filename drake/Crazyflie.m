@@ -8,8 +8,8 @@ classdef Crazyflie
     input_freq = 200;
 
     % only used with LQR
-    %Q = diag([.5 .5 .5 .1 .1 1 .5 .5 .5 1 1 1]);
-    Q = diag([500 500 1000 .1 .1 1 5 5 5 1 1 1]);
+    Q = diag([5 5 5 1 1 1 1 1 1 1 1 1]);
+    %Q = diag([50 50 10 1 1 1 5 5 1 .1 .1 .1]);
     R = eye(4);
   end
   
@@ -54,7 +54,7 @@ classdef Crazyflie
       controller = controller.inInputFrame(state_estimator_frame);
       
       input_frame = LCMCoordinateFrame('crazyflie_input',InputCoder('omegasqu'),'u');
-      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(length(obj.nominal_input)),obj.nominal_input-10));
+      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(length(obj.nominal_input)),obj.nominal_input-15));
       controller = controller.inOutputFrame(input_frame);
       
       runLCM(controller,[]);
@@ -113,6 +113,14 @@ classdef Crazyflie
       
       v = obj.manip.constructVisualizer();
       v.playback(xtraj,struct('slider',true));
+    end
+    
+    function visualize(obj)
+      v = obj.manip.constructVisualizer();
+      state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
+      state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,v.getInputFrame,[eye(6),zeros(6)],zeros(6,1)));
+      v = v.inInputFrame(state_estimator_frame);
+      runLCM(v,[]);
     end
 
   end

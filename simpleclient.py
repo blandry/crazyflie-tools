@@ -43,21 +43,21 @@ class SimpleClient:
         self._dev_handle = self._cf.link.cradio.handle
         self._send_vendor_setup(SET_RADIO_ARC, 0, 0, ())
 
-        self._use_drake_controller = False
+        self._use_drake_controller = True
 
         # state estimator
-        self._state_estimator = StateEstimator(listen_to_vicon=False,
-                                               publish_to_lcm=True,
-                                               use_rpydot=False,
+        self._state_estimator = StateEstimator(listen_to_vicon=True,
+                                               publish_to_lcm=True, # True if controler in Drake
+                                               use_rpydot=True, # True if running LQR in Drake
                                                use_ukf=False)
 
         # controller
         self._control_input_updated_flag = Event()
         self._controller = Controller(control_input_type='omegasqu',
-                                      listen_to_lcm=False,
+                                      listen_to_lcm=True, # True if controler in Drake
                                       control_input_updated_flag=self._control_input_updated_flag,
                                       listen_to_extra_input=True,
-                                      publish_to_lcm=True)
+                                      publish_to_lcm=False)
         
         # Transmitter thread (handles all comm with the crazyflie)
         Thread(target=self._transmitter_thread).start()
@@ -94,9 +94,6 @@ class SimpleClient:
 
             self._control_input_updated_flag.clear()
             xhat = self._state_estimator.get_xhat()
-
-            print xhat
-
             if self._use_drake_controller:
                 # wait for Drake to give us the control input...
                 self._control_input_updated_flag.wait(0.01)

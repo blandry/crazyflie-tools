@@ -23,7 +23,7 @@ Robot Locomotion Laboratory, MIT
 
 from numpy.linalg import inv, cholesky
 import numpy as np
-from numpy import asarray, eye, zeros, dot, isscalar, outer
+from numpy import asarray, eye, zeros, dot, isscalar, outer, diag
 from filterpy.common import dot3
 
 
@@ -32,9 +32,11 @@ class UnscentedKalmanFilter(object):
     def __init__(self, dim_x, dim_z, plant, kappa=0):
 
         self.plant = plant
+        self.fx = plant.fx
+        self.hx = plant.hx
 
         self.Q = eye(dim_x)
-        self.R = eye(dim_z)
+        self.R = diag([10, 10, 10, 100, 100, 100])
         self.x = zeros(dim_x)
         self.P = eye(dim_x)
         self._dim_x = dim_x
@@ -71,7 +73,7 @@ class UnscentedKalmanFilter(object):
         sigmas = self.sigma_points(self.x, self.P, self.kappa)
 
         for i in range(self._num_sigmas):
-            self.sigmas_f[i] = self.plant.fx(sigmas[i], control_input, dt)
+            self.sigmas_f[i] = self.fx(sigmas[i], control_input, dt)
 
         self.x, self.P = unscented_transform(self.sigmas_f, self.W, self.W, self.Q)
 
@@ -123,7 +125,7 @@ class UnscentedKalmanFilter(object):
 
         # transform sigma points into measurement space
         for i in range(self._num_sigmas):
-            sigmas_h[i] = self.plant.hx(sigmas_f[i])
+            sigmas_h[i] = self.hx(sigmas_f[i])
 
         # mean and covariance of prediction passed through inscented transform
         zp, Pz = UT(sigmas_h, self.W, self.W, R)
