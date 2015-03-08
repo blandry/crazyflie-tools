@@ -35,8 +35,14 @@ class UnscentedKalmanFilter(object):
         self.fx = plant.fx
         self.hx = plant.hx
 
+        # process noise matrix
+        # x y z dx dy dz axbias aybias azbias
         self.Q = eye(dim_x)
-        self.R = diag([10, 10, 10, 100, 100, 100])
+
+        # measurement noise matrix
+        # x y z dx dy dz axbias aybias azbias
+        self.R = eye(dim_z)
+        
         self.x = zeros(dim_x)
         self.P = eye(dim_x)
         self._dim_x = dim_x
@@ -127,7 +133,7 @@ class UnscentedKalmanFilter(object):
         for i in range(self._num_sigmas):
             sigmas_h[i] = self.hx(sigmas_f[i])
 
-        # mean and covariance of prediction passed through inscented transform
+        # mean and covariance of prediction passed through unscented transform
         zp, Pz = UT(sigmas_h, self.W, self.W, R)
 
         # compute cross variance of the state and the measurements
@@ -147,6 +153,8 @@ class UnscentedKalmanFilter(object):
 
         self.x = self.x + dot(K, y)
         self.P = self.P - dot3(K, Pz, K.T)
+        
+        return y
 
 
     @staticmethod

@@ -8,8 +8,7 @@ classdef Crazyflie
     input_freq = 200;
 
     % only used with LQR
-    Q = diag([5 5 5 1 1 1 1 1 1 1 1 1]);
-    %Q = diag([50 50 10 1 1 1 5 5 1 .1 .1 .1]);
+    Q = diag([25 25 25 1 1 5 .001 .001 .001 2.5 2.5 5.0]);
     R = eye(4);
   end
   

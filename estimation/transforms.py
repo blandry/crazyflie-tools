@@ -42,6 +42,11 @@ def body2world(rpy, xyz):
     xyz_world = np.dot(R,np.array(xyz).transpose())
     return (np.array(xyz_world)[0]).tolist()
 
+def world2body(rpy, xyz):
+    R = rpy2rotmat(rpy)
+    xyz_body = np.dot(np.linalg.inv(R),np.array(xyz).transpose())
+    return (np.array(xyz_body)[0]).tolist()
+
 def angularvel2rpydot(rpy, omega):
 	p = rpy[1]
 	y = rpy[2]

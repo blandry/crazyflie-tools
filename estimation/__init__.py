@@ -7,8 +7,8 @@ from threading import Thread
 from crazyflie_t import crazyflie_state_estimate_t
 from vicon_t import vicon_pos_t
 from ukf import UnscentedKalmanFilter
-from models import Crazyflie2Model
-from transforms import angularvel2rpydot, body2world, quat2rpy
+from models import DoubleIntegrator
+from transforms import angularvel2rpydot, body2world, quat2rpy, world2body
 
 
 class StateEstimator():
@@ -24,9 +24,10 @@ class StateEstimator():
 
 		self._last_xyz = [0.0, 0.0, 0.0]
 		self._last_dxyz = [0.0, 0.0, 0.0]
+		self._last_vicon_rpy = [0.0, 0.0, 0.0]
 		self._last_vicon_update = time.time()
 		self._valid_vicon = False
-		self._vicon_alpha_pos = .7
+		self._vicon_alpha_pos = .8
 		self._vicon_alpha_vel = .7
 
 		self._use_rpydot = use_rpydot
@@ -41,12 +42,14 @@ class StateEstimator():
 		self._last_input = [0.0, 0.0, 0.0, 0.0]
 		self._use_ukf = use_ukf
 		if use_ukf:
-			# states: x y z dx dy dz
+			# (acc in Gs in body frame)
+			# states: x y z dx dy dz accxbias accybias acczbias
 			# inputs: roll pitch yaw accx accy accz
-			# observations: x y z dx dy dz
-			self._plant = Crazyflie2Model()
-			self._ukf = UnscentedKalmanFilter(dim_x=6, dim_z=6, plant=self._plant)
+			# measurements: x y z dx dy dz accxbias accybias acczbias
+			self._plant = DoubleIntegrator()
+			self._ukf = UnscentedKalmanFilter(dim_x=9, dim_z=9, plant=self._plant)
 			self._last_ukf_update = time.time()
+			self._last_acc_bias = [0.0, 0.0, 0.0]
 
 	def add_imu_reading(self, imu_reading):
 		(gx, gy, gz, ax, ay, az, dt_imu) = imu_reading
@@ -107,9 +110,13 @@ class StateEstimator():
 		# should maybe put a lock on those variables before accessing them
 
 		if self._use_ukf:
-			dt = time.time() - self._last_ukf_update 
+			dt = time.time() - self._last_ukf_update
+			# predict step
 			self._ukf.predict(np.array(self._last_rpy + self._last_acc), dt)
-			self._ukf.update(np.array(self._last_xyz + self._last_dxyz))
+			# update step
+			residual = self._ukf.update(np.array(self._last_xyz + self._last_dxyz + self._last_acc_bias))
+			# use the update error as a 'measurement' of the accelerometer bias
+			self._last_acc_bias = world2body(self._last_rpy,np.dot((1.0/(dt*9.81)),residual[3:6])) # measured acc bias (body frame) in Gs			
 			self._last_ukf_update = time.time()
 			ukf_xhat = self._ukf.x.tolist()
 			xhat = [ukf_xhat[0],ukf_xhat[1],ukf_xhat[2],

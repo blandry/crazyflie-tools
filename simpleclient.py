@@ -47,14 +47,14 @@ class SimpleClient:
 
         # state estimator
         self._state_estimator = StateEstimator(listen_to_vicon=True,
-                                               publish_to_lcm=True, # True if controler in Drake
-                                               use_rpydot=True, # True if running LQR in Drake
-                                               use_ukf=False)
+                                               publish_to_lcm=True,
+                                               use_rpydot=True,
+                                               use_ukf=False) # not working yet
 
         # controller
         self._control_input_updated_flag = Event()
         self._controller = Controller(control_input_type='omegasqu',
-                                      listen_to_lcm=True, # True if controler in Drake
+                                      listen_to_lcm=True,
                                       control_input_updated_flag=self._control_input_updated_flag,
                                       listen_to_extra_input=True,
                                       publish_to_lcm=False)
