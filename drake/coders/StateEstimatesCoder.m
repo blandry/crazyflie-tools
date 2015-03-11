@@ -4,13 +4,13 @@ classdef StateEstimatesCoder < LCMCoder
     function [xhat,t] = decode(obj,data)
       msg = crazyflie_t.crazyflie_state_estimate_t(data);
       xhat = msg.xhat;
-      t = msg.timestamp;
+      t = msg.t;
     end
     
     function msg = encode(obj,t,xhat)
       msg = crazyflie_t.crazyflie_state_estimate_t();
       msg.xhat = xhat;
-      msg.timestamp = t;
+      msg.t = t;
     end
     
     function d = dim(obj)

@@ -4,7 +4,7 @@ import lcm
 import numpy as np
 import MahonyAHRS
 from threading import Thread
-from crazyflie_t import crazyflie_state_estimate_t
+from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t
 from vicon_t import vicon_pos_t
 from ukf import UnscentedKalmanFilter
 from models import DoubleIntegrator
@@ -15,6 +15,11 @@ class StateEstimator():
 
 	def __init__(self, listen_to_vicon=False, publish_to_lcm=False, use_rpydot=False, use_ukf=False):
 		
+		self._tvlqr_counting = False
+		self._last_time_update = time.time()
+		self._current_dt = 0.0
+		Thread(target=self._estimator_watchdog).start()
+
 		self.q = [1.0, 0.0, 0.0, 0.0] # quaternion of sensor frame relative to auxiliary frame
 		self.integralFB = [0.0, 0.0, 0.0] # integral error terms scaled by Ki	
 		self._last_rpy = [0.0, 0.0, 0.0]
@@ -138,6 +143,23 @@ class StateEstimator():
 		if self._publish_to_lcm:
 			msg = crazyflie_state_estimate_t()
 			msg.xhat = xhat
+			msg.t = self.get_time()
 			self._xhat_lc.publish("crazyflie_state_estimate", msg.encode())
 
 		return xhat
+
+	def get_time(self):
+		if self._tvlqr_counting:
+			self._current_dt += (time.time()-self._last_time_update)
+		self._last_time_update = time.time()
+		return self._current_dt
+
+	def _estimator_watchdog(self):
+		_watchdog_lc = lcm.LCM()
+		_watchdog_lc.subscribe('crazyflie_state_estimator_commands',self._estimator_watchdog_update)
+		while True:
+			_watchdog_lc.handle()
+
+	def _estimator_watchdog_update(self, channel, data):
+		msg = crazyflie_state_estimator_commands_t.decode(data)
+		self._tvlqr_counting = msg.tvlqr_counting

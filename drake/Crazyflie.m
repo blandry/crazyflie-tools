@@ -10,6 +10,9 @@ classdef Crazyflie
     % only used with LQR
     Q = diag([25 25 25 1 1 5 .001 .001 .001 2.5 2.5 5.0]);
     R = eye(4);
+    
+    tvQ = diag([25 25 25 1 1 5 .001 .001 .001 2.5 2.5 5.0]);
+    tvR = eye(4);
   end
   
   methods
@@ -59,6 +62,30 @@ classdef Crazyflie
       runLCM(controller,[]);
     end
     
+    function controller = gettvlqr(obj, xtraj, utraj)
+      options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
+      
+      % use the TILQR infinite cost to go as final cost on TVLQR (this
+      % assumes that your final position is a fixed point
+      tf = xtraj.tspan(2);
+      [~,V] = tilqr(obj.manip,xtraj.eval(tf),utraj.eval(tf),obj.Q,obj.R,options);
+      Qf = V.S;
+      
+      controller = tvlqr(obj.manip,xtraj,utraj,obj.tvQ,obj.tvR,Qf,options);
+    end
+    
+    function runtvlqr(obj, controller, xtraj, utraj)
+      state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
+      state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,controller.getInputFrame,eye(12),-xtraj));
+      controller = controller.inInputFrame(state_estimator_frame);
+      
+      input_frame = LCMCoordinateFrame('crazyflie_input',InputCoder('omegasqu'),'u');
+      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(4),utraj-ConstantTrajectory(repmat(14.5,4,1))));
+      controller = controller.inOutputFrame(input_frame);
+
+      runLCM(controller,[]);
+    end
+      
     function pd(obj, xd)
       if (nargin<2)
         xd = zeros(12,1);
@@ -112,6 +139,17 @@ classdef Crazyflie
       
       v = obj.manip.constructVisualizer();
       v.playback(xtraj,struct('slider',true));
+    end
+    
+    function xtraj = simulatetvlqr(obj, xtraj, utraj)
+      options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
+      controller = tvlqr(obj.manip,xtraj,utraj,obj.tvQ,obj.tvR,obj.tvQf,options);
+            
+      sys = feedback(obj.manip,controller);
+      systraj = sys.simulate([0 5],xtraj.eval(0));
+      
+      v = obj.manip.constructVisualizer();
+      v.playback(systraj,struct('slider',true));
     end
     
     function visualize(obj)

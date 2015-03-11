@@ -10,11 +10,12 @@ except ImportError:
 import struct
 
 class crazyflie_state_estimate_t(object):
-    __slots__ = ["timestamp", "xhat"]
+    __slots__ = ["timestamp", "xhat", "t"]
 
     def __init__(self):
         self.timestamp = 0
         self.xhat = [ 0.0 for dim0 in range(12) ]
+        self.t = 0.0
 
     def encode(self):
         buf = BytesIO()
@@ -25,6 +26,7 @@ class crazyflie_state_estimate_t(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">q", self.timestamp))
         buf.write(struct.pack('>12d', *self.xhat[:12]))
+        buf.write(struct.pack(">d", self.t))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -40,13 +42,14 @@ class crazyflie_state_estimate_t(object):
         self = crazyflie_state_estimate_t()
         self.timestamp = struct.unpack(">q", buf.read(8))[0]
         self.xhat = struct.unpack('>12d', buf.read(96))
+        self.t = struct.unpack(">d", buf.read(8))[0]
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if crazyflie_state_estimate_t in parents: return 0
-        tmphash = (0x4ab2098a76431c55) & 0xffffffffffffffff
+        tmphash = (0xf28782fb9b176eb0) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

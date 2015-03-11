@@ -1,7 +1,7 @@
 import lcm
 import math
 import numpy as np
-from crazyflie_t import crazyflie_input_t
+from crazyflie_t import crazyflie_input_t, crazyflie_controller_commands_t
 from threading import Thread
 
 
@@ -39,6 +39,9 @@ class Controller():
 	def __init__(self, control_input_type='32bits', listen_to_lcm=False, control_input_updated_flag=None,
 				 listen_to_extra_input=False, publish_to_lcm=False):
 
+		self._is_running = True
+		Thread(target=self._controller_watchdog).start()
+
 		self._K = {'32bits': K32bits, 'omegasqu': Komegasqu}
 		self._latest_control_input = [0.0, 0.0, 0.0, 0.0, 0.0, MODES.get(control_input_type,1)]
 		self._control_input_type = control_input_type
@@ -60,6 +63,9 @@ class Controller():
 		self._control_input_updated_flag = control_input_updated_flag
 
 	def get_control_input(self, xhat=None):
+		if not self._is_running:
+			return [0.0, 0.0, 0.0, 0.0, 0.0, MODES.get(self._control_input_type,1)]
+
 		if self._listen_to_lcm or not xhat:
 			control_input = self._latest_control_input
 		else:
@@ -105,3 +111,13 @@ class Controller():
 	def _update_extra_input(self, channel, data):
 		msg = crazyflie_input_t.decode(data)
 		self._extra_control_input = list(msg.input) + [msg.offset, MODES.get(msg.type,1)]
+
+	def _controller_watchdog(self):
+		_watchdog_lc = lcm.LCM()
+		_watchdog_lc.subscribe('crazyflie_controller_commands',self._controller_watchdog_update)
+		while True:
+			_watchdog_lc.handle()
+
+	def _controller_watchdog_update(self, channel, data):
+		msg = crazyflie_controller_commands_t.decode(data)
+		self._is_running = msg.is_running

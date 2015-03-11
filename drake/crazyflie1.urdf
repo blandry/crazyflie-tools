@@ -6,10 +6,7 @@
     <inertial>
       <mass value="0.0234"/>
       <origin xyz="0 0 0"/>
-      <!--First run of sys id:--> <inertia ixx="5.6E-6" ixy="0" ixz="0" iyy="6.2E-6" iyz="0" izz="24.6E-6"/>
-      <!--Second run of sys id: <inertia ixx="9.74E-6" ixy="0" ixz="0" iyy="10.02E-6" iyz="0" izz="0.02E-6"/>-->
-      <!--Guess that just works well: <inertia ixx="5E-5" ixy="0" ixz="0" iyy="5E-5" iyz="0" izz="10E-5"/>-->
-      <!--Solidworks: <inertia ixx="1.5474291e-006" ixy="1.300365e-008" ixz="3.2996326e-008" iyy="1.5474291e-006" iyz="3.2996326e-008" izz="3.0743992e-006"/>-->
+      <inertia ixx="1.5474291e-006" ixy="1.300365e-008" ixz="3.2996326e-008" iyy="1.5474291e-006" iyz="3.2996326e-008" izz="3.0743992e-006"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>

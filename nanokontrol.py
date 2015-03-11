@@ -4,7 +4,7 @@ import time
 import pygame
 import pygame.midi
 import lcm
-from crazyflie_t import crazyflie_input_t
+from crazyflie_t import crazyflie_input_t, crazyflie_state_estimator_commands_t, crazyflie_controller_commands_t
 
 # INPUT_TYPE = '32bits'
 # INPUT_MIN = 0
@@ -12,7 +12,7 @@ from crazyflie_t import crazyflie_input_t
 
 INPUT_TYPE = 'omegasqu'
 INPUT_MIN = 0.0
-INPUT_MAX = 15.0
+INPUT_MAX = 15 #13.2283
 
 # INPUT_TYPE = 'onboardpd'
 # INPUT_MIN = 0
@@ -25,6 +25,9 @@ INPUT_FREQ = 100.0;
 class Kon():
 
     def __init__(self):
+        self._tvlqr_counting = False
+        self._is_running = True
+
         pygame.init()
         pygame.midi.init()
         (in_device_id, out_device_id) = self.find_nano_kontrol()
@@ -67,6 +70,7 @@ class Kon():
 
     def forward_kon_to_lcm(self):
         self.read_input()        
+        
         msg = crazyflie_input_t()
         msg.input[0] = (self.sliders.get(2,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
         msg.input[1] = (self.sliders.get(3,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
@@ -78,6 +82,34 @@ class Kon():
             self.lc.publish('crazyflie_extra_input', msg.encode())
         else:
             self.lc.publish('crazyflie_input', msg.encode())
+        
+        tvlqr_play = self.sliders.get(45)
+        if not(self._tvlqr_counting) and tvlqr_play==127:
+            msg = crazyflie_state_estimator_commands_t()
+            msg.tvlqr_counting = True
+            self.lc.publish('crazyflie_state_estimator_commands', msg.encode())
+            self._tvlqr_counting = True
+
+        tvlqr_stop = self.sliders.get(46)
+        if self._tvlqr_counting and tvlqr_stop==127:
+            msg = crazyflie_state_estimator_commands_t()
+            msg.tvlqr_counting = False
+            self.lc.publish('crazyflie_state_estimator_commands', msg.encode())
+            self._tvlqr_counting = False
+
+        reset_stop_all = self.sliders.get(49)
+        if reset_stop_all==127:
+            msg = crazyflie_controller_commands_t()
+            msg.is_running = True
+            self.lc.publish('crazyflie_controller_commands', msg.encode())
+            self._is_running = True
+
+        stop_all = self.sliders.get(44)
+        if stop_all==127:
+            msg = crazyflie_controller_commands_t()
+            msg.is_running = False
+            self.lc.publish('crazyflie_controller_commands', msg.encode())
+            self._is_running = False
 
 
 if __name__=='__main__':

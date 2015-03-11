@@ -25,10 +25,8 @@ class DoubleIntegrator():
 
         g = 9.81
         [axw,ayw,azw] = body2world([roll,pitch,yaw],[ax+axbias,ay+aybias,az+azbias])
-        new_dx = dx #+ g*axw*dt
-        new_dy = dy #+ g*ayw*dt
-        new_dz = dz #+ g*(azw-1.0)*dt
-
-        # print "bias: %s %s %s" % (axbias,aybias,azbias)
+        new_dx = dx + g*axw*dt
+        new_dy = dy + g*ayw*dt
+        new_dz = dz + g*(azw-1.0)*dt
 
         return np.array([new_x, new_y, new_z, new_dx, new_dy, new_dz, axbias, aybias, azbias])
