@@ -19,16 +19,16 @@
 		  <inertia ixx="10"  ixy="0"  ixz="0" iyy="10" iyz="0" izz="10" />
    	</inertial>
   	<visual>
-      <origin xyz="0 0 1.5" rpy="0 1.5 0" />
+      <origin xyz="-.45 -.45 1.5" rpy="0 1.5 0" />
       <geometry>
-        <mesh filename="mesh/hulahoop.stl" scale=".01"/>
+        <mesh filename="mesh/hulahoop.obj" scale=".001"/>
       </geometry>
       <material name="Red"/>
     </visual>
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="-.45 -.45 1.5" rpy="0 1.5 0" />
       <geometry>
-        <mesh filename="mesh/hulahoop.stl" scale=".01"/>
+        <mesh filename="mesh/hulahoop.obj" scale=".001"/>
       </geometry>
     </collision>
    </link>

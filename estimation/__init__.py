@@ -88,7 +88,7 @@ class StateEstimator():
 		
 		if msg.q[0] < -999:
 			self._valid_vicon = False
-			self._last_dxyz = [0.0, 0.0, 0.0]
+			#self._last_dxyz = [0.0, 0.0, 0.0]
 			return
 		
 		xyz = list(msg.q)[0:3]
@@ -102,7 +102,7 @@ class StateEstimator():
 			dxyz[1] = (1.0/dt)*(xyz[1]-self._last_xyz[1])
 			dxyz[2] = (1.0/dt)*(xyz[2]-self._last_xyz[2])
 		
-		self._last_xyz[0] = self._vicon_alpha_pos*xyz[0]+(1-self._vicon_alpha_pos)*self._last_xyz[0]
+		self._last_xyz[0] = self._vicon_alpha_pos*xyz[0]+(1-self._vicon_alpha_pos)*self._last_xyz[0]+1
 		self._last_xyz[1] = self._vicon_alpha_pos*xyz[1]+(1-self._vicon_alpha_pos)*self._last_xyz[1]
 		self._last_xyz[2] = self._vicon_alpha_pos*xyz[2]+(1-self._vicon_alpha_pos)*self._last_xyz[2]
 		self._last_dxyz[0] = self._vicon_alpha_vel*dxyz[0]+(1-self._vicon_alpha_vel)*self._last_dxyz[0]
