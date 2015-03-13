@@ -1,0 +1,129 @@
+# -*- coding: utf-8 -*-
+
+"""Copyright 2014 Roger R Labbe Jr.
+
+filterpy library.
+http://github.com/rlabbe/filterpy
+
+Documentation at:
+https://filterpy.readthedocs.org
+
+Supporting book at:
+https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python
+
+This is licensed under an MIT license. See the readme.MD file
+for more information.
+
+****************************************
+Modified on March 2015 by Benoit Landry, Robot Locomotion Laboratory, MIT
+using [State Estimation for Legged Robots, Bloesch 2012]
+****************************************
+
+"""
+
+import numpy as np
+import scipy.linalg as linalg
+from numpy import dot, zeros, eye
+from filterpy.common import setter, setter_1d, setter_scalar, dot3
+
+
+class ExtendedKalmanFilter(object):
+
+    def __init__(self, dim_x, dim_z, plant):
+        
+        self.plant = plant
+        self.fx = plant.fx
+        self.hx = plant.hx
+
+        self.dim_x = dim_x
+        self.dim_z = dim_z
+
+        self._x = zeros((dim_x,1)) # state
+        self._P = eye(dim_x)       # uncertainty covariance
+        self._R = eye(dim_z)       # state uncertainty
+        self._Q = eye(dim_x)       # process uncertainty
+        self._y = zeros((dim_z, 1))
+
+        # identity matrix. Do not alter this.
+        self._I = np.eye(dim_x)
+
+    def predict(self, control_input, dt):
+        """ Predict next position. """
+
+        [self._x, F] = self.fx(self._x, control_input, dt)
+        self._P = dot3(F, self._P, F.T) + self._Q
+
+    def update(self, z, R=None):
+        """ Performs the update innovation of the extended Kalman filter. """
+
+        P = self._P
+        if R is None:
+            R = self._R
+        elif np.isscalar(R):
+            R = eye(self.dim_z) * R
+
+        if np.isscalar(z) and self.dim_z == 1:
+            z = np.asarray([z], float)
+
+        x = self._x
+
+        [h,H] = self.hx(x)
+
+        S = dot3(H, P, H.T) + R
+        K = dot3(P, H.T, linalg.inv(S))
+
+        y = z.reshape(self.dim_z,1) - h
+        self._x = x + dot(K, y)
+
+        I_KH = self._I - dot(K, H)
+        self._P = dot3(I_KH, P, I_KH.T) + dot3(K, R, K.T)
+
+    @property
+    def Q(self):
+        """ Process uncertainty"""
+        return self._Q
+
+    @Q.setter
+    def Q(self, value):
+        self._Q = setter_scalar(value, self.dim_x)
+
+    @property
+    def P(self):
+        """ covariance matrix"""
+        return self._P
+
+    @P.setter
+    def P(self, value):
+        self._P = setter_scalar(value, self.dim_x)
+
+    @property
+    def R(self):
+        """ measurement uncertainty"""
+        return self._R
+
+    @R.setter
+    def R(self, value):
+        self._R = setter_scalar(value, self.dim_z)
+
+    @property
+    def x(self):
+        return self._x
+
+    @x.setter
+    def x(self, value):
+        self._x = setter_1d(value, self.dim_x)
+
+    @property
+    def K(self):
+        """ Kalman gain """
+        return self._K
+
+    @property
+    def y(self):
+        """ measurement residual (innovation) """
+        return self._y
+
+    @property
+    def S(self):
+        """ system uncertainty in measurement space """
+        return self._S

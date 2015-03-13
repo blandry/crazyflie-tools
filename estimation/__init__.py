@@ -7,13 +7,15 @@ from threading import Thread
 from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t
 from vicon_t import vicon_pos_t
 from ukf import UnscentedKalmanFilter
+from ekf import ExtendedKalmanFilter
 from models import DoubleIntegrator
 from transforms import angularvel2rpydot, body2world, quat2rpy, world2body
 
 
 class StateEstimator():
 
-	def __init__(self, listen_to_vicon=False, publish_to_lcm=False, use_rpydot=False, use_ukf=False):
+	def __init__(self, listen_to_vicon=False, publish_to_lcm=False, 
+				 use_rpydot=False, use_ukf=False, use_ekf=False):
 		
 		self._tvlqr_counting = False
 		self._last_time_update = time.time()
@@ -46,6 +48,7 @@ class StateEstimator():
 
 		self._last_input = [0.0, 0.0, 0.0, 0.0]
 		self._use_ukf = use_ukf
+		self._use_ekf = use_ekf
 		if use_ukf:
 			# (acc in Gs in body frame)
 			# states: x y z dx dy dz accxbias accybias acczbias
@@ -55,6 +58,14 @@ class StateEstimator():
 			self._ukf = UnscentedKalmanFilter(dim_x=9, dim_z=9, plant=self._plant)
 			self._last_ukf_update = time.time()
 			self._last_acc_bias = [0.0, 0.0, 0.0]
+		elif use_ekf:
+			# (acc in Gs in body frame)
+			# states: x y z dx dy dz accxbias accybias acczbias
+			# inputs: roll pitch yaw accx accy accz
+			# measurements: x y z dx dy dz
+			self._plant = DoubleIntegrator()
+			self._ekf = ExtendedKalmanFilter(dim_x=9, dim_z=6, plant=self._plant)
+			self._last_ekf_update = time.time()	
 
 	def add_imu_reading(self, imu_reading):
 		(gx, gy, gz, ax, ay, az, dt_imu) = imu_reading
@@ -128,6 +139,16 @@ class StateEstimator():
 					self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],
 					ukf_xhat[3],ukf_xhat[4],ukf_xhat[5],
 					self._last_gyro[0],self._last_gyro[1],self._last_gyro[2]]
+		elif self._use_ekf:
+			dt = time.time() - self._last_ekf_update
+			self._ekf.predict(np.array(self._last_rpy + self._last_acc), dt)
+			self._ekf.update(np.array(self._last_xyz + self._last_dxyz))
+			self._last_ekf_update = time.time()
+			ekf_xhat = self._ekf.x.reshape(9).tolist()
+			xhat = [ekf_xhat[0],ekf_xhat[1],ekf_xhat[2],
+					self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],
+					ekf_xhat[3],ekf_xhat[4],ekf_xhat[5],
+					self._last_gyro[0],self._last_gyro[1],self._last_gyro[2]]
 		else:
 			xhat = [self._last_xyz[0],self._last_xyz[1],self._last_xyz[2],
 					self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],
@@ -145,6 +166,8 @@ class StateEstimator():
 			msg.xhat = xhat
 			msg.t = self.get_time()
 			self._xhat_lc.publish("crazyflie_state_estimate", msg.encode())
+
+		print ekf_xhat
 
 		return xhat
 

@@ -43,18 +43,19 @@ class SimpleClient:
         self._dev_handle = self._cf.link.cradio.handle
         self._send_vendor_setup(SET_RADIO_ARC, 0, 0, ())
 
-        self._use_drake_controller = True
+        self._use_drake_controller = False
 
         # state estimator
         self._state_estimator = StateEstimator(listen_to_vicon=True,
                                                publish_to_lcm=True,
                                                use_rpydot=True,
-                                               use_ukf=False) # not working yet
+                                               use_ukf=False,
+                                               use_ekf=True)
 
         # controller
         self._control_input_updated_flag = Event()
         self._controller = Controller(control_input_type='omegasqu',
-                                      listen_to_lcm=True,
+                                      listen_to_lcm=False,
                                       control_input_updated_flag=self._control_input_updated_flag,
                                       listen_to_extra_input=True,
                                       publish_to_lcm=False)
