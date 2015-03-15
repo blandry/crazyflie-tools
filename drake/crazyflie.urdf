@@ -17,6 +17,7 @@
    <material name="Blue">
      <color rgba="0 0 1"/>
    </material>
+
   <link name="base_link">
     <inertial>
       <mass value="0.03337"/>
@@ -30,7 +31,14 @@
       </geometry>
       <material name="Blue"/>
     </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.017 0.017 0.006"/>
+      </geometry>
+    </collision>
   </link>
+
   <force_element name="prop1">
     <propellor lower_limit="2.8" upper_limit="40.87" scale_factor_thrust="0.004522393588278" scale_factor_moment="-1.400164274777642e-06" visual_geometry="false">
       <parent link="base_link"/>
@@ -59,4 +67,5 @@
       <axis xyz="0 0 1"/>
     </propellor>
   </force_element>
+
 </robot>

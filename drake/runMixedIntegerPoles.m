@@ -1,4 +1,4 @@
-AUTOSAVE = false;
+AUTOSAVE = true;
 
 cf = Crazyflie();
 r = cf.manip;
@@ -9,20 +9,20 @@ r = r.setTerrain(terrain);
 
 dt = .5;
 degree = 3;
-n_segments = 10;
+n_segments = 7;
 start = [0;0;1];
 goal = [3;0;1.5];
 
 r = addRobotFromURDF(r, 'poles.urdf');
 
-lb = [-1;-5;.1];
-ub = [4;5;3];
+lb = [-1;-1;.1];
+ub = [4;1;3];
 
 seeds = [...
          start';
          goal';
          ]';
-n_regions = 5;
+n_regions = 7;
 
 [ytraj,v] = runMixedIntegerEnvironment(r, start, goal, lb, ub, seeds, degree, n_segments, n_regions, dt);
 
@@ -63,7 +63,7 @@ v.playback(xtraj, struct('slider', true));
 if AUTOSAVE
   folder = fullfile('data', datestr(now,'yyyy-mm-dd_HH.MM.SS'));
   system(sprintf('mkdir -p %s', folder));
-  save(fullfile(folder, 'results.mat'), 'xtraj', 'ytraj', 'utraj', 'r', 'v', 'safe_region_assignments', 'prob', 'safe_regions', 'xtraj_sim', 'start', 'goal', 'sys');
+  save(fullfile(folder, 'results.mat'), 'xtraj', 'ytraj', 'utraj');
 end
 
 % % Draw the result

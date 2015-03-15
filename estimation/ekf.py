@@ -41,8 +41,7 @@ class ExtendedKalmanFilter(object):
         self._x = zeros((dim_x,1))
         self._P = eye(dim_x) 
 
-        # measure by looking at the covariance
-        # of vicon measurements on a stationary object
+        # measurement covariance
         self._R = 1.0e-03 * array([
             [0.000003549299086,-0.000002442814972,-0.000004480024840,0.000267707847733,-0.000144518246735,-0.000212282673978],
             [-0.000002442814972,0.000005899512446,0.000006498387107,-0.000138622536892,0.000440883366233,0.000388550687603],
