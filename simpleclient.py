@@ -20,6 +20,9 @@ from cflib.crtp.crtpstack import CRTPPacket, CRTPPort
 from estimation import StateEstimator
 from controller import Controller
 
+import lcm
+from crazyflie_t import crazyflie_imu_t
+
 # Crazyradio options
 ACK_ENABLE = 0x10
 SET_RADIO_ARC = 0x06
@@ -43,19 +46,19 @@ class SimpleClient:
         self._dev_handle = self._cf.link.cradio.handle
         self._send_vendor_setup(SET_RADIO_ARC, 0, 0, ())
 
-        self._use_drake_controller = False
+        self._use_drake_controller = True
 
         # state estimator
         self._state_estimator = StateEstimator(listen_to_vicon=True,
                                                publish_to_lcm=True,
                                                use_rpydot=True,
-                                               use_ukf=False,
+                                               use_ukf=False, # process covariance needs to be fixed
                                                use_ekf=True)
 
         # controller
         self._control_input_updated_flag = Event()
         self._controller = Controller(control_input_type='omegasqu',
-                                      listen_to_lcm=False,
+                                      listen_to_lcm=True,
                                       control_input_updated_flag=self._control_input_updated_flag,
                                       listen_to_extra_input=True,
                                       publish_to_lcm=False)
@@ -79,6 +82,9 @@ class SimpleClient:
         sensor_request_dataout = self._pk_to_dataout(sensor_request_pk)
         control_input_pk = CRTPPacket()
         control_input_pk.port = CRTPPort.OFFBOARDCTRL
+        
+        imu_lc = lcm.LCM()
+
         while True:
             t0 = time.time()
 
@@ -92,6 +98,12 @@ class SimpleClient:
                 continue
 
             self._state_estimator.add_imu_reading(imu_reading)
+
+            msg = crazyflie_imu_t()
+            msg.alphax = imu_reading[3]
+            msg.alphay = imu_reading[4]
+            msg.alphaz = imu_reading[5]
+            imu_lc.publish('crazyflie_imu', msg.encode())
 
             self._control_input_updated_flag.clear()
             xhat = self._state_estimator.get_xhat()

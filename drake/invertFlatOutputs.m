@@ -41,9 +41,8 @@ end
 function [x,u] = extractStateAndInput(plant,t,ytraj,ydtraj,yddtraj,ydddtraj,yddddtraj,options)
     g = plant.getGravity;
     zW = g/norm(g);
-    robotnum = plant.getBody(plant.findLinkInd('base_link')).robotnum;
-    m = plant.getMass(robotnum);
-    I = plant.body(2).inertia;
+    m = plant.getMass(plant.getBody(plant.findLinkId('base_link')).robotnum);
+    I = plant.getBody(plant.findLinkId('base_link')).inertia;
     y = ytraj.eval(t);
     yd = ydtraj.eval(t);
     ydd = yddtraj.eval(t);

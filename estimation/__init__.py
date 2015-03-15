@@ -50,16 +50,13 @@ class StateEstimator():
 		self._use_ukf = use_ukf
 		self._use_ekf = use_ekf
 		if use_ukf:
-			# (acc in Gs in body frame)
 			# states: x y z dx dy dz accxbias accybias acczbias
 			# inputs: roll pitch yaw accx accy accz
 			# measurements: x y z dx dy dz accxbias accybias acczbias
 			self._plant = DoubleIntegrator()
 			self._ukf = UnscentedKalmanFilter(dim_x=9, dim_z=9, plant=self._plant)
 			self._last_ukf_update = time.time()
-			self._last_acc_bias = [0.0, 0.0, 0.0]
 		elif use_ekf:
-			# (acc in Gs in body frame)
 			# states: x y z dx dy dz accxbias accybias acczbias
 			# inputs: roll pitch yaw accx accy accz
 			# measurements: x y z dx dy dz
@@ -113,7 +110,7 @@ class StateEstimator():
 			dxyz[1] = (1.0/dt)*(xyz[1]-self._last_xyz[1])
 			dxyz[2] = (1.0/dt)*(xyz[2]-self._last_xyz[2])
 		
-		self._last_xyz[0] = self._vicon_alpha_pos*xyz[0]+(1-self._vicon_alpha_pos)*self._last_xyz[0]+1
+		self._last_xyz[0] = self._vicon_alpha_pos*xyz[0]+(1-self._vicon_alpha_pos)*self._last_xyz[0]
 		self._last_xyz[1] = self._vicon_alpha_pos*xyz[1]+(1-self._vicon_alpha_pos)*self._last_xyz[1]
 		self._last_xyz[2] = self._vicon_alpha_pos*xyz[2]+(1-self._vicon_alpha_pos)*self._last_xyz[2]
 		self._last_dxyz[0] = self._vicon_alpha_vel*dxyz[0]+(1-self._vicon_alpha_vel)*self._last_dxyz[0]
@@ -127,14 +124,10 @@ class StateEstimator():
 
 		if self._use_ukf:
 			dt = time.time() - self._last_ukf_update
-			# predict step
 			self._ukf.predict(np.array(self._last_rpy + self._last_acc), dt)
-			# update step
-			residual = self._ukf.update(np.array(self._last_xyz + self._last_dxyz + self._last_acc_bias))
-			# use the update error as a 'measurement' of the accelerometer bias
-			self._last_acc_bias = world2body(self._last_rpy,np.dot((1.0/(dt*9.81)),residual[3:6])) # measured acc bias (body frame) in Gs			
+			self._ukf.update(np.array(self._last_xyz + self._last_dxyz))
 			self._last_ukf_update = time.time()
-			ukf_xhat = self._ukf.x.tolist()
+			ukf_xhat = self._ukf.x.reshape(9).tolist()
 			xhat = [ukf_xhat[0],ukf_xhat[1],ukf_xhat[2],
 					self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],
 					ukf_xhat[3],ukf_xhat[4],ukf_xhat[5],
@@ -166,8 +159,6 @@ class StateEstimator():
 			msg.xhat = xhat
 			msg.t = self.get_time()
 			self._xhat_lc.publish("crazyflie_state_estimate", msg.encode())
-
-		print ekf_xhat
 
 		return xhat
 

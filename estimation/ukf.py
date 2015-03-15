@@ -23,7 +23,7 @@ Robot Locomotion Laboratory, MIT
 
 from numpy.linalg import inv, cholesky
 import numpy as np
-from numpy import asarray, eye, zeros, dot, isscalar, outer, diag
+from numpy import asarray, eye, zeros, dot, isscalar, outer, diag, array
 from filterpy.common import dot3
 
 
@@ -35,18 +35,23 @@ class UnscentedKalmanFilter(object):
         self.fx = plant.fx
         self.hx = plant.hx
 
-        # process noise matrix
-        # x y z dx dy dz axbias aybias azbias
-        self.Q = eye(dim_x)
-
-        # measurement noise matrix
-        # x y z dx dy dz axbias aybias azbias
-        self.R = eye(dim_z)
-        
-        self.x = zeros(dim_x)
-        self.P = eye(dim_x)
         self._dim_x = dim_x
         self._dim_z = dim_z
+
+        self.x = zeros(dim_x)
+        self.P = eye(dim_x)
+
+        self.R = 1.0e-03 * array([
+            [0.000003549299086,-0.000002442814972,-0.000004480024840,0.000267707847733,-0.000144518246735,-0.000212282673978],
+            [-0.000002442814972,0.000005899512446,0.000006498387107,-0.000138622536892,0.000440883366233,0.000388550687603],
+            [-0.000004480024840,0.000006498387107,0.000014749347917,-0.000218834499062,0.000402004146826,0.000932091499876],
+            [0.000267707847733,-0.000138622536892,-0.000218834499062,0.042452413803684,-0.022718840083072,-0.034590131072346],
+            [-0.000144518246735,0.000440883366233,0.000402004146826,-0.022718840083072,0.071342980281184,0.064549199777213],
+            [-0.000212282673978,0.000388550687603,0.000932091499876,-0.034590131072346,0.064549199777213,0.149298685351403],
+            ])
+
+        self.Q = 1.0e-09*eye(dim_x) 
+
         self._num_sigmas = 2*dim_x + 1
         self.kappa = kappa
 
@@ -57,60 +62,18 @@ class UnscentedKalmanFilter(object):
         # variables for efficiency so we don't recreate every update
         self.sigmas_f = zeros((self._num_sigmas, self._dim_x))
 
-
     def predict(self, control_input, dt):
-        """ Performs the predict step of the UKF. On return, self.xp and
-        self.Pp contain the predicted state (xp) and covariance (Pp). 'p'
-        stands for prediction.
-
-        **Parameters**
-
-        input : np.array
-                The input sent to the plant for dt
-
-        dt : double
-            The time step to be used for this prediction.
-
-        Important: this MUST be called before update() is called for the
-        first time.
-        """
 
         # calculate sigma points for given mean and covariance
         sigmas = self.sigma_points(self.x, self.P, self.kappa)
 
         for i in range(self._num_sigmas):
-            self.sigmas_f[i] = self.fx(sigmas[i], control_input, dt)
+            [xk1,F,Q] = self.fx(sigmas[i], control_input, dt)
+            self.sigmas_f[i] = xk1.reshape(9)
 
         self.x, self.P = unscented_transform(self.sigmas_f, self.W, self.W, self.Q)
 
-
     def update(self, z, R=None, residual=np.subtract, UT=None):
-        """ Update the UKF with the given measurements. On return,
-        self.x and self.P contain the new mean and covariance of the filter.
-
-        **Parameters**
-
-        z : numpy.array of shape (dim_z)
-            measurement vector
-
-        R : numpy.array((dim_z, dim_z)), optional
-            Measurement noise. If provided, overrides self.R for
-            this function call.
-
-        residual : function (z, z2), optional
-            Optional function that computes the residual (difference) between
-            the two measurement vectors. If you do not provide this, then the
-            built in minus operator will be used. You will normally want to use
-            the built in unless your residual computation is nonlinear (for
-            example, if they are angles)
-
-        UT : function(sigmas, Wm, Wc, noise_cov), optional
-            Optional function to compute the unscented transform for the sigma
-            points passed through hx. Typically the default function will
-            work, but if for example you are using angles the default method
-            of computing means and residuals will not work, and you will have
-            to define how to compute it.
-        """
 
         if isscalar(z):
             dim_z = 1
@@ -131,7 +94,7 @@ class UnscentedKalmanFilter(object):
 
         # transform sigma points into measurement space
         for i in range(self._num_sigmas):
-            sigmas_h[i] = self.hx(sigmas_f[i])
+            [sigmas_h[i], H] = self.hx(sigmas_f[i])
 
         # mean and covariance of prediction passed through unscented transform
         zp, Pz = UT(sigmas_h, self.W, self.W, R)
@@ -153,9 +116,6 @@ class UnscentedKalmanFilter(object):
 
         self.x = self.x + dot(K, y)
         self.P = self.P - dot3(K, Pz, K.T)
-        
-        return y
-
 
     @staticmethod
     def weights(n, kappa):
@@ -167,7 +127,6 @@ class UnscentedKalmanFilter(object):
         W = np.full(2*n+1, k)
         W[0] = kappa / (n+kappa)
         return W
-
 
     @staticmethod
     def sigma_points(x, P, kappa):
@@ -223,7 +182,6 @@ class UnscentedKalmanFilter(object):
         sigmas[n+1:2*n+2] = x - U
 
         return sigmas
-
 
 def unscented_transform(Sigmas, Wm, Wc, noise_cov):
     """ Computes unscented transform of a set of sigma points and weights.

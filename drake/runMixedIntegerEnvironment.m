@@ -1,7 +1,7 @@
 function runMixedIntegerEnvironment(r, start, goal, lb, ub, seeds, traj_degree, num_traj_segments, n_regions, dt)
 % NOTEST
 % Run the mixed-integer SOS trajectory planner on a simulated 3D environment, using IRIS to seed
-% convex regions of safe space. For example usage, see runMixedIntegerForest and runMixedIntegerOffice.
+% convex regions of safe space.
 % @param r the Quadrotor, with obstacle geometry added
 % @param start 3x1 the initial pose
 % @param goal 3x1 the final pose
@@ -143,7 +143,7 @@ if AUTOSAVE
 end
 
 % Draw the result
-v = v.setInputFrame(sys.getOutputFrame().getFrameByName('quadrotorPosition'));
+xtraj_sim = xtraj_sim.setOutputFrame(r.getStateFrame());
 v.playback(xtraj_sim, struct('slider', true));
 
 lc = lcm.lcm.LCM.getSingleton();

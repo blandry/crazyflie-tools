@@ -19,7 +19,7 @@ classdef Crazyflie
     
     function obj = Crazyflie()
       options.floating = true;
-      obj.manip = RigidBodyManipulator('crazyflie2.urdf',options);
+      obj.manip = RigidBodyManipulator('crazyflie.urdf',options);
       obj.nominal_input = .25*norm(getMass(obj.manip)*obj.manip.gravity)./ ...
           [obj.manip.force{1}.scale_factor_thrust obj.manip.force{2}.scale_factor_thrust ...
           obj.manip.force{3}.scale_factor_thrust obj.manip.force{4}.scale_factor_thrust]';
@@ -67,10 +67,11 @@ classdef Crazyflie
       
       % use the TILQR infinite cost to go as final cost on TVLQR (this
       % assumes that your final position is a fixed point
-      tf = xtraj.tspan(2);
-      [~,V] = tilqr(obj.manip,xtraj.eval(tf),utraj.eval(tf),obj.Q,obj.R,options);
-      Qf = V.S;
-      
+%       tf = xtraj.tspan(2);
+%       [~,V] = tilqr(obj.manip,xtraj.eval(tf),utraj.eval(tf),obj.Q,obj.R,options);
+%       Qf = V.S;
+      Qf = obj.Q;
+
       controller = tvlqr(obj.manip,xtraj,utraj,obj.tvQ,obj.tvR,Qf,options);
     end
     

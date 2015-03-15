@@ -12,7 +12,7 @@ from crazyflie_t import crazyflie_input_t, crazyflie_state_estimator_commands_t,
 
 INPUT_TYPE = 'omegasqu'
 INPUT_MIN = 0.0
-INPUT_MAX = 15 #13.2283
+INPUT_MAX = 15.0
 
 # INPUT_TYPE = 'onboardpd'
 # INPUT_MIN = 0

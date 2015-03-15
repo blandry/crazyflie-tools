@@ -23,7 +23,7 @@ using [State Estimation for Legged Robots, Bloesch 2012]
 
 import numpy as np
 import scipy.linalg as linalg
-from numpy import dot, zeros, eye
+from numpy import dot, zeros, eye, array
 from filterpy.common import setter, setter_1d, setter_scalar, dot3
 
 
@@ -38,10 +38,20 @@ class ExtendedKalmanFilter(object):
         self.dim_x = dim_x
         self.dim_z = dim_z
 
-        self._x = zeros((dim_x,1)) # state
-        self._P = eye(dim_x)       # uncertainty covariance
-        self._R = eye(dim_z)       # state uncertainty
-        self._Q = eye(dim_x)       # process uncertainty
+        self._x = zeros((dim_x,1))
+        self._P = eye(dim_x) 
+
+        # measure by looking at the covariance
+        # of vicon measurements on a stationary object
+        self._R = 1.0e-03 * array([
+            [0.000003549299086,-0.000002442814972,-0.000004480024840,0.000267707847733,-0.000144518246735,-0.000212282673978],
+            [-0.000002442814972,0.000005899512446,0.000006498387107,-0.000138622536892,0.000440883366233,0.000388550687603],
+            [-0.000004480024840,0.000006498387107,0.000014749347917,-0.000218834499062,0.000402004146826,0.000932091499876],
+            [0.000267707847733,-0.000138622536892,-0.000218834499062,0.042452413803684,-0.022718840083072,-0.034590131072346],
+            [-0.000144518246735,0.000440883366233,0.000402004146826,-0.022718840083072,0.071342980281184,0.064549199777213],
+            [-0.000212282673978,0.000388550687603,0.000932091499876,-0.034590131072346,0.064549199777213,0.149298685351403],
+            ])
+
         self._y = zeros((dim_z, 1))
 
         # identity matrix. Do not alter this.
@@ -50,8 +60,8 @@ class ExtendedKalmanFilter(object):
     def predict(self, control_input, dt):
         """ Predict next position. """
 
-        [self._x, F] = self.fx(self._x, control_input, dt)
-        self._P = dot3(F, self._P, F.T) + self._Q
+        [self._x, F, Q] = self.fx(self._x, control_input, dt)
+        self._P = dot3(F, self._P, F.T) + Q
 
     def update(self, z, R=None):
         """ Performs the update innovation of the extended Kalman filter. """
@@ -77,15 +87,6 @@ class ExtendedKalmanFilter(object):
 
         I_KH = self._I - dot(K, H)
         self._P = dot3(I_KH, P, I_KH.T) + dot3(K, R, K.T)
-
-    @property
-    def Q(self):
-        """ Process uncertainty"""
-        return self._Q
-
-    @Q.setter
-    def Q(self, value):
-        self._Q = setter_scalar(value, self.dim_x)
 
     @property
     def P(self):

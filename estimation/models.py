@@ -5,15 +5,28 @@ from transforms import body2world, angularvel2rpydot, rpy2rotmat
 
 class DoubleIntegrator():
 
-    # (acc in Gs in body frame)
     # states: x y z dx dy dz accxbias accybias acczbias
     # inputs: roll pitch yaw accx accy accz
     # measurements: x y z dx dy dz
 
+    def __init__(self):
+        # noise covariance of the accelerometer
+        self.Qf = 1.0e-05*array([
+            [0.091517244935232,0.056603535693738,0.007133936098991],
+            [0.056603535693738,0.221460824578487,0.079347515535003],
+            [0.007133936098991,0.079347515535003,0.296561306839593],
+            ])
+        # noise covariance of the accelerometer bias
+        self.Qbf = 1.0e-08*array([
+            [0.185339474280695,-0.409856608242542,-0.157150435676934],
+            [-0.409856608242542,0.906350036720579,0.347519840553981],
+            [-0.157150435676934,0.347519840553981,0.133248783235717],
+            ])
+
     def fx(self, state, control_input, dt):
         """ computes the next x[k+1] from x[k], u[k], dt 
 
-        returns x[k+1] and dx[k+1]/dx[k]
+        returns x[k+1], dx[k+1]/dx[k] and the process covariance
 
         """
         
@@ -21,7 +34,7 @@ class DoubleIntegrator():
 
         rk = state[0:3].reshape(3,1)
         vk = state[3:6].reshape(3,1)
-        bfk = 9.81*state[6:9].reshape(3,1)
+        bfk = state[6:9].reshape(3,1)
 
         Ck = array(rpy2rotmat(control_input[0:3])).T
         ftildak = 9.81*control_input[3:6].reshape(3,1)
@@ -39,7 +52,14 @@ class DoubleIntegrator():
         F3 = concatenate([zeros([3,6]),eye(3)],1)
         F = concatenate([F1,F2,F3],0)
 
-        return (xk1,F)
+        Qf = self.Qf
+        Qbf = self.Qbf
+        Q1 = concatenate([(dt**3/3)*Qf+(dt**5/20)*Qbf,(dt**2/2)*Qf+(dt**4/8)*Qbf,-(dt**3/6)*dot(Ck.T,Qbf)],1)
+        Q2 = concatenate([(dt**2/2)*Qf+(dt**4/8)*Qbf,dt*Qf+(dt**3/3)*Qbf,-(dt**2/2)*dot(Ck.T,Qbf)],1)
+        Q3 = concatenate([(dt**3/6)*dot(Qbf,Ck),-(dt**2/2)*dot(Qbf,Ck),dt*Qbf],1)
+        Q = concatenate([Q1,Q2,Q3],0)
+
+        return (xk1,F,Q)
 
     def hx(self, x):
         """ transform state into measurement space 

@@ -1,4 +1,4 @@
-function [V, utraj,xtraj]=runFunnel(p)
+function [V,utraj,xtraj]=runFunnel()
 
 if (nargin<1)
   p = PlanePlant();

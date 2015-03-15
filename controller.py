@@ -46,6 +46,8 @@ class Controller():
 		self._latest_control_input = [0.0, 0.0, 0.0, 0.0, 0.0, MODES.get(control_input_type,1)]
 		self._control_input_type = control_input_type
 
+		self._control_input_updated_flag = control_input_updated_flag
+
 		self._listen_to_lcm = listen_to_lcm
 		if listen_to_lcm:
 			publish_to_lcm = False
@@ -60,14 +62,12 @@ class Controller():
 			self._extra_control_input = [0.0, 0.0, 0.0, 0.0, 0.0, MODES.get(self._control_input_type,1)]
 			Thread(target=self._extra_input_thread).start()
 
-		self._control_input_updated_flag = control_input_updated_flag
-
 	def get_control_input(self, xhat=None):
 		if not self._is_running:
 			return [0.0, 0.0, 0.0, 0.0, 0.0, MODES.get(self._control_input_type,1)]
 
 		if self._listen_to_lcm or not xhat:
-			control_input = self._latest_control_input
+			control_input = list(self._latest_control_input) # note how we create a NEW list
 		else:
 			thrust_input = (np.array(np.dot(self._K.get(self._control_input_type),np.array(xhat).transpose()))[0]).tolist()
 			control_input = thrust_input + [0.0, MODES.get(self._control_input_type,1)]
@@ -79,6 +79,7 @@ class Controller():
 			control_input[2] += self._extra_control_input[2]
 			control_input[3] += self._extra_control_input[3]
 			control_input[4] += self._extra_control_input[4]
+			# this is why we had to create a new list
 
 		if self._publish_to_lcm:
 			msg = crazyflie_input_t()

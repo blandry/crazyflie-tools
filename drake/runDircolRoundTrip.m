@@ -1,4 +1,6 @@
-function [xtraj,utraj,prog] = runDircolRoundTrip(cf)
+function [xtraj,utraj,prog] = runDircolRoundTrip()
+
+cf = Crazyflie();
 
 N = 60;
 minimum_duration = .1;
@@ -21,8 +23,8 @@ xf = x0;
 prog = prog.addStateConstraint(ConstantConstraint(double(xf)),N);
 prog = prog.addInputConstraint(ConstantConstraint(u0),N);
 
-prog = prog.addRunningCost(@(t,x,u)cost(t,x,u,cf));
-prog = prog.addFinalCost(@(t,x)finalCost(t,x,cf));
+prog = prog.addRunningCost(@cost);
+prog = prog.addFinalCost(@finalCost);
 
 tf0 = 5;
 traj_init.x = PPTrajectory(foh([0,tf0],[double(x0),double(xf)]));
@@ -42,13 +44,13 @@ end
 
 end
 
-function [g,dg] = cost(dt,x,u,cf)
+function [g,dg] = cost(dt,x,u)
   R = eye(4);
   g = u'*R*u;
   dg = [0,zeros(1,size(x,1)),2*u'*R];
 end
 
-function [h,dh] = finalCost(t,x,cf)
+function [h,dh] = finalCost(t,x)
   h = t;
   dh = [1,zeros(1,size(x,1))];
 end
