@@ -3,6 +3,20 @@
 
 ############################ CLIENT OPTIONS ##########################################
 TXRX_FREQUENCY = 1000.0
+STARTUP_NANOKONTROL = True
+
+USE_DRAKE_CONTROLLER = True
+
+SE_LISTEN_TO_VICON = True
+SE_PUBLISH_TO_LCM = True
+SE_USE_RPYDOT = True
+SE_USE_UKF = False
+SE_USE_EKF = True
+
+CTRL_INPUT_TYPE = 'omegasqu'
+CTRL_LISTEN_TO_LCM = True
+CTRL_LISTEN_TO_EXTRA_INPUT = True
+CTRL_PUBLISH_TO_LCM = False
 ######################################################################################
 
 
@@ -17,6 +31,7 @@ import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crtp.crtpstack import CRTPPacket, CRTPPort
 
+import nanokontrol
 from estimation import StateEstimator
 from controller import Controller
 
@@ -46,25 +61,28 @@ class SimpleClient:
         self._dev_handle = self._cf.link.cradio.handle
         self._send_vendor_setup(SET_RADIO_ARC, 0, 0, ())
 
-        self._use_drake_controller = True
+        self._use_drake_controller = USE_DRAKE_CONTROLLER
 
         # state estimator
-        self._state_estimator = StateEstimator(listen_to_vicon=True,
-                                               publish_to_lcm=True,
-                                               use_rpydot=True,
-                                               use_ukf=False, # process covariance needs to be fixed
-                                               use_ekf=True)
+        self._state_estimator = StateEstimator(listen_to_vicon=SE_LISTEN_TO_VICON,
+                                               publish_to_lcm=SE_PUBLISH_TO_LCM,
+                                               use_rpydot=SE_USE_RPYDOT,
+                                               use_ukf=SE_USE_UKF,
+                                               use_ekf=SE_USE_EKF)
 
         # controller
         self._control_input_updated_flag = Event()
-        self._controller = Controller(control_input_type='omegasqu',
-                                      listen_to_lcm=True,
+        self._controller = Controller(control_input_type=CTRL_INPUT_TYPE,
+                                      listen_to_lcm=CTRL_LISTEN_TO_LCM,
                                       control_input_updated_flag=self._control_input_updated_flag,
-                                      listen_to_extra_input=True,
-                                      publish_to_lcm=False)
+                                      listen_to_extra_input=CTRL_LISTEN_TO_EXTRA_INPUT,
+                                      publish_to_lcm=CTRL_PUBLISH_TO_LCM)
         
         # Transmitter thread (handles all comm with the crazyflie)
         Thread(target=self._transmitter_thread).start()
+
+        if STARTUP_NANOKONTROL:
+            Thread(target=nanokontrol.main).start()
 
     def _connection_failed(self, link_uri, msg):
         print "Connection to %s failed: %s" % (link_uri, msg)

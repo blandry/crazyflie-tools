@@ -21,7 +21,6 @@ INPUT_MAX = 15.0
 IS_EXTRA_INPUT = True
 INPUT_FREQ = 100.0;
 
-
 class Kon():
 
     def __init__(self):
@@ -111,9 +110,11 @@ class Kon():
             self.lc.publish('crazyflie_controller_commands', msg.encode())
             self._is_running = False
 
-
-if __name__=='__main__':
+def main():
     kon = Kon()
     while True:
         kon.forward_kon_to_lcm()
-        time.sleep(1.0/INPUT_FREQ)
+        time.sleep(1.0/INPUT_FREQ)   
+
+if __name__=='__main__':
+    main()
