@@ -2,15 +2,15 @@ function [xtraj,utraj,prog] = runDircolSquare()
 
 cf = Crazyflie();
 
-N = 50;
+N = 60;
 minimum_duration = .1;
 maximum_duration = 6;
 prog = DircolTrajectoryOptimization(cf.manip,N,[minimum_duration maximum_duration]);  
 
 x0 = Point(getStateFrame(cf.manip));
-x0.base_x = 1.0;
+x0.base_x = 0;
 x0.base_y = -1.0;
-x0.base_z = 1.5;
+x0.base_z = 1.25;
 u0 = double(cf.nominal_input);
 prog = prog.addStateConstraint(ConstantConstraint(double(x0)),1);
 prog = prog.addInputConstraint(ConstantConstraint(u0),1);
@@ -24,7 +24,7 @@ x2.base_y = 1.0;
 prog = prog.addStateConstraint(ConstantConstraint(double(x2)),round(N/2));
 
 x3 = x2;
-x3.base_x = 1.0;
+x3.base_x = 0;
 prog = prog.addStateConstraint(ConstantConstraint(double(x3)),round(3*N/4));
 
 xf = x3;

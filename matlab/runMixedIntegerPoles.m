@@ -32,6 +32,12 @@ ytraj = ytraj.setOutputFrame(DifferentiallyFlatOutputFrame);
 [xtraj, utraj] = invertFlatOutputs(r,ytraj);
 disp('done!');
 
+if AUTOSAVE
+  folder = fullfile('data', datestr(now,'yyyy-mm-dd_HH.MM.SS'));
+  system(sprintf('mkdir -p %s', folder));
+  save(fullfile(folder, 'results.mat'), 'xtraj', 'ytraj', 'utraj');
+end
+
 figure(83);
 clf
 hold on
@@ -59,12 +65,6 @@ v.playback(xtraj, struct('slider', true));
 % disp('Simulating the system...');
 % xtraj_sim = simulate(sys,[0 tf],x0);
 % disp('done!');
-
-if AUTOSAVE
-  folder = fullfile('data', datestr(now,'yyyy-mm-dd_HH.MM.SS'));
-  system(sprintf('mkdir -p %s', folder));
-  save(fullfile(folder, 'results.mat'), 'xtraj', 'ytraj', 'utraj');
-end
 
 % % Draw the result
 % xtraj_sim = xtraj_sim.setOutputFrame(r.getStateFrame());

@@ -15,7 +15,7 @@ from transforms import angularvel2rpydot, body2world, quat2rpy, world2body
 class StateEstimator():
 
 	def __init__(self, listen_to_vicon=False, publish_to_lcm=False, 
-				 use_rpydot=False, use_ukf=False, use_ekf=False):
+				 use_rpydot=False, use_ekf=False, use_ukf=False):
 		
 		self._tvlqr_counting = False
 		self._last_time_update = time.time()
@@ -47,22 +47,20 @@ class StateEstimator():
 			Thread(target=self._vicon_listener).start()
 
 		self._last_input = [0.0, 0.0, 0.0, 0.0]
-		self._use_ukf = use_ukf
+
 		self._use_ekf = use_ekf
-		if use_ukf:
-			# states: x y z dx dy dz accxbias accybias acczbias
-			# inputs: roll pitch yaw accx accy accz
-			# measurements: x y z dx dy dz accxbias accybias acczbias
-			self._plant = DoubleIntegrator()
-			self._ukf = UnscentedKalmanFilter(dim_x=9, dim_z=9, plant=self._plant)
-			self._last_ukf_update = time.time()
-		elif use_ekf:
+		self._use_ukf = use_ukf
+		self._use_kalman = use_ekf or use_ukf
+		if self._use_kalman:
 			# states: x y z dx dy dz accxbias accybias acczbias
 			# inputs: roll pitch yaw accx accy accz
 			# measurements: x y z dx dy dz
 			self._plant = DoubleIntegrator()
-			self._ekf = ExtendedKalmanFilter(dim_x=9, dim_z=6, plant=self._plant)
-			self._last_ekf_update = time.time()	
+			self._last_kalman_update = time.time()
+			if use_ekf:
+				self._kalman = ExtendedKalmanFilter(dim_x=9, dim_z=6, plant=self._plant)
+			elif use_ukf:
+				self._kalman = UnscentedKalmanFilter(dim_x=9, dim_z=6, plant=self._plant)
 
 	def add_imu_reading(self, imu_reading):
 		(gx, gy, gz, ax, ay, az, dt_imu) = imu_reading
@@ -120,27 +118,15 @@ class StateEstimator():
 		self._valid_vicon = True
 
 	def get_xhat(self):
-		# should maybe put a lock on those variables before accessing them
-
-		if self._use_ukf:
-			dt = time.time() - self._last_ukf_update
-			self._ukf.predict(np.array(self._last_rpy + self._last_acc), dt)
-			self._ukf.update(np.array(self._last_xyz + self._last_dxyz))
-			self._last_ukf_update = time.time()
-			ukf_xhat = self._ukf.x.reshape(9).tolist()
-			xhat = [ukf_xhat[0],ukf_xhat[1],ukf_xhat[2],
+		if self._use_kalman:
+			dt = time.time() - self._last_kalman_update
+			self._kalman.predict(np.array(self._last_rpy + self._last_acc), dt)
+			self._kalman.update(np.array(self._last_xyz + self._last_dxyz))
+			self._last_kalman_update = time.time()
+			kalman_xhat = self._kalman.x.reshape(9).tolist()
+			xhat = [kalman_xhat[0],kalman_xhat[1],kalman_xhat[2],
 					self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],
-					ukf_xhat[3],ukf_xhat[4],ukf_xhat[5],
-					self._last_gyro[0],self._last_gyro[1],self._last_gyro[2]]
-		elif self._use_ekf:
-			dt = time.time() - self._last_ekf_update
-			self._ekf.predict(np.array(self._last_rpy + self._last_acc), dt)
-			self._ekf.update(np.array(self._last_xyz + self._last_dxyz))
-			self._last_ekf_update = time.time()
-			ekf_xhat = self._ekf.x.reshape(9).tolist()
-			xhat = [ekf_xhat[0],ekf_xhat[1],ekf_xhat[2],
-					self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],
-					ekf_xhat[3],ekf_xhat[4],ekf_xhat[5],
+					kalman_xhat[3],kalman_xhat[4],kalman_xhat[5],
 					self._last_gyro[0],self._last_gyro[1],self._last_gyro[2]]
 		else:
 			xhat = [self._last_xyz[0],self._last_xyz[1],self._last_xyz[2],

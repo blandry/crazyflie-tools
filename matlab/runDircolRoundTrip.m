@@ -8,8 +8,8 @@ maximum_duration = 10;
 prog = DircolTrajectoryOptimization(cf.manip,N,[minimum_duration maximum_duration]);  
 
 x0 = Point(getStateFrame(cf.manip));
-x0.base_x = 1.0;
-x0.base_z = 1.5;
+x0.base_x = 0;
+x0.base_z = 1.25;
 u0 = double(cf.nominal_input);
 
 prog = prog.addStateConstraint(ConstantConstraint(double(x0)),1);

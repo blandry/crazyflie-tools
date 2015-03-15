@@ -10,8 +10,8 @@ USE_DRAKE_CONTROLLER = True
 SE_LISTEN_TO_VICON = True
 SE_PUBLISH_TO_LCM = True
 SE_USE_RPYDOT = True
-SE_USE_UKF = False
 SE_USE_EKF = True
+SE_USE_UKF = False
 
 CTRL_INPUT_TYPE = 'omegasqu'
 CTRL_LISTEN_TO_LCM = True
@@ -67,8 +67,8 @@ class SimpleClient:
         self._state_estimator = StateEstimator(listen_to_vicon=SE_LISTEN_TO_VICON,
                                                publish_to_lcm=SE_PUBLISH_TO_LCM,
                                                use_rpydot=SE_USE_RPYDOT,
-                                               use_ukf=SE_USE_UKF,
-                                               use_ekf=SE_USE_EKF)
+                                               use_ekf=SE_USE_EKF,
+                                               use_ukf=SE_USE_UKF)
 
         # controller
         self._control_input_updated_flag = Event()
