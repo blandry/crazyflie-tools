@@ -109,6 +109,7 @@ classdef Crazyflie
       ROLL_RATE_KP = .8*.8;
       PITCH_RATE_KP = .8*.8;
       YAW_RATE_KP = .8*.6;
+      
       K = [0 0 0 0 PITCH_KP YAW_KP 0 0 0 0 PITCH_RATE_KP YAW_RATE_KP;
            0 0 0 ROLL_KP 0 -YAW_KP 0 0 0 ROLL_RATE_KP 0 -YAW_RATE_KP;
            0 0 0 0 -PITCH_KP YAW_KP 0 0 0 0 -PITCH_RATE_KP YAW_RATE_KP;
