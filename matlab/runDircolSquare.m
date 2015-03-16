@@ -4,7 +4,7 @@ cf = Crazyflie();
 
 N = 60;
 minimum_duration = .1;
-maximum_duration = 6;
+maximum_duration = 20;
 prog = DircolTrajectoryOptimization(cf.manip,N,[minimum_duration maximum_duration]);  
 
 x0 = Point(getStateFrame(cf.manip));
@@ -16,7 +16,7 @@ prog = prog.addStateConstraint(ConstantConstraint(double(x0)),1);
 prog = prog.addInputConstraint(ConstantConstraint(u0),1);
 
 x1 = x0;
-x1.base_x = 3;
+x1.base_x = 1.5;
 prog = prog.addStateConstraint(ConstantConstraint(double(x1)),round(N/4));
 
 x2 = x1;
@@ -35,7 +35,7 @@ prog = prog.addInputConstraint(ConstantConstraint(u0),N);
 prog = prog.addRunningCost(@cost);
 prog = prog.addFinalCost(@finalCost);
 
-tf0 = 4;
+tf0 = 20;
 traj_init.x = PPTrajectory(foh([0,tf0],[double(x0),double(xf)]));
 traj_init.u = ConstantTrajectory(u0);
 

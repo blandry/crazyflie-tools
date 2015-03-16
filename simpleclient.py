@@ -10,8 +10,8 @@ USE_DRAKE_CONTROLLER = True
 SE_LISTEN_TO_VICON = True
 SE_PUBLISH_TO_LCM = True
 SE_USE_RPYDOT = True
-SE_USE_EKF = True
-SE_USE_UKF = False
+SE_USE_EKF = False
+SE_USE_UKF = True
 
 CTRL_INPUT_TYPE = 'omegasqu'
 CTRL_LISTEN_TO_LCM = True
@@ -117,11 +117,11 @@ class SimpleClient:
 
             self._state_estimator.add_imu_reading(imu_reading)
 
-            msg = crazyflie_imu_t()
-            msg.alphax = imu_reading[3]
-            msg.alphay = imu_reading[4]
-            msg.alphaz = imu_reading[5]
-            imu_lc.publish('crazyflie_imu', msg.encode())
+            # msg = crazyflie_imu_t()
+            # msg.alphax = imu_reading[3]
+            # msg.alphay = imu_reading[4]
+            # msg.alphaz = imu_reading[5]
+            # imu_lc.publish('crazyflie_imu', msg.encode())
 
             self._control_input_updated_flag.clear()
             xhat = self._state_estimator.get_xhat()
@@ -186,6 +186,6 @@ if __name__ == '__main__':
         print i[0]
 
     if len(available) > 0:
-        client = SimpleClient(available[0][0])
+        client = SimpleClient('radio://0/80/250K') #available[0][0]
     else:
         print "No Crazyflies found, cannot run the client"
