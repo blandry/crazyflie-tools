@@ -23,7 +23,7 @@ end
 
 bot_radius = 0.3;
 
-can_draw_lcm_polytopes = logical(exist('drawLCMPolytope', 'file')) && logical(exist('drc.lin_con_t'));
+can_draw_lcm_polytopes = logical(exist('drawLCMPolytope', 'file'));
 
 lc = lcm.lcm.LCM.getSingleton();
 lcmgl = LCMGLClient('quad_goal');

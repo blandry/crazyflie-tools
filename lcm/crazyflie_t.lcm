@@ -47,3 +47,12 @@ struct crazyflie_controller_commands_t
 {
   boolean is_running;
 }
+
+struct polytopes_t 
+{
+  int32_t id;
+  boolean highlighted;
+  boolean remove;
+  int32_t num_vertices;
+  double V[3][num_vertices]; 
+}
