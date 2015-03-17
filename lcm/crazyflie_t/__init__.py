@@ -10,3 +10,4 @@ from .crazyflie_imu_t import crazyflie_imu_t
 from .crazyflie_state_estimator_commands_t import crazyflie_state_estimator_commands_t
 from .crazyflie_controller_commands_t import crazyflie_controller_commands_t
 from .polytopes_t import polytopes_t
+from .dxyz_compare_t import dxyz_compare_t

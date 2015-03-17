@@ -1,4 +1,4 @@
-function [ytraj,v] = runMixedIntegerEnvironment(r, start, goal, lb, ub, seeds, traj_degree, num_traj_segments, n_regions, dt)
+function [ytraj,v] = runMixedIntegerEnvironment(r, start, goal, lb, ub, seeds, traj_degree, num_traj_segments, n_regions, dt, bot_radius)
 % NOTEST
 % Run the mixed-integer SOS trajectory planner on a simulated 3D environment, using IRIS to seed
 % convex regions of safe space.
@@ -20,8 +20,9 @@ checkDependency('mosek');
 if nargin < 10
   dt = 0.5;
 end
-
-bot_radius = 0.3;
+if nargin < 11
+  bot_radius = 0.3;
+end
 
 can_draw_lcm_polytopes = logical(exist('drawLCMPolytope', 'file'));
 
@@ -95,6 +96,9 @@ disp('done!');
 % Run the program again with the region assignments fixed, for a piecewise 5th-degree polynomial
 disp('Running semidefinite program for 5th-degree polynomial...');
 prob.traj_degree = 5;
+% add one more condition to get the roll,pitch and yaw dot to be zero
+start = [start, [0;0;0]];
+goal = [goal, [0;0;0]];
 ytraj = prob.solveTrajectory(start, goal, safe_regions, safe_region_assignments);
 disp('done!');
 

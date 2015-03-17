@@ -2,7 +2,7 @@ function plotlog(file_num)
 
 data = load(strcat(num2str(file_num),'.mat'));
 
-tpos = data.crazyflie_state_estimate(:,14);
+tpos = data.crazyflie_state_estimate(:,15);
 pos = [data.crazyflie_state_estimate(:,2:4),data.crazyflie_state_estimate(:,5:7)];
 
 tinput = data.crazyflie_input(:,7);

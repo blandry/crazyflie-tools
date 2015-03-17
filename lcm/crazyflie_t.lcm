@@ -56,3 +56,9 @@ struct polytopes_t
   int32_t num_vertices;
   double V[3][num_vertices]; 
 }
+
+struct dxyz_compare_t
+{
+  double dxyzraw[3];
+  double dxyzfiltered[3];
+}

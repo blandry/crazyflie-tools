@@ -1,0 +1,1 @@
+Changed the smoothing to use the last raw xyz when computing velocity, not the last xyz estimate.

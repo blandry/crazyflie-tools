@@ -88,13 +88,13 @@ classdef Crazyflie
       controller = controller.inOutputFrame(input_frame);      
     end
     
-    function controller = getTilqr(obj, xd)
+    function [controller,V] = getTilqr(obj, xd)
       if (nargin<2)
         xd = zeros(12,1);
       end
        
       options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
-      controller = tilqr(obj.manip,xd,obj.nominal_input,obj.Q,obj.R,options);
+      [controller,V] = tilqr(obj.manip,xd,obj.nominal_input,obj.Q,obj.R,options);
       
       state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
       state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,controller.getInputFrame,eye(length(xd)),-xd));
@@ -105,12 +105,24 @@ classdef Crazyflie
       controller = controller.inOutputFrame(input_frame);      
     end
     
-    function controller = getTvlqr(obj, xtraj, utraj)
+    function controller = getTvlqr(obj, xtraj, utraj, end_on_fixed_point)
+      if (nargin<4)
+        end_on_fixed_point = true;
+      end
+      
+      if end_on_fixed_point
+        xf = xtraj.eval(xtraj.tspan(2));
+        [~,V] = obj.getTilqr(xf);
+        Qf = V.S;
+      else
+        Qf = obj.tvQf;
+      end
+      
       xtraj = xtraj.setOutputFrame(obj.manip.getStateFrame);      
       utraj = utraj.setOutputFrame(obj.manip.getInputFrame);
       
       options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
-      controller = tvlqr(obj.manip,xtraj,utraj,obj.tvQ,obj.tvR,obj.tvQf,options);
+      controller = tvlqr(obj.manip,xtraj,utraj,obj.tvQ,obj.tvR,Qf,options);
       
       state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
       state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,controller.getInputFrame,eye(12),-xtraj));

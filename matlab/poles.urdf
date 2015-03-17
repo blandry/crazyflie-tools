@@ -36,7 +36,7 @@
    <joint name="pole1_weld" type="fixed">
     <parent link="world"/>
       <child link="pole1"/>
-    <origin xyz=".7 .5 0" rpy="0 0 0" />
+    <origin xyz="-1 .5 0" rpy="0 0 0" />
    </joint>
 
    <link name="pole2">
@@ -62,7 +62,7 @@
    <joint name="pole2_weld" type="fixed">
     <parent link="world"/>
       <child link="pole2"/>
-    <origin xyz=".9 -.5 0" rpy="0 0 0" />
+    <origin xyz="-.8 -.5 0" rpy="0 0 0" />
    </joint>
 
    <link name="pole3">
@@ -88,7 +88,7 @@
    <joint name="pole3_weld" type="fixed">
     <parent link="world"/>
       <child link="pole3"/>
-    <origin xyz="1.4 0 0" rpy="0 0 0" />
+    <origin xyz="-.3 0 0" rpy="0 0 0" />
    </joint>
 
 </robot>

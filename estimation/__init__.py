@@ -4,7 +4,7 @@ import lcm
 import numpy as np
 import MahonyAHRS
 from threading import Thread
-from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t
+from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t, dxyz_compare_t
 from vicon_t import vicon_pos_t
 from ukf import UnscentedKalmanFilter
 from ekf import ExtendedKalmanFilter
@@ -30,6 +30,7 @@ class StateEstimator():
 		self._last_imu_update = time.time()	
 
 		self._last_xyz = [0.0, 0.0, 0.0]
+		self._last_xyz_raw = [0.0, 0.0, 0.0]
 		self._last_dxyz = [0.0, 0.0, 0.0]
 		self._last_vicon_rpy = [0.0, 0.0, 0.0]
 		self._last_vicon_update = time.time()
@@ -102,11 +103,12 @@ class StateEstimator():
 		if self._valid_vicon:
 			dt = 1.0/120.0
 			dt_measured = (msg.timestamp-self._last_vicon_update)/1000.0
-			if (dt_measured>1.1*dt):
+			if (dt_measured>1.5*dt):
 				dt = dt_measured
-			dxyz[0] = (1.0/dt)*(xyz[0]-self._last_xyz[0])
-			dxyz[1] = (1.0/dt)*(xyz[1]-self._last_xyz[1])
-			dxyz[2] = (1.0/dt)*(xyz[2]-self._last_xyz[2])
+			dxyz[0] = (1.0/dt)*(xyz[0]-self._last_xyz_raw[0])
+			dxyz[1] = (1.0/dt)*(xyz[1]-self._last_xyz_raw[1])
+			dxyz[2] = (1.0/dt)*(xyz[2]-self._last_xyz_raw[2])
+			self._last_xyz_raw = list(xyz)
 		
 		self._last_xyz[0] = self._vicon_alpha_pos*xyz[0]+(1-self._vicon_alpha_pos)*self._last_xyz[0]
 		self._last_xyz[1] = self._vicon_alpha_pos*xyz[1]+(1-self._vicon_alpha_pos)*self._last_xyz[1]
@@ -128,6 +130,12 @@ class StateEstimator():
 					self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],
 					kalman_xhat[3],kalman_xhat[4],kalman_xhat[5],
 					self._last_gyro[0],self._last_gyro[1],self._last_gyro[2]]
+
+			msg = dxyz_compare_t()
+			msg.dxyzraw = self._last_dxyz
+			msg.dxyzfiltered = kalman_xhat[3:6]
+			self._xhat_lc.publish('dxyz_compare', msg.encode())
+
 		else:
 			xhat = [self._last_xyz[0],self._last_xyz[1],self._last_xyz[2],
 					self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],

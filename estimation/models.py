@@ -17,7 +17,12 @@ class DoubleIntegrator():
             [0.007133936098991,0.079347515535003,0.296561306839593],
             ])
         # noise covariance of the accelerometer bias
-        self.Qbf = zeros([3,3])
+        self.Qbf = 1.0e-08*array([
+            [0.185339474280695,-0.409856608242542,-0.157150435676934],
+            [-0.409856608242542,0.906350036720579,0.347519840553981],
+            [-0.157150435676934,0.347519840553981,0.133248783235717],
+            ])
+        #self.Qbf = zeros([3,3])
 
     def fx(self, state, control_input, dt):
         """ computes the next x[k+1] from x[k], u[k], dt 

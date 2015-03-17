@@ -2,6 +2,7 @@ AUTOSAVE = true;
 
 cf = Crazyflie();
 r = cf.manip;
+bot_radius = .2;
 
 terrain = RigidBodyFlatTerrain();
 terrain = terrain.setGeometryColor([.1 .1 .1]');
@@ -10,13 +11,13 @@ r = r.setTerrain(terrain);
 dt = .5;
 degree = 3;
 n_segments = 7;
-start = [0;0;1];
-goal = [3;0;1.5];
+start = [-1.7;0;.7];
+goal = [1;0;1.5];
 
 r = addRobotFromURDF(r, 'poles.urdf');
 
-lb = [-1;-1;.1];
-ub = [4;1;3];
+lb = [-3;-1;.1];
+ub = [2;1;3];
 
 seeds = [...
          start';
@@ -24,7 +25,7 @@ seeds = [...
          ]';
 n_regions = 7;
 
-[ytraj,v] = runMixedIntegerEnvironment(r, start, goal, lb, ub, seeds, degree, n_segments, n_regions, dt);
+[ytraj,v] = runMixedIntegerEnvironment(r, start, goal, lb, ub, seeds, degree, n_segments, n_regions, dt, bot_radius);
 
 % % Invert differentially flat outputs to find the state traj
 disp('Inverting differentially flat system...')
