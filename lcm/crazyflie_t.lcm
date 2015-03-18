@@ -62,3 +62,27 @@ struct dxyz_compare_t
   double dxyzraw[3];
   double dxyzfiltered[3];
 }
+
+struct kalman_args_t
+{
+  double input_rpy[3];
+  double input_acc[3];
+  double input_dt;
+  boolean valid_vicon;
+  double meas_xyz[3];
+
+  double smooth_xyz[3];
+  double smooth_dxyz[3];
+}
+
+struct kalman_out_t
+{
+  double kalman_xyz[3];
+  double kalman_dxyz[3];
+
+  double smooth_xyz[3];
+  double smooth_dxyz[3];
+
+  double smooth_xyz_noblackout[3];
+  double smooth_dxyz_noblackout[3];
+}

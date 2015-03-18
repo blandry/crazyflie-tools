@@ -10,24 +10,26 @@ r = r.setTerrain(terrain);
 
 dt = .5;
 degree = 3;
-n_segments = 10;
+n_segments = 7;
 
-start = [-1;0;1];
-goal = [3;0;1.5];
+start = [-1.8;0;1.25];
+goal = [1.1;0;1.25];
 
 r = addRobotFromURDF(r, 'gates.urdf');
 
-lb = [-2;-1;.1];
-ub = [4;1;2];
+lb = [-2.3;-.7;.2];
+ub = [1.6;.7;2];
 
 seeds = [...
          start';
          goal';
-         [.5 .25 1.25]; % middle of the first gate
-         [1 -.25 1.25]; % middle of the second gate
-         [1.5 0 1]; % below of the third gate
+         [-.5 .25 1.25]; % middle of the first gate
+         [0 -.25 1.25]; % middle of the second gate
+         [.5 0 1]; % below of the third gate
+         [-.25 0 1.25]; % between the first two gates
+         [.25 0 1.25]; % below the last two gates
          ]';
-n_regions = 5;
+n_regions = 7;
 
 [ytraj,v] = runMixedIntegerEnvironment(r, start, goal, lb, ub, seeds, degree, n_segments, n_regions, dt, bot_radius);
 

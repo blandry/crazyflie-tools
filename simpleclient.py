@@ -3,8 +3,7 @@
 
 ############################ CLIENT OPTIONS ##########################################
 TXRX_FREQUENCY = 1000.0
-STARTUP_NANOKONTROL = True
-
+STARTUP_NANOKONTROL = False
 USE_DRAKE_CONTROLLER = False
 
 SE_LISTEN_TO_VICON = True
@@ -178,6 +177,10 @@ class SimpleClient:
 
 
 if __name__ == '__main__':
+    
+    if SE_USE_UKF:
+        raise Exception('The UKF is not functional yet. Please use the EKF.')
+
     cflib.crtp.init_drivers(enable_debug_driver=False)
     print "Scanning interfaces for Crazyflies..."
     available = cflib.crtp.scan_interfaces()

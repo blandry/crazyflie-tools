@@ -14,17 +14,19 @@ for i=1:size(T,1)
   pos = [rawdata.crazyflie_state_estimate(:,2:4),rawdata.crazyflie_state_estimate(:,11:13),rawdata.crazyflie_state_estimate(:,15)];
   input = [rawdata.crazyflie_input(:,2:5)+repmat(rawdata.crazyflie_input(:,6),1,4),rawdata.crazyflie_input(:,7)];
   t = rawdata.crazyflie_state_estimate(:,15);
+  posdata = pos((t>t0)&(t<tf),1:6);
   
-  input1zoh = PPTrajectory(zoh(input(:,5),input(:,1)));
-  input2zoh = PPTrajectory(zoh(input(:,5),input(:,2)));
-  input3zoh = PPTrajectory(zoh(input(:,5),input(:,3)));
-  input4zoh = PPTrajectory(zoh(input(:,5),input(:,4)));
+  t = t((t>t0)&(t<tf));
+  
+  input1zoh = PPTrajectory(zoh(input(:,5),input(:,1)'));
+  input2zoh = PPTrajectory(zoh(input(:,5),input(:,2)'));
+  input3zoh = PPTrajectory(zoh(input(:,5),input(:,3)'));
+  input4zoh = PPTrajectory(zoh(input(:,5),input(:,4)'));
   input1 = input1zoh.eval(t);
   input2 = input2zoh.eval(t);
   input3 = input3zoh.eval(t);
   input4 = input4zoh.eval(t);
 
-  posdata = pos(:,1:6);
   inputdata = [input1,input2,input3,input4];
   
   data = [t,inputdata,posdata];
@@ -34,7 +36,7 @@ end
 % you can remove some experiments from the sysid here
 % ex: files = [1 3 4]
 %files = 1:size(T,1);
-file = [1];
+files = [1];
 
 d = cell(1,numel(files));
 for i=1:numel(files)

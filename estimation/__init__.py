@@ -4,7 +4,7 @@ import lcm
 import numpy as np
 import MahonyAHRS
 from threading import Thread
-from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t, dxyz_compare_t
+from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t, dxyz_compare_t, kalman_args_t
 from vicon_t import vicon_pos_t
 from ukf import UnscentedKalmanFilter
 from ekf import ExtendedKalmanFilter
@@ -55,13 +55,13 @@ class StateEstimator():
 		if self._use_kalman:
 			# states: x y z dx dy dz accxbias accybias acczbias
 			# inputs: roll pitch yaw accx accy accz
-			# measurements: x y z dx dy dz
+			# measurements: x y z
 			self._plant = DoubleIntegrator()
 			self._last_kalman_update = time.time()
 			if use_ekf:
-				self._kalman = ExtendedKalmanFilter(dim_x=9, dim_z=6, plant=self._plant)
+				self._kalman = ExtendedKalmanFilter(dim_x=9, dim_z=3, plant=self._plant)
 			elif use_ukf:
-				self._kalman = UnscentedKalmanFilter(dim_x=9, dim_z=6, plant=self._plant)
+				self._kalman = UnscentedKalmanFilter(dim_x=9, dim_z=3, plant=self._plant)
 
 	def add_imu_reading(self, imu_reading):
 		(gx, gy, gz, ax, ay, az, dt_imu) = imu_reading
@@ -123,7 +123,8 @@ class StateEstimator():
 		if self._use_kalman:
 			dt = time.time() - self._last_kalman_update
 			self._kalman.predict(np.array(self._last_rpy + self._last_acc), dt)
-			self._kalman.update(np.array(self._last_xyz + self._last_dxyz))
+			if self._valid_vicon:
+				self._kalman.update(np.array(self._last_xyz))
 			self._last_kalman_update = time.time()
 			kalman_xhat = self._kalman.x.reshape(9).tolist()
 			xhat = [kalman_xhat[0],kalman_xhat[1],kalman_xhat[2],
@@ -131,10 +132,20 @@ class StateEstimator():
 					kalman_xhat[3],kalman_xhat[4],kalman_xhat[5],
 					self._last_gyro[0],self._last_gyro[1],self._last_gyro[2]]
 
-			msg = dxyz_compare_t()
-			msg.dxyzraw = self._last_dxyz
-			msg.dxyzfiltered = kalman_xhat[3:6]
-			self._xhat_lc.publish('dxyz_compare', msg.encode())
+			# msg = dxyz_compare_t()
+			# msg.dxyzraw = self._last_dxyz
+			# msg.dxyzfiltered = kalman_xhat[3:6]
+			# self._xhat_lc.publish('dxyz_compare', msg.encode())
+
+			msg = kalman_args_t()
+			msg.input_rpy = self._last_rpy
+			msg.input_acc = self._last_acc
+			msg.input_dt = dt
+			msg.valid_vicon = self._valid_vicon
+			msg.meas_xyz = self._last_xyz
+			msg.smooth_xyz = self._last_xyz
+			msg.smooth_dxyz =self._last_dxyz
+			self._xhat_lc.publish('kalman_args', msg.encode())
 
 		else:
 			xhat = [self._last_xyz[0],self._last_xyz[1],self._last_xyz[2],
