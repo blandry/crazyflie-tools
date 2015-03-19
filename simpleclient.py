@@ -3,8 +3,8 @@
 
 ############################ CLIENT OPTIONS ##########################################
 TXRX_FREQUENCY = 1000.0
-STARTUP_NANOKONTROL = False
-USE_DRAKE_CONTROLLER = False
+STARTUP_NANOKONTROL = True
+USE_DRAKE_CONTROLLER = True
 
 SE_LISTEN_TO_VICON = True
 SE_PUBLISH_TO_LCM = True
@@ -13,7 +13,7 @@ SE_USE_EKF = True
 SE_USE_UKF = False
 
 CTRL_INPUT_TYPE = 'omegasqu'
-CTRL_LISTEN_TO_LCM = False
+CTRL_LISTEN_TO_LCM = True
 CTRL_LISTEN_TO_EXTRA_INPUT = True
 CTRL_PUBLISH_TO_LCM = False
 ######################################################################################

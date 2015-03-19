@@ -1,5 +1,5 @@
 
-from numpy import dot, array, concatenate, eye, zeros
+from numpy import dot, array, concatenate, eye, zeros, ones
 import numpy as np
 from transforms import body2world, angularvel2rpydot, rpy2rotmat
 
@@ -17,7 +17,11 @@ class DoubleIntegrator():
             [0.007133936098991,0.079347515535003,0.296561306839593],
             ])
         # noise covariance of the accelerometer bias
-        self.Qbf = 0.0015397776*eye(3)
+        self.Qbf = array([
+            [.1, .05, .05],
+            [.05, .1, .05],
+            [.05, .05, .5],
+            ])
 
     def fx(self, state, control_input, dt):
         """ computes the next x[k+1] from x[k], u[k], dt 

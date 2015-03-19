@@ -16,7 +16,7 @@ class Simulator():
 		self.lc = lcm.LCM()
 		self.max_blackout = 20
 		self.min_blackout = 5
-		self.blackout_prob = .1
+		self.blackout_prob = 0 #.1
 		self.current_blackout_count = 0
 
 	def run(self):
