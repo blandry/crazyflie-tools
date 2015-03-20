@@ -13,7 +13,7 @@
    </material>
    <link name="world"/>
 
-   <link name="v1">
+   <link name="l1">
    	<inertial>
    		<mass value=".5" />
    		<origin xyz="0 0 1.5" rpy="0 0 0"/>
@@ -33,12 +33,12 @@
       </geometry>
     </collision>
    </link>
-   <joint name="v1_weld" type="fixed">
+   <joint name="l1_weld" type="fixed">
     <parent link="world"/>
-      <child link="v1"/>
+      <child link="l1"/>
     <origin xyz="-.5 .5 0" rpy="0 0 0" />
    </joint>
-   <link name="v2">
+   <link name="l2">
    	<inertial>
    		<mass value=".5" />
    		<origin xyz="0 0 1.5" rpy="0 0 0"/>
@@ -58,12 +58,12 @@
       </geometry>
     </collision>
    </link>
-   <joint name="v2_weld" type="fixed">
+   <joint name="l2_weld" type="fixed">
     <parent link="world"/>
-      <child link="v2"/>
+      <child link="l2"/>
     <origin xyz="-.5 -.5 0" rpy="0 0 0" />
    </joint>
-   <link name="d1">
+   <link name="s1">
    	<inertial>
    		<mass value=".5" />
    		<origin xyz="0 0 .6" rpy="0 0 0"/>
@@ -83,12 +83,12 @@
       </geometry>
     </collision>
    </link>
-   <joint name="d1_weld" type="fixed">
-    <parent link="v2"/>
-      <child link="d1"/>
+   <joint name="s1_weld" type="fixed">
+    <parent link="l2"/>
+      <child link="s1"/>
     <origin xyz="0.042 0 1.25" rpy="-1.047197551196598 0 0" />
    </joint>
-   <link name="d2">
+   <link name="s2">
    	<inertial>
    		<mass value=".5" />
    		<origin xyz="0 0 .6" rpy="0 0 0"/>
@@ -108,13 +108,13 @@
       </geometry>
     </collision>
    </link>
-   <joint name="d2_weld" type="fixed">
-    <parent link="v2"/>
-      <child link="d2"/>
+   <joint name="s2_weld" type="fixed">
+    <parent link="l2"/>
+      <child link="s2"/>
     <origin xyz="0.042 0 1.25" rpy="-2.094395102393196 0 0" />
    </joint>
 
-   <link name="v3">
+   <link name="l3">
    	<inertial>
    		<mass value=".5" />
    		<origin xyz="0 0 1.5" rpy="0 0 0"/>
@@ -134,12 +134,12 @@
       </geometry>
     </collision>
    </link>
-   <joint name="v3_weld" type="fixed">
+   <joint name="l3_weld" type="fixed">
     <parent link="world"/>
-      <child link="v3"/>
+      <child link="l3"/>
     <origin xyz="0 .5 0" rpy="0 0 0" />
    </joint>
-   <link name="v4">
+   <link name="l4">
    	<inertial>
    		<mass value=".5" />
    		<origin xyz="0 0 1.5" rpy="0 0 0"/>
@@ -159,12 +159,12 @@
       </geometry>
     </collision>
    </link>
-   <joint name="v4_weld" type="fixed">
+   <joint name="l4_weld" type="fixed">
     <parent link="world"/>
-      <child link="v4"/>
+      <child link="l4"/>
     <origin xyz="0 -.5 0" rpy="0 0 0" />
    </joint>
-  <link name="d3">
+  <link name="s3">
    	<inertial>
    		<mass value=".5" />
    		<origin xyz="0 0 .6" rpy="0 0 0"/>
@@ -184,12 +184,12 @@
       </geometry>
     </collision>
    </link>
-   <joint name="d3_weld" type="fixed">
-    <parent link="v3"/>
-      <child link="d3"/>
+   <joint name="s3_weld" type="fixed">
+    <parent link="l3"/>
+      <child link="s3"/>
     <origin xyz="0.042 0 1.25" rpy="1.047197551196598 0 0" />
    </joint>
-  <link name="d4">
+  <link name="s4">
    	<inertial>
    		<mass value=".5" />
    		<origin xyz="0 0 .6" rpy="0 0 0"/>
@@ -209,13 +209,13 @@
       </geometry>
     </collision>
    </link>
-   <joint name="d4_weld" type="fixed">
-    <parent link="v3"/>
-      <child link="d4"/>
+   <joint name="s4_weld" type="fixed">
+    <parent link="l3"/>
+      <child link="s4"/>
     <origin xyz="0.042 0 1.25" rpy="2.094395102393196 0 0" />
    </joint>
 
-   <link name="v5">
+   <link name="l5">
    	<inertial>
    		<mass value=".5" />
    		<origin xyz="0 0 1.5" rpy="0 0 0"/>
@@ -235,12 +235,12 @@
       </geometry>
     </collision>
    </link>
-   <joint name="v5_weld" type="fixed">
+   <joint name="l5_weld" type="fixed">
     <parent link="world"/>
-      <child link="v5"/>
+      <child link="l5"/>
     <origin xyz=".5 .5 0" rpy="0 0 0" />
    </joint>
-   <link name="v6">
+   <link name="l6">
    	<inertial>
    		<mass value=".5" />
    		<origin xyz="0 0 1.5" rpy="0 0 0"/>
@@ -260,12 +260,12 @@
       </geometry>
     </collision>
    </link>
-   <joint name="v6_weld" type="fixed">
+   <joint name="l6_weld" type="fixed">
     <parent link="world"/>
-      <child link="v6"/>
+      <child link="l6"/>
     <origin xyz=".5 -.5 0" rpy="0 0 0" />
    </joint>
-  <link name="h1">
+  <link name="s5">
    	<inertial>
    		<mass value=".5" />
    		<origin xyz="0 0 0.6" rpy="0 0 0"/>
@@ -285,10 +285,36 @@
       </geometry>
     </collision>
    </link>
-   <joint name="h1_weld" type="fixed">
-    <parent link="v5"/>
-      <child link="h1"/>
+   <joint name="s5_weld" type="fixed">
+    <parent link="l5"/>
+      <child link="s5"/>
     <origin xyz="0.042 .1 1.25" rpy="1.570796326794897 0 0" />
    </joint>
-
+<!--
+   <link name="m1">
+   	<inertial>
+   		<mass value=".5" />
+   		<origin xyz="0 0 .775" rpy="0 0 0"/>
+		  <inertia ixx="10"  ixy="0"  ixz="0" iyy="10" iyz="0" izz="1" />
+   	</inertial>
+  	<visual>
+      <origin xyz="0 0 .775" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 1.55"/>
+      </geometry>
+      <material name="White"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 .775" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 1.55"/>
+      </geometry>
+    </collision>
+   </link>
+   <joint name="m1_weld" type="fixed">
+    <parent link="world"/>
+      <child link="m1"/>
+    <origin xyz="-.5 -.1 0" rpy="0 0 0" />
+   </joint>
+-->
 </robot>

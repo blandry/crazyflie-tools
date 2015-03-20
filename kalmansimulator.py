@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 import lcm
 import numpy as np
 import random

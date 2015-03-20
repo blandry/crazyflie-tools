@@ -1,4 +1,4 @@
-AUTOSAVE = false;
+AUTOSAVE = true;
 
 cf = Crazyflie();
 r = cf.manip;
