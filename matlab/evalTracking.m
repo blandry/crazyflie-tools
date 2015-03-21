@@ -9,6 +9,8 @@ tref = xtraj.getBreaks();
 
 col = 'r';
 
+figure(22)
+
 subplot(3,2,1)
 hold on
 plot(tref,xref(1,:),'b');
@@ -53,3 +55,14 @@ hold on
 plot(tref,xref(4,:),'b',tref,xref(5,:),'b');
 plot(t,x(4,:),col,t,x(5,:),col);
 title('roll and pitch vs time');
+
+figure(23)
+
+ureft = utraj.getBreaks();
+uref = utraj.eval(ureft);
+ut = crazyflie_input(:,7)';
+u = crazyflie_input(:,2:5)'+15;
+hold on
+plot(ureft,uref(4,:),'b');
+plot(ut,u(4,:),'r');
+

@@ -290,7 +290,7 @@
       <child link="s5"/>
     <origin xyz="0.042 .1 1.25" rpy="1.570796326794897 0 0" />
    </joint>
-<!--
+
    <link name="m1">
    	<inertial>
    		<mass value=".5" />
@@ -314,7 +314,7 @@
    <joint name="m1_weld" type="fixed">
     <parent link="world"/>
       <child link="m1"/>
-    <origin xyz="-.5 -.1 0" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
    </joint>
--->
+
 </robot>
