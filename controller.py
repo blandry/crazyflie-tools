@@ -48,6 +48,8 @@ class Controller():
 		Thread(target=self._controller_watchdog).start()
 
 		self._hover = False
+		self._reset_xhat_desired = False
+		self._xhat_desired = np.zeros([12,1])
 		Thread(target=self._hover_watchdog).start()
 
 		self._K = {'32bits': K32bits, 'omegasqu': Komegasqu, 'tilqr': Ktilqr}
@@ -81,8 +83,16 @@ class Controller():
 			thrust_input = (np.array(np.dot(self._K.get(self._control_input_type),np.array(xhat).transpose()))[0]).tolist()
 			control_input = thrust_input + [0.0, MODES.get(self._control_input_type,1)]
 
+		if self._reset_xhat_desired:
+			self._xhat_desired = np.array([xhat[0], xhat[1], xhat[2], 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
+			self._reset_xhat_desired = False
 		if self._hover:
-			thrust_input = (np.array(np.dot(self._K.get('tilqr'),np.array(xhat).transpose()))[0]).tolist()
+			xhat_error = np.array(xhat).transpose()-self._xhat_desired
+			thrust_input = (np.array(np.dot(self._K.get('tilqr'),xhat_error))[0]).tolist()
+			thrust_input[0] += 16.2950 - 15
+			thrust_input[1] += 16.2950 - 15
+			thrust_input[2] += 16.2950 - 15
+			thrust_input[3] += 16.2950 - 15
 			control_input = thrust_input + [0.0, MODES.get('omegasqu',2)]
 
 		if self._listen_to_extra_input:
@@ -144,4 +154,6 @@ class Controller():
 
 	def _hover_watchdog_update(self, channel, data):
 		msg = crazyflie_hover_commands_t.decode(data)
+		if not(self._hover) and msg.hover:
+			self._reset_xhat_desired = True
 		self._hover = msg.hover 

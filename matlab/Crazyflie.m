@@ -6,10 +6,9 @@ classdef Crazyflie
     Q = diag([50 50 75 1 1 25 .001 .001 .001 2.0 2.0 5.0]);
     R = eye(4);
     
-    tvQ = diag([1 1 1 1 1 1 1 1 1 2 2 5]);
+    tvQ = diag([1 1 1 10 10 10 1 1 1 10 10 10]);
+    tvQf = diag([1 1 1 10 10 10 1 1 1 10 10 10]);
     tvR = eye(4);
-    
-    tvQf = diag([200 200 200 2 2 2 .01 .01 .01 1 1 1]);
   end
   
   methods
