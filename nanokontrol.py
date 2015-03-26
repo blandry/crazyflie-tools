@@ -4,7 +4,7 @@ import time
 import pygame
 import pygame.midi
 import lcm
-from crazyflie_t import crazyflie_input_t, crazyflie_state_estimator_commands_t, crazyflie_controller_commands_t
+from crazyflie_t import crazyflie_input_t, crazyflie_state_estimator_commands_t, crazyflie_controller_commands_t, crazyflie_hover_commands_t
 
 # INPUT_TYPE = '32bits'
 # INPUT_MIN = 0
@@ -26,6 +26,8 @@ class Kon():
     def __init__(self):
         self._tvlqr_counting = False
         self._is_running = True
+        self._hover = False
+        self._last_hover_update = time.time()
 
         pygame.init()
         pygame.midi.init()
@@ -66,6 +68,7 @@ class Kon():
             midi_evs = pygame.midi.midis2events(midi_events, self.midi_in.device_id)
             for me in midi_evs:
                 self.sliders[me.data1] = me.data2
+                #print me.data1
 
     def forward_kon_to_lcm(self):
         self.read_input()        
@@ -109,6 +112,15 @@ class Kon():
             msg.is_running = False
             self.lc.publish('crazyflie_controller_commands', msg.encode())
             self._is_running = False
+
+        hover = self.sliders.get(28)
+        if hover==127 and (time.time()-self._last_hover_update)>.5:
+            self._hover = not(self._hover)
+            msg = crazyflie_hover_commands_t()
+            msg.hover = self._hover
+            self.lc.publish('crazyflie_hover_commands', msg.encode())
+            self._last_hover_update = time.time()
+
 
 def main():
     kon = Kon()

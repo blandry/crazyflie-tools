@@ -1,7 +1,7 @@
 import lcm
 import math
 import numpy as np
-from crazyflie_t import crazyflie_input_t, crazyflie_controller_commands_t
+from crazyflie_t import crazyflie_input_t, crazyflie_controller_commands_t, crazyflie_hover_commands_t
 from threading import Thread
 
 
@@ -27,6 +27,11 @@ Komegasqu = np.matrix([[0,0,0,0,PITCH_KP,YAW_KP,0,0,0,0,PITCH_RATE_KP,YAW_RATE_K
                        [0,0,0,0,-PITCH_KP,YAW_KP,0,0,0,0,-PITCH_RATE_KP,YAW_RATE_KP],
                        [0,0,0,-ROLL_KP,0,-YAW_KP,0,0,0,-ROLL_RATE_KP,0,-YAW_RATE_KP]])
 
+Ktilqr = np.matrix([[5.0000,-0.0000,-4.3301,0.0137,7.4915,2.5000,2.7635,-0.0025,-3.7928,0.0038,1.0343,2.2539],
+    				[0.0000,-5.0000,-4.3301,7.4915,0.0137,-2.5000,0.0025,-2.7635,-3.7928,1.0343,0.0038,-2.2539],
+   					[-5.0000,0.0000,-4.3301,-0.0137,-7.4915,2.5000,-2.7635,0.0025,-3.7928,-0.0038,-1.0343,2.2539],
+   					[-0.0000,5.0000,-4.3301,-7.4915,-0.0137,-2.5000,-0.0025,2.7635,-3.7928,-1.0343,-0.0038,-2.2539]])
+
 # Input mode in the Crazyflie
 MODES = {
 '32bits':       1,
@@ -42,7 +47,10 @@ class Controller():
 		self._is_running = True
 		Thread(target=self._controller_watchdog).start()
 
-		self._K = {'32bits': K32bits, 'omegasqu': Komegasqu}
+		self._hover = False
+		Thread(target=self._hover_watchdog).start()
+
+		self._K = {'32bits': K32bits, 'omegasqu': Komegasqu, 'tilqr': Ktilqr}
 		self._latest_control_input = [0.0, 0.0, 0.0, 0.0, 0.0, MODES.get(control_input_type,1)]
 		self._control_input_type = control_input_type
 
@@ -63,6 +71,7 @@ class Controller():
 			Thread(target=self._extra_input_thread).start()
 
 	def get_control_input(self, xhat=None):
+
 		if not self._is_running:
 			return [0.0, 0.0, 0.0, 0.0, 0.0, MODES.get(self._control_input_type,1)]
 
@@ -71,6 +80,10 @@ class Controller():
 		else:
 			thrust_input = (np.array(np.dot(self._K.get(self._control_input_type),np.array(xhat).transpose()))[0]).tolist()
 			control_input = thrust_input + [0.0, MODES.get(self._control_input_type,1)]
+
+		if self._hover:
+			thrust_input = (np.array(np.dot(self._K.get('tilqr'),np.array(xhat).transpose()))[0]).tolist()
+			control_input = thrust_input + [0.0, MODES.get('omegasqu',2)]
 
 		if self._listen_to_extra_input:
 			assert control_input[5] == self._extra_control_input[5], 'The extra input is not of the right type'
@@ -122,3 +135,13 @@ class Controller():
 	def _controller_watchdog_update(self, channel, data):
 		msg = crazyflie_controller_commands_t.decode(data)
 		self._is_running = msg.is_running
+
+	def _hover_watchdog(self):
+		_hover_lc = lcm.LCM()
+		_hover_lc.subscribe('crazyflie_hover_commands',self._hover_watchdog_update)
+		while True:
+			_hover_lc.handle()
+
+	def _hover_watchdog_update(self, channel, data):
+		msg = crazyflie_hover_commands_t.decode(data)
+		self._hover = msg.hover 

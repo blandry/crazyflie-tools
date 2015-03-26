@@ -23,11 +23,11 @@ ub = [1.6;.7;2];
 seeds = [...
          start';
          goal';
-%         [-.5 .25 1.25]; % middle of the first gate
-%         [0 -.25 1.25]; % middle of the second gate
-%         [.5 0 1]; % below of the third gate
-%         [-.25 0 1.25]; % between the first two gates
-%         [.25 0 1.25]; % below the last two gates
+         [-.5 .25 1.25]; % middle of the first gate
+         [0 -.25 1.25]; % middle of the second gate
+         [.5 0 1]; % below of the third gate
+         [-.25 0 1.25]; % between the first two gates
+         [.25 0 1.25]; % below the last two gates
          ]';
 n_regions = 7;
 

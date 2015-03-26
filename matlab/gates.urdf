@@ -291,30 +291,4 @@
     <origin xyz="0.042 .1 1.25" rpy="1.570796326794897 0 0" />
    </joint>
 
-   <link name="m1">
-   	<inertial>
-   		<mass value=".5" />
-   		<origin xyz="0 0 .775" rpy="0 0 0"/>
-		  <inertia ixx="10"  ixy="0"  ixz="0" iyy="10" iyz="0" izz="1" />
-   	</inertial>
-  	<visual>
-      <origin xyz="0 0 .775" rpy="0 0 0" />
-      <geometry>
-        <box size="0.042 0.042 1.55"/>
-      </geometry>
-      <material name="White"/>
-    </visual>
-    <collision>
-      <origin xyz="0 0 .775" rpy="0 0 0" />
-      <geometry>
-        <box size="0.042 0.042 1.55"/>
-      </geometry>
-    </collision>
-   </link>
-   <joint name="m1_weld" type="fixed">
-    <parent link="world"/>
-      <child link="m1"/>
-    <origin xyz="0 0 0" rpy="0 0 0" />
-   </joint>
-
 </robot>

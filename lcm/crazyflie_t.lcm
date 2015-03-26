@@ -48,6 +48,11 @@ struct crazyflie_controller_commands_t
   boolean is_running;
 }
 
+struct crazyflie_hover_commands_t
+{
+  boolean hover;
+}
+
 struct polytopes_t 
 {
   int32_t id;
