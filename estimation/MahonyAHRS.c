@@ -16,11 +16,8 @@
 #include <math.h>
 #include <Python.h>
 
-#define twoKpDef	(2.0f * 0.5f)	// 2 * proportional gain
-#define twoKiDef	(2.0f * 0.0f)	// 2 * integral gain
-
-volatile float twoKp = twoKpDef;											// 2 * proportional gain (Kp)
-volatile float twoKi = twoKiDef;											// 2 * integral gain (Ki)
+#define twoKp	(2.0f * 0.5f)	// 2 * proportional gain
+#define twoKi	(2.0f * 0.0f)	// 2 * integral gain
 
 float invSqrt(float x);
 
