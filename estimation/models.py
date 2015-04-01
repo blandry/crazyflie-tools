@@ -36,7 +36,7 @@ class DoubleIntegrator():
         vk = state[3:6].reshape(3,1)
         bfk = state[6:9].reshape(3,1)
 
-        Ck = array(rpy2rotmat(control_input[0:3])).T
+        Ck = rpy2rotmat(control_input[0:3]).T
         ftildak = 9.81*control_input[3:6].reshape(3,1)
 
         fhatk = ftildak - bfk

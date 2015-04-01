@@ -1,5 +1,6 @@
 
 import numpy as np
+from numpy import array, dot
 from math import atan2, asin, cos, sin
 
 
@@ -18,34 +19,34 @@ def quat2rpy(q):
 def rotx(theta):
     c = cos(theta)
     s = sin(theta)
-    M = np.matrix([[1,0,0],[0,c,-s],[0,s,c]])
+    M = array([[1,0,0],[0,c,-s],[0,s,c]])
     return M
 
 def roty(theta):
     c = cos(-theta)
     s = sin(-theta)
-    M = np.matrix([[c,0,-s],[0,1,0],[s,0,c]])
+    M = array([[c,0,-s],[0,1,0],[s,0,c]])
     return M
 
 def rotz(theta):
     c = cos(theta)
     s = sin(theta)
-    M = np.matrix([[c,-s,0],[s,c,0],[0,0,1]])
+    M = array([[c,-s,0],[s,c,0],[0,0,1]])
     return M
 
 def rpy2rotmat(rpy):
-    R = np.dot(rotz(rpy[2]),np.dot(roty(rpy[1]),rotx(rpy[0])))
+    R = dot(rotz(rpy[2]),dot(roty(rpy[1]),rotx(rpy[0])))
     return R
 
 def body2world(rpy, xyz):
     R = rpy2rotmat(rpy)
-    xyz_world = np.dot(R,np.array(xyz).transpose())
-    return (np.array(xyz_world)[0]).tolist()
+    xyz_world = dot(R,array(xyz))
+    return xyz_world.tolist()
 
 def world2body(rpy, xyz):
     R = rpy2rotmat(rpy)
-    xyz_body = np.dot(np.linalg.inv(R),np.array(xyz).transpose())
-    return (np.array(xyz_body)[0]).tolist()
+    xyz_body = dot(R.T,array(xyz))
+    return xyz_body.tolist()
 
 def angularvel2rpydot(rpy, omega):
 	p = rpy[1]
@@ -55,6 +56,6 @@ def angularvel2rpydot(rpy, omega):
 	sp = sin(p)
 	cp = cos(p)
 	tp = sp/cp
-	Phi = np.matrix([[cy/cp, sy/cp, 0],[-sy, cy, 0],[cy*tp, tp*sy, 1]])
-	rpydot = np.dot(Phi,np.array(omega).transpose())
-	return (np.array(rpydot)[0]).tolist()
+	Phi = array([[cy/cp, sy/cp, 0],[-sy, cy, 0],[cy*tp, tp*sy, 1]])
+	rpydot = dot(Phi,omega)
+	return rpydot.tolist()
