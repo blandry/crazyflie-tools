@@ -74,11 +74,11 @@ class Kon():
         self.read_input()        
         
         msg = crazyflie_input_t()
-        msg.input[0] = (self.sliders.get(2,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
-        msg.input[1] = (self.sliders.get(3,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
-        msg.input[2] = (self.sliders.get(4,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
-        msg.input[3] = (self.sliders.get(5,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
-        msg.offset = (self.sliders.get(7,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
+        msg.input[0] = (self.sliders.get(0,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
+        msg.input[1] = (self.sliders.get(1,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
+        msg.input[2] = (self.sliders.get(2,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
+        msg.input[3] = (self.sliders.get(3,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
+        msg.offset = (self.sliders.get(4,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
         msg.type = INPUT_TYPE
         if IS_EXTRA_INPUT:
             self.lc.publish('crazyflie_extra_input', msg.encode())
@@ -116,14 +116,14 @@ class Kon():
             self.lc.publish('crazyflie_controller_commands', msg.encode())
             self._is_running = True
 
-        stop_all = self.sliders.get(42)
+        stop_all = self.sliders.get(45)
         if stop_all==127:
             msg = crazyflie_controller_commands_t()
             msg.is_running = False
             self.lc.publish('crazyflie_controller_commands', msg.encode())
             self._is_running = False
 
-        hover = self.sliders.get(39)
+        hover = self.sliders.get(60)
         if hover==127 and (time.time()-self._last_hover_update)>.5:
             self._hover = not(self._hover)
             msg = crazyflie_hover_commands_t()
