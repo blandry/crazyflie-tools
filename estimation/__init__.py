@@ -8,14 +8,15 @@ from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_co
 from vicon_t import vicon_pos_t
 from ukf import UnscentedKalmanFilter
 from ekf import ExtendedKalmanFilter
-from models import DoubleIntegrator
+from models import DoubleIntegrator, Crazyflie2
 from transforms import angularvel2rpydot, body2world, quat2rpy, world2body
 
 
 class StateEstimator():
 
 	def __init__(self, listen_to_vicon=False, publish_to_lcm=False, 
-				 use_rpydot=False, use_ekf=False, use_ukf=False):
+				 use_rpydot=False, use_ekf=False, use_ukf=False,
+				 delay_comp=False):
 		
 		self._tvlqr_counting = False
 		self._last_time_update = time.time()
@@ -48,6 +49,11 @@ class StateEstimator():
 			Thread(target=self._vicon_listener).start()
 
 		self._last_input = [0.0, 0.0, 0.0, 0.0]
+
+		self._delay_comp = delay_comp
+		if delay_comp:
+			self._cf_model = Crazyflie2()
+			self._delay = 0.02 # delay in the control loop in seconds
 
 		self._use_ekf = use_ekf
 		self._use_ukf = use_ukf
@@ -152,6 +158,9 @@ class StateEstimator():
 					self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],
 					self._last_dxyz[0],self._last_dxyz[1],self._last_dxyz[2],
 					self._last_gyro[0],self._last_gyro[1],self._last_gyro[2]]
+
+		if self._delay_comp:
+			xhat = self._cf_model.simulate(xhat,self._last_input,self._delay)
 
 		if self._use_rpydot:
 			try:

@@ -125,7 +125,7 @@ class Crazyflie2():
     def simulate(self, x0, u0, tspan):
         """ simulates the input u0 as a zero-order hold starting at x0 """
 
-        dt = 0.010 # time-step size in ms
+        dt = 0.010 # time-step size in seconds
         nstep = int(tspan/dt)
         x = array(x0)
         for n in range(nstep):

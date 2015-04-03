@@ -14,3 +14,4 @@ from .polytopes_t import polytopes_t
 from .dxyz_compare_t import dxyz_compare_t
 from .kalman_args_t import kalman_args_t
 from .kalman_out_t import kalman_out_t
+from .vortex_sensor_t import vortex_sensor_t
