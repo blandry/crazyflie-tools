@@ -34,23 +34,31 @@ for i = 1 : length(x0_dat)
   InitialStates{1} = [ InitialStates{1} x0_dat{i}(1) ];
   InitialStates{2} = [ InitialStates{2} x0_dat{i}(2) ];
   InitialStates{3} = [ InitialStates{3} x0_dat{i}(3) ];
-  InitialStates{4} = [ InitialStates{4} 0 ];
-  InitialStates{5} = [ InitialStates{5} 0 ];
-  InitialStates{6} = [ InitialStates{6} 0 ];
-  InitialStates{7} = [ InitialStates{7} 0 ];
-  InitialStates{8} = [ InitialStates{8} 0 ];
-  InitialStates{9} = [ InitialStates{9} 0 ];
-  InitialStates{10} = [ InitialStates{10} 0 ];
-  InitialStates{11} = [ InitialStates{11} 0 ];
-  InitialStates{12} = [ InitialStates{12} 0 ];
+  InitialStates{4} = [ InitialStates{4} x0_dat{i}(4) ];
+  InitialStates{5} = [ InitialStates{5} x0_dat{i}(5) ];
+  InitialStates{6} = [ InitialStates{6} x0_dat{i}(6) ];
+%   InitialStates{7} = [ InitialStates{7} .6379 ];
+%   InitialStates{8} = [ InitialStates{8} -.1533 ];
+%   InitialStates{9} = [ InitialStates{9} .1521 ];
+%   InitialStates{10} = [ InitialStates{10} -.3525 ];
+%   InitialStates{11} = [ InitialStates{11} -.6599 ];
+%   InitialStates{12} = [ InitialStates{12} -1.171 ];
+   InitialStates{7} = [ InitialStates{7} 0 ];
+   InitialStates{8} = [ InitialStates{8} 0 ];
+   InitialStates{9} = [ InitialStates{9} 0 ];
+   InitialStates{10} = [ InitialStates{10} 0 ];
+   InitialStates{11} = [ InitialStates{11} 0 ];
+   InitialStates{12} = [ InitialStates{12} 0 ];
 end
 
 nlgr = idnlgrey(FileName, Order, Parameters, InitialStates, Ts); 
+%compare(z, nlgr);
+%return;
 
 % Regularization
 nlgr.Algorithm.Regularization.Lambda = 0.01;
 nlgr.Algorithm.Regularization.Nominal = 'model';
-RR = diag([.01 .01 .01 .01 .01 .01 0.01*ones(1,length(z.ExperimentName)*12)]);
+RR = diag([.01 .01 .01 .01 .01 .01 .01*ones(1,length(z.ExperimentName)*12)]);
 nlgr.Algorithm.Regularization.R = RR;
 
 setinit(nlgr, 'Fixed', {false false false false false false false false false false false false});
@@ -84,14 +92,14 @@ displayNlgr(nlgr.InitialStates);
 disp(' ------------- Parameters -------------');
 displayNlgr(nlgr.Parameters);
 
-x0_out = zeros(12,length(z.ExperimentName));
-for i = 1:12
-  x0_out(i,:) = nlgr.InitialStates(i).Value;
-end
-compare_options = compareOptions('InitialCondition',x0_out);
+% x0_out = zeros(12,length(z.ExperimentName));
+% for i = 1:12
+%   x0_out(i,:) = nlgr.InitialStates(i).Value;
+% end
+% compare_options = compareOptions('InitialCondition',x0_out);
 
 % Fitted model
-nlgr = idnlgrey(FileName, Order, Parameters, nlgr.InitialStates, Ts);
+nlgr = idnlgrey(FileName, Order, nlgr.Parameters, nlgr.InitialStates, Ts);
 % Make plots comparing simulations of fitted model with training data
 figure(5);
-compare(z, nlgr, compare_options);
+compare(z, nlgr);%, compare_options);

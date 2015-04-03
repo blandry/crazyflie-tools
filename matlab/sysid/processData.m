@@ -1,9 +1,14 @@
 % The time intervals to use
 % Use plotlog to identify those
 T = [
-12 12.5;%10.81 12.71;
-19.66 21.57;
-15.82 16.57;
+%10.81 12.71;
+%19.66 21.57;
+%15.82 16.57;
+53.66 54.45;
+17.95 18.25;%19.88;
+104 104.5;%102.3 107;
+25.63 27.9;
+41.42 43.27;
 ];
 
 for i=1:size(T,1)
@@ -11,8 +16,10 @@ for i=1:size(T,1)
   tf = T(i,2);
   rawdata = load([num2str(i) '.mat']);
 
-  pos = [rawdata.crazyflie_state_estimate(:,2:4),rawdata.crazyflie_state_estimate(:,11:13),rawdata.crazyflie_state_estimate(:,15)];
-  input = [rawdata.crazyflie_input(:,2:5)+repmat(rawdata.crazyflie_input(:,6),1,4),rawdata.crazyflie_input(:,7)];
+  %pos = [rawdata.crazyflie_state_estimate(:,2:4),rawdata.crazyflie_state_estimate(:,11:13),rawdata.crazyflie_state_estimate(:,15)];
+  pos = [rawdata.crazyflie_state_estimate(:,2:4),rawdata.crazyflie_state_estimate(:,5:7),rawdata.crazyflie_state_estimate(:,15)];
+  %input = [rawdata.crazyflie_input(:,2:5)+repmat(rawdata.crazyflie_input(:,6),1,4),rawdata.crazyflie_input(:,7)];
+  input = [rawdata.crazyflie_extra_input(:,2:5)+repmat(rawdata.crazyflie_extra_input(:,6),1,4),rawdata.crazyflie_extra_input(:,7)];
   t = rawdata.crazyflie_state_estimate(:,15);
   posdata = pos((t>t0)&(t<tf),1:6);
   
@@ -36,7 +43,7 @@ end
 % you can remove some experiments from the sysid here
 % ex: files = [1 3 4]
 %files = 1:size(T,1);
-files = [1];
+files = [2];
 
 d = cell(1,numel(files));
 for i=1:numel(files)
@@ -64,6 +71,9 @@ for i=1:numel(files)
   gyrooutputs = xdata.eval(t_sample);
   gyrooutputs = gyrooutputs(4:6,:);
 
+  %[b,a] = butter(1,0.2);
+  %gyrooutputs = filtfilt(b,a,gyrooutputs')';
+  
   outputs = [xyzoutputs;gyrooutputs];
   
   sysiddata = iddata(outputs',inputs',dt);

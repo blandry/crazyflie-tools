@@ -39,8 +39,25 @@ v.draw(0,double(x0));
 
 b = r.getBody(1);
 obstacles = cell(1, length(b.getCollisionGeometry()));
+centroids = cell(size(obstacles));
 for j = 1:length(b.getCollisionGeometry())
   obstacles{j} = b.getCollisionGeometry{j}.getPoints();
+  centroids{j} = mean(obstacles{j},2);
+end
+
+% inflating the obstacles
+inflated_obstacles = cell(size(obstacles));
+for j=1:numel(obstacles)
+  obs = obstacles{j};
+  inflated_obs = zeros(size(obs));
+  for k=1:size(obs,2)
+    v_center_to_point = obs(:,k)-centroids{j}; v_center_to_point = v_center_to_point/norm(v_center_to_point);
+    inflated_obs(:,k) = obs(:,k) + bot_radius*sign(v_center_to_point);
+    lcmgl.glColor3f(.8,.8,.2);
+    lcmgl.sphere(inflated_obs(:,k), 0.06, 20, 20);
+    lcmgl.switchBuffers();
+  end
+  inflated_obstacles{j} = inflated_obs;
 end
 
 if can_draw_lcm_polytopes
@@ -75,13 +92,13 @@ end
 
 % Automatically generate IRIS regions as necessary
 num_steps = 10;
-safe_regions = iris.util.auto_seed_regions(obstacles, lb, ub, seeds, n_regions, num_steps, @drawRegion);
+safe_regions = iris.util.auto_seed_regions(inflated_obstacles, lb, ub, seeds, n_regions, num_steps, @drawRegion);
 
 % Set up and solve the problem
 prob = MISOSTrajectoryProblem();
 prob.num_traj_segments = num_traj_segments;
 prob.traj_degree = traj_degree;
-prob.bot_radius = bot_radius;
+prob.bot_radius = 0;
 prob.dt = dt;
 
 % Add initial and final velocities and accelerations

@@ -21,3 +21,80 @@ successfully loaded model
 loading new robot with 2 links
 GLM: Warning: illum material ignored: illum 1
 successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+loading new robot with 2 links
+GLM: Warning: illum material ignored: illum 1
+successfully loaded model
+==== LCM Warning ===
+LCM detected that large packets are being received, but the kernel UDP
+receive buffer is very small.  The possibility of dropping packets due to
+insufficient buffer space is very high.
+
+For more information, visit:
+   http://lcm-proj.github.io/multicast_setup.html
+

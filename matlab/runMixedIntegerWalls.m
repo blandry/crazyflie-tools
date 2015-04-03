@@ -2,7 +2,7 @@ AUTOSAVE = true;
 
 cf = Crazyflie();
 r = cf.manip;
-bot_radius = 0;
+bot_radius = .09;
 
 terrain = RigidBodyFlatTerrain();
 terrain = terrain.setGeometryColor([.1 .1 .1]');
@@ -15,7 +15,7 @@ n_segments = 7;
 start = [-1.8;0;1.25];
 goal = [1.1;0;1.25];
 
-r = addRobotFromURDF(r, 'gates2.urdf');
+r = addRobotFromURDF(r, 'walls.urdf');
 
 lb = [-2.3;-.7;.2];
 ub = [1.6;.7;2];
@@ -23,10 +23,11 @@ ub = [1.6;.7;2];
 seeds = [...
          start';
          goal';
-         %[-.5 .25 1.25]; % middle of the first gate
-         %[0 -.25 1.25]; % middle of the second gate
-         %[.5 0 1]; % below of the third gate
-         %[.25 0 1.25]; % below the last two gates
+         [0 .3 1.25];
+         [-.25 0 1.25];
+         [.25 0 1.25];
+         [-.5 0 1.6];
+         [.5 0 .5];
          ]';
 n_regions = 7;
 
