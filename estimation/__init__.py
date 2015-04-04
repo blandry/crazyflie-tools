@@ -3,6 +3,7 @@ import time
 import lcm
 import numpy as np
 import MahonyAHRS
+from Queue import Queue
 from threading import Thread
 from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t, dxyz_compare_t, kalman_args_t
 from vicon_t import vicon_pos_t
@@ -48,12 +49,11 @@ class StateEstimator():
 		if listen_to_vicon:
 			Thread(target=self._vicon_listener).start()
 
-		self._last_input = [0.0, 0.0, 0.0, 0.0]
-
+		self._last_inputs = list()
 		self._delay_comp = delay_comp
 		if delay_comp:
 			self._cf_model = Crazyflie2()
-			self._delay = 0.02 # delay in the control loop in seconds
+			self._delay = 0.042 # delay in the control loop in seconds
 
 		self._use_ekf = use_ekf
 		self._use_ukf = use_ukf
@@ -88,7 +88,24 @@ class StateEstimator():
 		self._last_acc = [ax,ay,az]
 
 	def add_input(self, input_sent):
-		self._last_input = input_sent
+		self._last_inputs.append([input_sent,time.time()])
+		if len(self._last_inputs)>100:
+			self._last_inputs = self._last_inputs[20:]
+
+	def get_last_inputs(self, tspan):
+		now = time.time()
+		start_time = now-tspan
+		control_inputs = []
+		i = -1
+		while now>start_time:
+			if abs(i)>len(self._last_inputs):
+				control_inputs.insert(0,[[0.0, 0.0, 0.0, 0.0],[now-start_time]])
+				break
+			[last_input,last_input_time] = self._last_inputs[i]
+			dt = now-last_input_time
+			control_inputs.insert(0,[last_input,dt])
+			now = last_input_time
+		return control_inputs
 
 	def _vicon_listener(self):
 		_vicon_listener_lc = lcm.LCM()
@@ -160,7 +177,9 @@ class StateEstimator():
 					self._last_gyro[0],self._last_gyro[1],self._last_gyro[2]]
 
 		if self._delay_comp:
-			xhat = self._cf_model.simulate(xhat,self._last_input,self._delay)
+			control_inputs = self.get_last_inputs(self._delay)
+			for ci in control_inputs:
+				xhat = self._cf_model.simulate(xhat,ci[0],ci[1])
 
 		if self._use_rpydot:
 			try:
