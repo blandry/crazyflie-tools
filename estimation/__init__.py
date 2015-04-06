@@ -39,6 +39,7 @@ class StateEstimator():
 		self._valid_vicon = False
 		self._vicon_alpha_pos = .8
 		self._vicon_alpha_vel = .7
+		self._vicon_init_yaw = None
 
 		self._use_rpydot = use_rpydot
 		self._publish_to_lcm = publish_to_lcm
@@ -82,6 +83,8 @@ class StateEstimator():
 		self.integralFB = new_quat[4:]
 		try:
 			self._last_rpy = quat2rpy(self.q)
+			if self._vicon_init_yaw:
+				self._last_rpy[2] += self._vicon_init_yaw
 		except ValueError:
 			pass
 		self._last_gyro = [gx,gy,gz]
@@ -121,6 +124,9 @@ class StateEstimator():
 			#self._last_dxyz = [0.0, 0.0, 0.0]
 			return
 		
+		if not self._vicon_init_yaw:
+			self._vicon_init_yaw = msg.q[5]
+
 		xyz = list(msg.q)[0:3]
 		dxyz = [0.0, 0.0, 0.0]
 		if self._valid_vicon:
