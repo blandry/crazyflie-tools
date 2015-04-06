@@ -1,20 +1,24 @@
 % The time intervals to use
 % Use plotlog to identify those
 T = [
-%10.81 12.71;
-%19.66 21.57;
-%15.82 16.57;
-53.66 54.45;
-17.95 18.25;%19.88;
-104 104.5;%102.3 107;
-25.63 27.9;
-41.42 43.27;
+1 53.66 54.45;
+2 17.95 18.5;
+2 18.5 19.88;
+3 102.3 103;
+3 103 104;
+3 104 105;
+3 105 106;
+3 106 107;
+4 25.63 26.5;
+4 26.5 27.9;
+5 41.42 42.5;
+5 42.5 43.27;
 ];
 
 for i=1:size(T,1)
-  t0 = T(i,1);
-  tf = T(i,2);
-  rawdata = load([num2str(i) '.mat']);
+  t0 = T(i,2);
+  tf = T(i,3);
+  rawdata = load([num2str(T(i,1)) '.mat']);
 
   %pos = [rawdata.crazyflie_state_estimate(:,2:4),rawdata.crazyflie_state_estimate(:,11:13),rawdata.crazyflie_state_estimate(:,15)];
   pos = [rawdata.crazyflie_state_estimate(:,2:4),rawdata.crazyflie_state_estimate(:,5:7),rawdata.crazyflie_state_estimate(:,15)];
@@ -36,14 +40,15 @@ for i=1:size(T,1)
 
   inputdata = [input1,input2,input3,input4];
   
+  posdata(:,4:6) = unwrap(posdata(:,4:6));
+  
   data = [t,inputdata,posdata];
   save(['clean' num2str(i) '.mat'],'data');
 end
 
 % you can remove some experiments from the sysid here
 % ex: files = [1 3 4]
-%files = 1:size(T,1);
-files = [2];
+files = 1:size(T,1);
 
 d = cell(1,numel(files));
 for i=1:numel(files)

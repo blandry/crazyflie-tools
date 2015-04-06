@@ -37,18 +37,12 @@ for i = 1 : length(x0_dat)
   InitialStates{4} = [ InitialStates{4} x0_dat{i}(4) ];
   InitialStates{5} = [ InitialStates{5} x0_dat{i}(5) ];
   InitialStates{6} = [ InitialStates{6} x0_dat{i}(6) ];
-%   InitialStates{7} = [ InitialStates{7} .6379 ];
-%   InitialStates{8} = [ InitialStates{8} -.1533 ];
-%   InitialStates{9} = [ InitialStates{9} .1521 ];
-%   InitialStates{10} = [ InitialStates{10} -.3525 ];
-%   InitialStates{11} = [ InitialStates{11} -.6599 ];
-%   InitialStates{12} = [ InitialStates{12} -1.171 ];
-   InitialStates{7} = [ InitialStates{7} 0 ];
-   InitialStates{8} = [ InitialStates{8} 0 ];
-   InitialStates{9} = [ InitialStates{9} 0 ];
-   InitialStates{10} = [ InitialStates{10} 0 ];
-   InitialStates{11} = [ InitialStates{11} 0 ];
-   InitialStates{12} = [ InitialStates{12} 0 ];
+  InitialStates{7} = [ InitialStates{7} 0 ];
+  InitialStates{8} = [ InitialStates{8} 0 ];
+  InitialStates{9} = [ InitialStates{9} 0 ];
+  InitialStates{10} = [ InitialStates{10} 0 ];
+  InitialStates{11} = [ InitialStates{11} 0 ];
+  InitialStates{12} = [ InitialStates{12} 0 ];
 end
 
 nlgr = idnlgrey(FileName, Order, Parameters, InitialStates, Ts); 
@@ -85,7 +79,7 @@ nlgr.InitialStates(11).Name = 'pitchd';
 nlgr.InitialStates(12).Name = 'yawd';
 
 % Grey box model sysid with pem
-nlgr = pem(z,nlgr,'display','Full','MaxIter',100);
+nlgr = pem(z,nlgr,'display','Full','MaxIter',60);
 
 disp(' ------------- Initial States -------------');
 displayNlgr(nlgr.InitialStates);
@@ -102,4 +96,4 @@ displayNlgr(nlgr.Parameters);
 nlgr = idnlgrey(FileName, Order, nlgr.Parameters, nlgr.InitialStates, Ts);
 % Make plots comparing simulations of fitted model with training data
 figure(5);
-compare(z, nlgr);%, compare_options);
+compare(z, nlgr);
