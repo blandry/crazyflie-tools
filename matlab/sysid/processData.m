@@ -1,18 +1,15 @@
 % The time intervals to use
 % Use plotlog to identify those
 T = [
-1 53.66 54.45;
-2 17.95 18.5;
-2 18.5 19.88;
-3 102.3 103;
-3 103 104;
-3 104 105;
-3 105 106;
-3 106 107;
-4 25.63 26.5;
-4 26.5 27.9;
-5 41.42 42.5;
-5 42.5 43.27;
+1 9.637 10.7;
+2 10.43 10.86;
+3 11.04 11.46;
+4 15.27 15.85;
+5 9.253 10.54;
+6 10.97 11.39;
+7 20.13 20.97;
+8 9.981 10.47;
+9 9.109 9.883;
 ];
 
 for i=1:size(T,1)
@@ -48,7 +45,8 @@ end
 
 % you can remove some experiments from the sysid here
 % ex: files = [1 3 4]
-files = 1:size(T,1);
+%files = 1:size(T,1);
+files = [1 2 3 4 5 6 7];
 
 d = cell(1,numel(files));
 for i=1:numel(files)
@@ -90,8 +88,8 @@ end
 z = merge(d{:});
 
 % Shift data to take into account delay
-% (delay is 42ms)
-delay = round(0.042/dt);
+% (delay is 28ms)
+delay = round(0.028/dt);
 z = nkshift(z,delay*ones(1,4));
 
 save('sysidData.mat','z');

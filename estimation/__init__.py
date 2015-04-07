@@ -50,11 +50,13 @@ class StateEstimator():
 		if listen_to_vicon:
 			Thread(target=self._vicon_listener).start()
 
-		self._last_inputs = list()
+		self._input_log = list()
+		self._last_input = [0.0, 0.0, 0.0, 0.0]
+		self._last_input_time = time.time()
 		self._delay_comp = delay_comp
 		if delay_comp:
 			self._cf_model = Crazyflie2()
-			self._delay = 0.042 # delay in the control loop in seconds
+			self._delay = 0.028 # delay in the control loop in seconds
 
 		self._use_ekf = use_ekf
 		self._use_ukf = use_ukf
@@ -91,23 +93,24 @@ class StateEstimator():
 		self._last_acc = [ax,ay,az]
 
 	def add_input(self, input_sent):
-		self._last_inputs.append([input_sent,time.time()])
-		if len(self._last_inputs)>100:
-			self._last_inputs = self._last_inputs[20:]
+		last_dt = time.time()-self._last_input_time
+		self._input_log.append([self._last_input,last_dt])		
+		if len(self._input_log)>20:
+			self._input_log = self._input_log[10:]
+		self._last_input = input_sent
+		self._last_input_time = time.time()
 
 	def get_last_inputs(self, tspan):
-		now = time.time()
-		start_time = now-tspan
-		control_inputs = []
-		i = -1
-		while now>start_time:
-			if abs(i)>len(self._last_inputs):
-				control_inputs.insert(0,[[0.0, 0.0, 0.0, 0.0],[now-start_time]])
+		control_inputs = list()
+		log = list(self._input_log)
+		dt = 0.0
+		for entry in log:
+			dt += entry[1]
+			if dt>tspan:
 				break
-			[last_input,last_input_time] = self._last_inputs[i]
-			dt = now-last_input_time
-			control_inputs.insert(0,[last_input,dt])
-			now = last_input_time
+			control_inputs.insert(0,entry)
+		if len(control_inputs)<1:
+			control_inputs = [[[0.0, 0.0, 0.0, 0.0],tspan]]
 		return control_inputs
 
 	def _vicon_listener(self):

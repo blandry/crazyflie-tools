@@ -79,11 +79,11 @@ class Crazyflie2():
     def __init__(self):
         self.Ixx = 2.15e-006
         self.Iyy = 2.15e-006
-        self.Izz = 4.29e-006
-        self.Ixy = 2.37e-007
+        self.Izz = 7.6362e-06
+        self.Ixy = 1.5571e-06
 
-        self.Kf = 0.005022393588278
-        self.Km = 1.400164274777642e-06
+        self.Kf = 0.004921945716505
+        self.Km = 7.420870656321504e-07
 
         self.u_min = [0.0, 0.0, 0.0, 0.0]
         self.u_max = [40.87, 40.87, 40.87, 40.87]

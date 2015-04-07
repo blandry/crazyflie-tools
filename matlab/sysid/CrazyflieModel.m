@@ -1,4 +1,4 @@
-function [xdot,y] = CrazyflieModel(t,x,uopen,Ixx,Iyy,Izz,Ixy,Kf,Km,varargin)
+function [xdot,y] = CrazyflieModel(t,x,uopen,Ixxyy,Izz,Ixy,Kf,Km,varargin)
 % States:
 % x
 % y
@@ -22,8 +22,8 @@ m = 0.03337; % mass in Kg
 L = 0.046; % Distance from rotor to COM (in m)
 
 % Unknown parameters
-Ixx = 2.15e-006*Ixx;
-Iyy = 2.15e-006*Iyy;
+Ixx = 2.15e-006*Ixxyy;
+Iyy = 2.15e-006*Ixxyy;
 Izz = 4.29e-006*Izz;
 Ixy = 2.37e-007*Ixy;
 Kf = 0.005022393588278*Kf;
@@ -63,7 +63,15 @@ K = [0,0,0,0,PITCH_KP,YAW_KP,0,0,0,0,PITCH_RATE_KP,YAW_RATE_KP;
      0,0,0,-ROLL_KP,0,-YAW_KP,0,0,0,-ROLL_RATE_KP,0,-YAW_RATE_KP];
 ufb = K*[x(1:9);pqr];
 
+% K = [5.0000 0.0000 -4.3301 0.0137 7.4915 2.5000 2.7635 -0.0025 -3.7928 0.0038 1.0343 2.2539;
+%      0.0000 -5.0000 -4.3301 7.4915 0.0137 -2.5000 0.0025 -2.7635 -3.7928 1.0343 0.0038 -2.2539;
+%      -5.0000 -0.0000 -4.3301 -0.0137 -7.4915 2.5000 -2.7635 0.0025 -3.7928 -0.0038 -1.0343 2.2539;
+%      -0.0000 5.0000 -4.3301 -7.4915 -0.0137 -2.5000 -0.0025 2.7635 -3.7928 -1.0343 -0.0038 -2.2539];
+% ufb = K*x + repmat(16.2950-15,4,1);
+
 u = uopen' + ufb;
+
+u = min(u,40.87);
 
 % These are omega^2
 w1 = u(1);
