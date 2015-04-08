@@ -49,15 +49,18 @@ end
 inflated_obstacles = cell(size(obstacles));
 for j=1:numel(obstacles)
   obs = obstacles{j};
-  inflated_obs = zeros(size(obs));
-  for k=1:size(obs,2)
-    v_center_to_point = obs(:,k)-centroids{j}; v_center_to_point = v_center_to_point/norm(v_center_to_point);
-    inflated_obs(:,k) = obs(:,k) + bot_radius*sign(v_center_to_point);
-    lcmgl.glColor3f(.8,.8,.2);
-    lcmgl.sphere(inflated_obs(:,k), 0.06, 20, 20);
-    lcmgl.switchBuffers();
+  Pobs = Polyhedron(obs');
+  Aobs = Pobs.A;
+  bobs = Pobs.b;
+  Anorms = sqrt(sum(Aobs.^2,2));
+  Aobs = Aobs./repmat(Anorms,1,3);
+  bobs = bobs./Anorms;
+  bobs = bobs + bot_radius;
+  Pobs_inf = Polyhedron(Aobs,bobs);
+  if (max(max(abs(obs)))<500 && Pobs_inf.volume>0.0001)
+    drawLCMPolytope(Pobs_inf.A,Pobs_inf.b,j+100,true)
   end
-  inflated_obstacles{j} = inflated_obs;
+  inflated_obstacles{j} = Pobs_inf.V';
 end
 
 if can_draw_lcm_polytopes
