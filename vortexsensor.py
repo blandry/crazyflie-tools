@@ -22,9 +22,9 @@ if __name__=="__main__":
     d = u3.U3()
     lc = lcm.LCM()
 
-    CALIBRATION_TIME = 2 #calibration time in seconds
+    CALIBRATION_TIME = 5 #calibration time in seconds
 
-    for i in range(1,2*CALIBRATION_TIME):
+    for i in range(1,1000*CALIBRATION_TIME):
         ain0bits, = d.getFeedback(u3.AIN(0)) # Read from raw bits from AIN0
         ain0Value = d.binaryToCalibratedAnalogVoltage(ain0bits, isLowVoltage=False, channelNumber=0)
         ain0offset = (ain0offset*(i-1) + ain0Value) / i
@@ -47,26 +47,27 @@ if __name__=="__main__":
             
             airspeed_pressure0 = (ain0Value - ain0offset)*VOLTS_TO_PASCAL
             raw_pressure0      = airspeed_pressure0
-            _raw_airspeed0     = math.sqrt( abs(airspeed_pressure0) * _ratio)
+            if airspeed_pressure0 < 0:
+                _raw_airspeed0 = -math.sqrt( -airspeed_pressure0 * _ratio)
+            else:
+                _raw_airspeed0 = math.sqrt( airspeed_pressure0 * _ratio)
             _airspeed0         = 0.7 * _airspeed0  +  0.3 * _raw_airspeed0;
-            msg.sensor1 = _airspeed0 #smoothing turned off for now
+            msg.sensor1 = _raw_airspeed0 #smoothing turned off for now
 
             ain2bits, = d.getFeedback(u3.AIN(2)) # Read from raw bits from AIN2
             ain2Value = d.binaryToCalibratedAnalogVoltage(ain2bits, isLowVoltage=False, channelNumber=2)
             
             airspeed_pressure2 = (ain2Value - ain2offset)*VOLTS_TO_PASCAL
             raw_pressure2      = airspeed_pressure2
-            _raw_airspeed2     = math.sqrt( abs(airspeed_pressure2) * _ratio)
+            if airspeed_pressure2 < 0:
+                _raw_airspeed2 = -math.sqrt( -airspeed_pressure2 * _ratio)
+            else:
+                _raw_airspeed2 = math.sqrt( airspeed_pressure2 * _ratio)
             _airspeed2         = 0.7 * _airspeed2  +  0.3 * _raw_airspeed2;
-            msg.sensor2 = _airspeed2 #smoothing turned off for now
+            msg.sensor2 = _raw_airspeed2 #smoothing turned off for now
 
 
             lc.publish('vortex_sensor',msg.encode())
-
-
-
-
-
 
 
     except KeyboardInterrupt:
