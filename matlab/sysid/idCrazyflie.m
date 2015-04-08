@@ -5,7 +5,8 @@ load sysidData.mat
 FileName = 'CrazyflieModel';
 Order = [6, 4, 12]; % [Number of observed outputs, Number of inputs, Number of states] 
 
-Parameters = [1 1 1 1 1];
+%Parameters = [1 1 1 1 1];
+Parameters = [66.71 26.59 0.00 1.00 46.37];
 
 Ts = 0; % Continuous time model
 
@@ -46,8 +47,8 @@ for i = 1 : length(x0_dat)
 end
 
 nlgr = idnlgrey(FileName, Order, Parameters, InitialStates, Ts); 
-%compare(z, nlgr);
-%return;
+compare(z, nlgr);
+return;
 
 % Regularization
 nlgr.Algorithm.Regularization.Lambda = 0.01;
@@ -67,7 +68,7 @@ nlgr.Parameters(5).Minimum = 0;
 nlgr.Parameters(1).Maximum = 100;
 nlgr.Parameters(2).Maximum = 100; 
 nlgr.Parameters(3).Maximum = 100;
-nlgr.Parameters(4).Maximum = 100; 
+nlgr.Parameters(4).Maximum = 100;
 nlgr.Parameters(5).Maximum = 100;
 %nlgr.Parameters(6).Maximum = 100;
 

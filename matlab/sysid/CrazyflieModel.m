@@ -71,7 +71,7 @@ ufb = K*[x(1:9);pqr];
 
 u = uopen' + ufb;
 
-u = min(u,40.87);
+%u = min(u,40.87);
 
 % These are omega^2
 w1 = u(1);

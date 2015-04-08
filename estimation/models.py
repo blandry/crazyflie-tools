@@ -77,13 +77,13 @@ class DoubleIntegrator():
 class Crazyflie2():
 
     def __init__(self):
-        self.Ixx = 2.15e-006
-        self.Iyy = 2.15e-006
-        self.Izz = 7.6362e-06
-        self.Ixy = 1.5571e-06
+        self.Ixx = 1.434265000000000e-04
+        self.Iyy = 1.434265000000000e-04
+        self.Izz = 1.140711000000000e-04
+        self.Ixy = 0
 
-        self.Kf = 0.004921945716505
-        self.Km = 7.420870656321504e-07
+        self.Kf = 0.005022393588278
+        self.Km = 6.492561742143926e-05
 
         self.u_min = [0.0, 0.0, 0.0, 0.0]
         self.u_max = [40.87, 40.87, 40.87, 40.87]
@@ -125,7 +125,7 @@ class Crazyflie2():
     def simulate(self, x0, u0, tspan):
         """ simulates the input u0 as a zero-order hold starting at x0 """
 
-        dt = 0.010 # time-step size in seconds
+        dt = 0.005 # time-step size in seconds
         nstep = int(tspan/dt)
         x = array(x0)
         for n in range(nstep):
