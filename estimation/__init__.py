@@ -3,19 +3,21 @@ import time
 import lcm
 import numpy as np
 import MahonyAHRS
+from Queue import Queue
 from threading import Thread
 from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t, dxyz_compare_t, kalman_args_t
 from vicon_t import vicon_pos_t
 from ukf import UnscentedKalmanFilter
 from ekf import ExtendedKalmanFilter
-from models import DoubleIntegrator
+from models import DoubleIntegrator, Crazyflie2
 from transforms import angularvel2rpydot, body2world, quat2rpy, world2body
 
 
 class StateEstimator():
 
 	def __init__(self, listen_to_vicon=False, publish_to_lcm=False, 
-				 use_rpydot=False, use_ekf=False, use_ukf=False):
+				 use_rpydot=False, use_ekf=False, use_ukf=False,
+				 delay_comp=False):
 		
 		self._tvlqr_counting = False
 		self._last_time_update = time.time()
@@ -37,6 +39,7 @@ class StateEstimator():
 		self._valid_vicon = False
 		self._vicon_alpha_pos = .8
 		self._vicon_alpha_vel = .7
+		self._vicon_init_yaw = None
 
 		self._use_rpydot = use_rpydot
 		self._publish_to_lcm = publish_to_lcm
@@ -47,7 +50,13 @@ class StateEstimator():
 		if listen_to_vicon:
 			Thread(target=self._vicon_listener).start()
 
+		self._input_log = list()
 		self._last_input = [0.0, 0.0, 0.0, 0.0]
+		self._last_input_time = time.time()
+		self._delay_comp = delay_comp
+		if delay_comp:
+			self._cf_model = Crazyflie2()
+			self._delay = 0.028 # delay in the control loop in seconds
 
 		self._use_ekf = use_ekf
 		self._use_ukf = use_ukf
@@ -76,13 +85,33 @@ class StateEstimator():
 		self.integralFB = new_quat[4:]
 		try:
 			self._last_rpy = quat2rpy(self.q)
+			if self._vicon_init_yaw:
+				self._last_rpy[2] += self._vicon_init_yaw
 		except ValueError:
 			pass
 		self._last_gyro = [gx,gy,gz]
 		self._last_acc = [ax,ay,az]
 
 	def add_input(self, input_sent):
+		last_dt = time.time()-self._last_input_time
+		self._input_log.append([self._last_input,last_dt])		
+		if len(self._input_log)>20:
+			self._input_log = self._input_log[10:]
 		self._last_input = input_sent
+		self._last_input_time = time.time()
+
+	def get_last_inputs(self, tspan):
+		control_inputs = list()
+		log = list(self._input_log)
+		dt = 0.0
+		for entry in log:
+			dt += entry[1]
+			if dt>tspan:
+				break
+			control_inputs.insert(0,entry)
+		if len(control_inputs)<1:
+			control_inputs = [[[0.0, 0.0, 0.0, 0.0],tspan]]
+		return control_inputs
 
 	def _vicon_listener(self):
 		_vicon_listener_lc = lcm.LCM()
@@ -98,6 +127,9 @@ class StateEstimator():
 			#self._last_dxyz = [0.0, 0.0, 0.0]
 			return
 		
+		if not self._vicon_init_yaw:
+			self._vicon_init_yaw = msg.q[5]
+
 		xyz = list(msg.q)[0:3]
 		dxyz = [0.0, 0.0, 0.0]
 		if self._valid_vicon:
@@ -152,6 +184,11 @@ class StateEstimator():
 					self._last_rpy[0],self._last_rpy[1],self._last_rpy[2],
 					self._last_dxyz[0],self._last_dxyz[1],self._last_dxyz[2],
 					self._last_gyro[0],self._last_gyro[1],self._last_gyro[2]]
+
+		if self._delay_comp:
+			control_inputs = self.get_last_inputs(self._delay)
+			for ci in control_inputs:
+				xhat = self._cf_model.simulate(xhat,ci[0],ci[1])
 
 		if self._use_rpydot:
 			try:

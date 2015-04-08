@@ -17,14 +17,14 @@ function xd = sodynamics(t,q,qd,u)
     g = 9.81;
     m = 0.03337;
     L = 0.046; % Distance from rotor to COM (in m)
-    kf = 0.004522393588278;
 
     % Unknown parameters
-    Ixx = 2.15*1E-4;
-    Iyy = 2.15*1E-4;
-    Izz = 4.29*1E-4;
-    Ixy = 2.37*1E-5;
-    km = 1E-7;
+Ixx = 2.15e-006;
+Iyy = 2.15e-006;
+Izz = 4.29e-006;
+Ixy = 2.37e-007;
+kf = 0.005022393588278;
+km = -1.400164274777642e-06;
     
     I =  [Ixx Ixy 0; Ixy Iyy 0; 0 0 Izz];
     invI = inv(I);

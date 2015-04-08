@@ -4,16 +4,17 @@
 ############################ CLIENT OPTIONS ##########################################
 TXRX_FREQUENCY = 1000.0
 STARTUP_NANOKONTROL = True
-USE_DRAKE_CONTROLLER = True
+USE_DRAKE_CONTROLLER = False
 
-SE_LISTEN_TO_VICON = True
+SE_LISTEN_TO_VICON = False
 SE_PUBLISH_TO_LCM = True
-SE_USE_RPYDOT = True
-SE_USE_EKF = True
+SE_USE_RPYDOT = False
+SE_USE_EKF = False
 SE_USE_UKF = False
+SE_DELAY_COMP = True
 
 CTRL_INPUT_TYPE = 'omegasqu'
-CTRL_LISTEN_TO_LCM = True
+CTRL_LISTEN_TO_LCM = False
 CTRL_LISTEN_TO_EXTRA_INPUT = True
 CTRL_PUBLISH_TO_LCM = False
 ######################################################################################
@@ -67,7 +68,8 @@ class SimpleClient:
                                                publish_to_lcm=SE_PUBLISH_TO_LCM,
                                                use_rpydot=SE_USE_RPYDOT,
                                                use_ekf=SE_USE_EKF,
-                                               use_ukf=SE_USE_UKF)
+                                               use_ukf=SE_USE_UKF,
+                                               delay_comp=SE_DELAY_COMP)
 
         # controller
         self._control_input_updated_flag = Event()

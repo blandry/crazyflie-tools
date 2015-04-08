@@ -3,7 +3,7 @@ classdef Crazyflie
     manip;
     nominal_input;
 
-    Q = diag([50 50 75 1 1 25 .001 .001 .001 2.0 2.0 5.0]);
+    Q = diag([10 10 10 1 1 1 1 1 1 1 1 1]);
     R = eye(4);
     
     tvQ = diag([1 1 1 10 10 10 1 1 1 10 10 10]);

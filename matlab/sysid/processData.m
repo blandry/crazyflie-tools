@@ -1,18 +1,28 @@
 % The time intervals to use
 % Use plotlog to identify those
 T = [
-12 12.5;%10.81 12.71;
-19.66 21.57;
-15.82 16.57;
+1 9.637 10.1;
+1 10.1 10.7;
+2 10.43 10.86;
+3 11.04 11.46;
+4 15.27 15.85;
+5 9.253 10.54;
+6 10.97 11.39;
+7 20.13 20.5;
+7 20.5 20.97;
+8 9.981 10.47;
+9 9.109 9.883;
 ];
 
 for i=1:size(T,1)
-  t0 = T(i,1);
-  tf = T(i,2);
-  rawdata = load([num2str(i) '.mat']);
+  t0 = T(i,2);
+  tf = T(i,3);
+  rawdata = load([num2str(T(i,1)) '.mat']);
 
-  pos = [rawdata.crazyflie_state_estimate(:,2:4),rawdata.crazyflie_state_estimate(:,11:13),rawdata.crazyflie_state_estimate(:,15)];
-  input = [rawdata.crazyflie_input(:,2:5)+repmat(rawdata.crazyflie_input(:,6),1,4),rawdata.crazyflie_input(:,7)];
+  %pos = [rawdata.crazyflie_state_estimate(:,2:4),rawdata.crazyflie_state_estimate(:,11:13),rawdata.crazyflie_state_estimate(:,15)];
+  pos = [rawdata.crazyflie_state_estimate(:,2:4),rawdata.crazyflie_state_estimate(:,5:7),rawdata.crazyflie_state_estimate(:,15)];
+  %input = [rawdata.crazyflie_input(:,2:5)+repmat(rawdata.crazyflie_input(:,6),1,4),rawdata.crazyflie_input(:,7)];
+  input = [rawdata.crazyflie_extra_input(:,2:5)+repmat(rawdata.crazyflie_extra_input(:,6),1,4),rawdata.crazyflie_extra_input(:,7)];
   t = rawdata.crazyflie_state_estimate(:,15);
   posdata = pos((t>t0)&(t<tf),1:6);
   
@@ -29,6 +39,8 @@ for i=1:size(T,1)
 
   inputdata = [input1,input2,input3,input4];
   
+  posdata(:,4:6) = unwrap(posdata(:,4:6));
+  
   data = [t,inputdata,posdata];
   save(['clean' num2str(i) '.mat'],'data');
 end
@@ -36,7 +48,8 @@ end
 % you can remove some experiments from the sysid here
 % ex: files = [1 3 4]
 %files = 1:size(T,1);
-files = [1];
+%files = [1 2 4 6 7 8];
+files = [3 5 9 10 11];
 
 d = cell(1,numel(files));
 for i=1:numel(files)
@@ -64,6 +77,9 @@ for i=1:numel(files)
   gyrooutputs = xdata.eval(t_sample);
   gyrooutputs = gyrooutputs(4:6,:);
 
+  %[b,a] = butter(1,0.2);
+  %gyrooutputs = filtfilt(b,a,gyrooutputs')';
+  
   outputs = [xyzoutputs;gyrooutputs];
   
   sysiddata = iddata(outputs',inputs',dt);
@@ -75,8 +91,8 @@ end
 z = merge(d{:});
 
 % Shift data to take into account delay
-% (delay is 42ms)
-delay = round(0.042/dt);
+% (delay is 28ms)
+delay = round(0.028/dt);
 z = nkshift(z,delay*ones(1,4));
 
 save('sysidData.mat','z');

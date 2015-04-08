@@ -91,3 +91,8 @@ struct kalman_out_t
   double smooth_xyz_noblackout[3];
   double smooth_dxyz_noblackout[3];
 }
+
+struct vortex_sensor_t
+{
+  double sensor1;
+}
