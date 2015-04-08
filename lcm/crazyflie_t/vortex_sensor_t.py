@@ -10,10 +10,11 @@ except ImportError:
 import struct
 
 class vortex_sensor_t(object):
-    __slots__ = ["sensor1"]
+    __slots__ = ["sensor1", "sensor2"]
 
     def __init__(self):
         self.sensor1 = 0.0
+        self.sensor2 = 0.0
 
     def encode(self):
         buf = BytesIO()
@@ -22,7 +23,7 @@ class vortex_sensor_t(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">d", self.sensor1))
+        buf.write(struct.pack(">dd", self.sensor1, self.sensor2))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -36,14 +37,14 @@ class vortex_sensor_t(object):
 
     def _decode_one(buf):
         self = vortex_sensor_t()
-        self.sensor1 = struct.unpack(">d", buf.read(8))[0]
+        self.sensor1, self.sensor2 = struct.unpack(">dd", buf.read(16))
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if vortex_sensor_t in parents: return 0
-        tmphash = (0x154b3a526e452642) & 0xffffffffffffffff
+        tmphash = (0x958922b0ff5fe793) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

@@ -95,4 +95,5 @@ struct kalman_out_t
 struct vortex_sensor_t
 {
   double sensor1;
+  double sensor2;
 }
