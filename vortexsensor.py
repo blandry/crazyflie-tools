@@ -12,9 +12,15 @@ if __name__=="__main__":
 
         while True:
             ain0bits, = d.getFeedback(u3.AIN(0)) # Read from raw bits from AIN0
-            ainValue = d.binaryToCalibratedAnalogVoltage(ain0bits, isLowVoltage=False, channelNumber=0)
+            ain0Value = d.binaryToCalibratedAnalogVoltage(ain0bits, isLowVoltage=False, channelNumber=0)
             msg = vortex_sensor_t()
-            msg.sensor1 = ainValue
+            msg.sensor1 = ain0Value
+            lc.publish('vortex_sensor',msg.encode())
+
+            ain2bits, = d.getFeedback(u3.AIN(2)) # Read from raw bits from AIN2
+            ain2Value = d.binaryToCalibratedAnalogVoltage(ain2bits, isLowVoltage=False, channelNumber=2)
+            msg = vortex_sensor_t()
+            msg.sensor2 = ain2Value
             lc.publish('vortex_sensor',msg.encode())
 
     except KeyboardInterrupt:
