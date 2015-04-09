@@ -22,9 +22,10 @@ if __name__=="__main__":
     d = u3.U3()
     lc = lcm.LCM()
 
-    CALIBRATION_TIME = 5 #calibration time in seconds
+    CALIBRATION_TIME = 1 # desired calibration time in seconds
+    SENSOR_FREQUENCY = 500 # in seconds
 
-    for i in range(1,1000*CALIBRATION_TIME):
+    for i in range(1,SENSOR_FREQUENCY*CALIBRATION_TIME):
         ain0bits, = d.getFeedback(u3.AIN(0)) # Read from raw bits from AIN0
         ain0Value = d.binaryToCalibratedAnalogVoltage(ain0bits, isLowVoltage=False, channelNumber=0)
         ain0offset = (ain0offset*(i-1) + ain0Value) / i
