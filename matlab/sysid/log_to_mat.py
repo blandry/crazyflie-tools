@@ -267,6 +267,10 @@ statusMsg = ""
 startTime = 0
 
 for e in log:
+
+    # MATLAB can't handle hyphens, this fixes that
+    e.channel = e.channel.replace('-','_')
+    
     if msgCount == 0:
         startTime = e.timestamp
 
