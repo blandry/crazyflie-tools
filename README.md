@@ -73,8 +73,7 @@ in the directory you want your log files.  This will produce a file that contain
 
 Running the visualizer
 ======================
-After running ``make -j``
-
+After running ``make -j`` in the drake-distro/director folder:
 
 ```
 drake-distro/build/bin/ddConsoleApp -m crazyflieviewer
