@@ -11,6 +11,7 @@ class VortexSensor():
   def __init__(self):
     self.lookingforvortex = False
     self.start = time.time()
+    self.sensordistance = 0.58 # 58 cm measured between sensors
 
   def my_handler(self, channel, data):
     msg = vortex_sensor_t.decode(data)
@@ -32,7 +33,7 @@ class VortexSensor():
       print("She's at the rear now!")
       delay = time.time() - self.start
       print("That took " + str(delay) + " seconds!")
-      speed = 0.58 / delay
+      speed = self.sensordistance / delay
       print("Estimated vortex speed is " + str(speed) + " meters / sec!")
       self.lookingforvortex = False
 
