@@ -37,7 +37,7 @@ Main Usage
     vicon/bin/vicon_lcm_client objectname
 ```
 
-* run the craziflie client
+* run the crazyflie client
 ```
     ./simpleclient
 ```
