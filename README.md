@@ -70,3 +70,19 @@ in the directory you want your log files.  This will produce a file that contain
 ```
     $ python log_to_mat.py -f -l lcmtypesmodule,anotherlcmtypemodule lcmlogfile
 ```
+
+Running the visualizer
+======================
+```
+drake-distro/build/bin/ddConsoleApp -m crazyflieviewer
+```
+you can play a log back
+```
+lcm-logplayer -s .5 lcmlog-2015-04-02.00
+```
+and visualize it in matlab 
+```
+addpath_crazyflie
+cf=Crazyflie()
+cf.visualizeStateEstimates()
+```
