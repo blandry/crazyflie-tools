@@ -160,11 +160,16 @@ classdef Crazyflie
     end
     
     function visualizeStateEstimates(obj)
+
+      
       v = obj.manip.constructVisualizer();
       state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
       state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,v.getInputFrame,[eye(6),zeros(6)],zeros(6,1)));
       v = v.inInputFrame(state_estimator_frame);
       runLCM(v,[]);
+      
+      
+      
     end
 
   end
