@@ -5,8 +5,11 @@ load sysidData.mat
 FileName = 'CrazyflieModel';
 Order = [6, 4, 12]; % [Number of observed outputs, Number of inputs, Number of states] 
 
-%Parameters = [1 1 1 1 1];
-Parameters = [66.71 26.59 0.00 1.00 46.37];
+%Parameters = [1 1 1 1];
+%Parameters = [66.71 26.59 0.00 1.00 46.37];
+%Parameters = [6.85 2.13 1.71 3.72];
+%Parameters = [6.10 2.85 0.00 4.59];
+Parameters = [11.14 7.54 0.00 13.27];
 
 Ts = 0; % Continuous time model
 
@@ -53,7 +56,7 @@ return;
 % Regularization
 nlgr.Algorithm.Regularization.Lambda = 0.01;
 nlgr.Algorithm.Regularization.Nominal = 'model';
-RR = diag([.01 .01 .01 .01 .01 .01*ones(1,length(z.ExperimentName)*12)]);
+RR = diag([10 10 .1 .01 .01*ones(1,length(z.ExperimentName)*12)]);
 nlgr.Algorithm.Regularization.R = RR;
 
 setinit(nlgr, 'Fixed', {false false false false false false false false false false false false});
@@ -63,13 +66,13 @@ nlgr.Parameters(1).Minimum = 0;
 nlgr.Parameters(2).Minimum = 0; 
 nlgr.Parameters(3).Minimum = 0;
 nlgr.Parameters(4).Minimum = 0; 
-nlgr.Parameters(5).Minimum = 0;
+%nlgr.Parameters(5).Minimum = 0;
 %nlgr.Parameters(6).Minimum = 0;
 nlgr.Parameters(1).Maximum = 100;
 nlgr.Parameters(2).Maximum = 100; 
 nlgr.Parameters(3).Maximum = 100;
 nlgr.Parameters(4).Maximum = 100;
-nlgr.Parameters(5).Maximum = 100;
+%nlgr.Parameters(5).Maximum = 100;
 %nlgr.Parameters(6).Maximum = 100;
 
 nlgr.InitialStates(1).Name = 'x';

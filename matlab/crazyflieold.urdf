@@ -22,7 +22,7 @@
     <inertial>
       <mass value="0.03337"/>
       <origin xyz="0 0 0"/>
-      <inertia ixx="2.395100000000000e-05" ixy="0" ixz="0" iyy="2.395100000000000e-05" iyz="0" izz="3.234660000000000e-05"/>
+      <inertia ixx="2.15e-006" ixy="2.37e-007" ixz="0" iyy="2.15e-006" iyz="0" izz="4.29e-006"/>    
     </inertial>
     <visual>
       <origin rpy="1.570796326794897 0 -2.356194490192345" xyz="0 0 -.01"/>
@@ -40,28 +40,28 @@
   </link>
 
   <force_element name="prop1">
-    <propellor lower_limit="2.8" upper_limit="40.87" scale_factor_thrust="0.005022393588278" scale_factor_moment="-1.858017992629931e-05" visual_geometry="false">
+    <propellor lower_limit="2.8" upper_limit="40.87" scale_factor_thrust="0.005022393588278" scale_factor_moment="-1.400164274777642e-06" visual_geometry="false">
       <parent link="base_link"/>
       <origin xyz="0.046 0 0"/>
       <axis xyz="0 0 1"/>
     </propellor>
   </force_element>
   <force_element name="prop2">
-    <propellor lower_limit="2.8" upper_limit="40.87" scale_factor_thrust="0.005022393588278" scale_factor_moment="1.858017992629931e-05" visual_geometry="false">
+    <propellor lower_limit="2.8" upper_limit="40.87" scale_factor_thrust="0.005022393588278" scale_factor_moment="1.400164274777642e-06" visual_geometry="false">
       <parent link="base_link"/>
       <origin xyz="0 -0.046 0"/>
       <axis xyz="0 0 1"/>
     </propellor>
   </force_element>
   <force_element name="prop3">
-    <propellor lower_limit="2.8" upper_limit="40.87" scale_factor_thrust="0.005022393588278" scale_factor_moment="-1.858017992629931e-05" visual_geometry="false">
+    <propellor lower_limit="2.8" upper_limit="40.87" scale_factor_thrust="0.005022393588278" scale_factor_moment="-1.400164274777642e-06" visual_geometry="false">
       <parent link="base_link"/>
       <origin xyz="-0.046 0 0"/>
       <axis xyz="0 0 1"/>
     </propellor>
   </force_element>
   <force_element name="prop4">
-    <propellor lower_limit="2.8" upper_limit="40.87" scale_factor_thrust="0.005022393588278" scale_factor_moment="1.858017992629931e-05" visual_geometry="false">
+    <propellor lower_limit="2.8" upper_limit="40.87" scale_factor_thrust="0.005022393588278" scale_factor_moment="1.400164274777642e-06" visual_geometry="false">
       <parent link="base_link"/>
       <origin xyz="0 0.046 0"/>
       <axis xyz="0 0 1"/>

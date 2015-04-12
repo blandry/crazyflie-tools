@@ -3,8 +3,17 @@ classdef Crazyflie
     manip;
     nominal_input;
 
+    % crazyflieold
+    % Q = diag([50 50 75 1 1 25 .001 .001 .001 2.0 2.0 5.0]);
+    % R = eye(4);
+    
     Q = diag([10 10 10 1 1 1 1 1 1 1 1 1]);
     R = eye(4);
+    
+    % crazyflieold
+    % tvQ = diag([1 1 1 10 10 10 1 1 1 10 10 10]);
+    % tvQf = diag([1 1 1 10 10 10 1 1 1 10 10 10]);
+    % tvR = eye(4);
     
     tvQ = diag([1 1 1 10 10 10 1 1 1 10 10 10]);
     tvQf = diag([1 1 1 10 10 10 1 1 1 10 10 10]);
@@ -16,6 +25,7 @@ classdef Crazyflie
     function obj = Crazyflie()
       options.floating = true;
       obj.manip = RigidBodyManipulator('crazyflie.urdf',options);
+      
       obj.nominal_input = .25*norm(getMass(obj.manip)*obj.manip.gravity)./ ...
           [obj.manip.force{1}.scale_factor_thrust obj.manip.force{2}.scale_factor_thrust ...
           obj.manip.force{3}.scale_factor_thrust obj.manip.force{4}.scale_factor_thrust]';
