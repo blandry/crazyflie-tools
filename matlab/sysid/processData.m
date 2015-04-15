@@ -1,17 +1,26 @@
 % The time intervals to use
 % Use plotlog to identify those
 T = [
-1 9.637 10.1;
-1 10.1 10.7;
-2 10.43 10.86;
-3 11.04 11.46;
-4 15.27 15.85;
-5 9.253 10.54;
-6 10.97 11.39;
-7 20.13 20.5;
-7 20.5 20.97;
-8 9.981 10.47;
-9 9.109 9.883;
+% 1 9.637 10.1;
+% 1 10.1 10.7;
+% 2 10.43 10.86;
+% 3 11.04 11.46;
+% 4 15.27 15.85;
+% 5 9.253 10.54;
+% 6 10.97 11.39;
+% 7 20.13 20.5;
+% 7 20.5 20.97;
+% 8 9.981 10.47;
+% 9 9.109 9.883;
+1 16.08 16.81;
+2 14.73 15.52;
+3 12.01 12.95;
+4 11.23 12.21;
+5 14.48 14.95;
+6 16.17 16.71;
+7 11.73 12.12;
+8 17.19 17.72;
+9 12.94 14.32;
 ];
 
 for i=1:size(T,1)
@@ -47,9 +56,9 @@ end
 
 % you can remove some experiments from the sysid here
 % ex: files = [1 3 4]
-%files = 1:size(T,1);
-%files = [1 2 4 6 7 8];
-files = [3 5 9 10 11];
+files = 1:size(T,1);
+%files = [1 2 3 4 5 7 9 10 11];
+%files = [6 8];
 
 d = cell(1,numel(files));
 for i=1:numel(files)
@@ -70,21 +79,20 @@ for i=1:numel(files)
 
   inputs = udata.eval(t_sample);
   
-  xyzoutputs = xdata.eval(t_sample);
-  xyzoutputs = xyzoutputs(1:3,:);
-  
+  %xyzoutputs = xdata.eval(t_sample);
+  %xyzoutputs = xyzoutputs(1:3,:);
   % you can shift the gyro w.r.t vicon here
-  gyrooutputs = xdata.eval(t_sample);
-  gyrooutputs = gyrooutputs(4:6,:);
-
+  %gyrooutputs = xdata.eval(t_sample);
+  %gyrooutputs = gyrooutputs(4:6,:);
   %[b,a] = butter(1,0.2);
   %gyrooutputs = filtfilt(b,a,gyrooutputs')';
-  
-  outputs = [xyzoutputs;gyrooutputs];
+  %outputs = [xyzoutputs;gyrooutputs];
+  outputs = xdata.eval(t_sample);
   
   sysiddata = iddata(outputs',inputs',dt);
-  set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'x','y','z','gyrox','gyroy','gyroz'});
-  
+  %set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'x','y','z','gyrox','gyroy','gyroz'});
+  set(sysiddata,'InputName',{'thrust1','thrust2','thrust3','thrust4'},'OutputName',{'x','y','z','roll','pitch','yaw'});
+
   d{i} = sysiddata;
 end
 

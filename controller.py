@@ -11,7 +11,7 @@ YAW_KP = 0
 ROLL_RATE_KP = 70*180/math.pi
 PITCH_RATE_KP = 70*180/math.pi
 YAW_RATE_KP = 50*180/math.pi
-K32bits = np.matrix([[0,0,0,0,PITCH_KP,YAW_KP,0,0,0,0,PITCH_RATE_KP,YAW_RATE_KP],
+K32bits = np.array([[0,0,0,0,PITCH_KP,YAW_KP,0,0,0,0,PITCH_RATE_KP,YAW_RATE_KP],
                     [0,0,0,ROLL_KP,0,-YAW_KP,0,0,0,ROLL_RATE_KP,0,-YAW_RATE_KP],
                     [0,0,0,0,-PITCH_KP,YAW_KP,0,0,0,0,-PITCH_RATE_KP,YAW_RATE_KP],
                     [0,0,0,-ROLL_KP,0,-YAW_KP,0,0,0,-ROLL_RATE_KP,0,-YAW_RATE_KP]])
@@ -22,15 +22,20 @@ YAW_KP = 0
 ROLL_RATE_KP = .8
 PITCH_RATE_KP = .8
 YAW_RATE_KP = .6
-Komegasqu = np.matrix([[0,0,0,0,PITCH_KP,YAW_KP,0,0,0,0,PITCH_RATE_KP,YAW_RATE_KP],
+Komegasqu = np.array([[0,0,0,0,PITCH_KP,YAW_KP,0,0,0,0,PITCH_RATE_KP,YAW_RATE_KP],
                        [0,0,0,ROLL_KP,0,-YAW_KP,0,0,0,ROLL_RATE_KP,0,-YAW_RATE_KP],
                        [0,0,0,0,-PITCH_KP,YAW_KP,0,0,0,0,-PITCH_RATE_KP,YAW_RATE_KP],
                        [0,0,0,-ROLL_KP,0,-YAW_KP,0,0,0,-ROLL_RATE_KP,0,-YAW_RATE_KP]])
 
-Ktilqr = np.matrix([[5.0000,-0.0000,-4.3301,0.0137,7.4915,2.5000,2.7635,-0.0025,-3.7928,0.0038,1.0343,2.2539],
-    				[0.0000,-5.0000,-4.3301,7.4915,0.0137,-2.5000,0.0025,-2.7635,-3.7928,1.0343,0.0038,-2.2539],
-   					[-5.0000,0.0000,-4.3301,-0.0137,-7.4915,2.5000,-2.7635,0.0025,-3.7928,-0.0038,-1.0343,2.2539],
-   					[-0.0000,5.0000,-4.3301,-7.4915,-0.0137,-2.5000,-0.0025,2.7635,-3.7928,-1.0343,-0.0038,-2.2539]])
+# Ktilqr = np.array([[5.0000,-0.0000,-4.3301,0.0137,7.4915,2.5000,2.7635,-0.0025,-3.7928,0.0038,1.0343,2.2539],
+#     				[0.0000,-5.0000,-4.3301,7.4915,0.0137,-2.5000,0.0025,-2.7635,-3.7928,1.0343,0.0038,-2.2539],
+#    				[-5.0000,0.0000,-4.3301,-0.0137,-7.4915,2.5000,-2.7635,0.0025,-3.7928,-0.0038,-1.0343,2.2539],
+#    				[-0.0000,5.0000,-4.3301,-7.4915,-0.0137,-2.5000,-0.0025,2.7635,-3.7928,-1.0343,-0.0038,-2.2539]])
+
+Ktilqr = np.array([[ 3.1623,   -0.0000,  -15.8114,    0.0000,    6.3078,    2.2361,    2.0167,   -0.0000,   -7.2476,   -0.0000,    1.0742,    1.7878],
+				  [-0.0000,   -3.1623,  -15.8114,    6.3078,   -0.0000,   -2.2361,   -0.0000,   -2.0167,   -7.2476,    1.0742,   -0.0000,   -1.7878],
+				  [-3.1623,   -0.0000,  -15.8114,    0.0000,   -6.3078,    2.2361,   -2.0167,   -0.0000,   -7.2476,    0.0000,   -1.0742,    1.7878],
+				  [ 0.0000,    3.1623,  -15.8114,   -6.3078,    0.0000,   -2.2361,    0.0000,    2.0167,   -7.2476,   -1.0742,    0.0000,   -1.7878]])
 
 # Input mode in the Crazyflie
 MODES = {
@@ -43,6 +48,8 @@ class Controller():
 	
 	def __init__(self, control_input_type='32bits', listen_to_lcm=False, control_input_updated_flag=None,
 				 listen_to_extra_input=False, publish_to_lcm=False):
+
+		self._go_to_start = True
 
 		self._is_running = True
 		Thread(target=self._controller_watchdog).start()
@@ -80,15 +87,19 @@ class Controller():
 		if self._listen_to_lcm or not xhat:
 			control_input = list(self._latest_control_input) # note how we create a NEW list
 		else:
-			thrust_input = (np.array(np.dot(self._K.get(self._control_input_type),np.array(xhat).transpose()))[0]).tolist()
+			thrust_input = np.dot(self._K.get(self._control_input_type),np.array(xhat)).tolist()
 			control_input = thrust_input + [0.0, MODES.get(self._control_input_type,1)]
 
 		if self._reset_xhat_desired:
-			self._xhat_desired = np.array([xhat[0], xhat[1], xhat[2], 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
+			if self._go_to_start:
+				self._xhat_desired = np.array([-1.8, 0, 1.25, 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
+				self._go_to_start = False
+			else:
+				self._xhat_desired = np.array([xhat[0], xhat[1], xhat[2], 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
 			self._reset_xhat_desired = False
 		if self._hover:
 			xhat_error = np.array(xhat).transpose()-self._xhat_desired
-			thrust_input = (np.array(np.dot(self._K.get('tilqr'),xhat_error))[0]).tolist()
+			thrust_input = np.dot(self._K.get('tilqr'),xhat_error).tolist()
 			thrust_input[0] += 16.2950 - 15
 			thrust_input[1] += 16.2950 - 15
 			thrust_input[2] += 16.2950 - 15

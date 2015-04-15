@@ -77,13 +77,13 @@ class DoubleIntegrator():
 class Crazyflie2():
 
     def __init__(self):
-        self.Ixx = 1.434265000000000e-04
-        self.Iyy = 1.434265000000000e-04
-        self.Izz = 1.140711000000000e-04
+        self.Ixx = 2.395100000000000e-05
+        self.Iyy = 2.395100000000000e-05
+        self.Izz = 3.234660000000000e-05
         self.Ixy = 0
 
         self.Kf = 0.005022393588278
-        self.Km = 6.492561742143926e-05
+        self.Km = 1.858017992629931e-05
 
         self.u_min = [0.0, 0.0, 0.0, 0.0]
         self.u_max = [40.87, 40.87, 40.87, 40.87]

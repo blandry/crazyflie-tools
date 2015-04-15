@@ -4,17 +4,17 @@
 ############################ CLIENT OPTIONS ##########################################
 TXRX_FREQUENCY = 1000.0
 STARTUP_NANOKONTROL = True
-USE_DRAKE_CONTROLLER = False
+USE_DRAKE_CONTROLLER = True
 
-SE_LISTEN_TO_VICON = False
+SE_LISTEN_TO_VICON = True
 SE_PUBLISH_TO_LCM = True
-SE_USE_RPYDOT = False
-SE_USE_EKF = False
+SE_USE_RPYDOT = True
+SE_USE_EKF = True
 SE_USE_UKF = False
-SE_DELAY_COMP = True
+SE_DELAY_COMP = False
 
 CTRL_INPUT_TYPE = 'omegasqu'
-CTRL_LISTEN_TO_LCM = False
+CTRL_LISTEN_TO_LCM = True
 CTRL_LISTEN_TO_EXTRA_INPUT = True
 CTRL_PUBLISH_TO_LCM = False
 ######################################################################################
@@ -127,8 +127,8 @@ class SimpleClient:
             self._control_input_updated_flag.clear()
             xhat = self._state_estimator.get_xhat()
             if self._use_drake_controller:
-                # wait for Drake to give us the control input...
-                self._control_input_updated_flag.wait(0.01)
+                # wait for Drake to give us the control input
+                self._control_input_updated_flag.wait(0.005)
 
             control_input = self._controller.get_control_input(xhat=xhat)
             control_input_pk.data = struct.pack('<5fi',*control_input)

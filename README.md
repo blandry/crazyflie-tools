@@ -37,7 +37,7 @@ Main Usage
     vicon/bin/vicon_lcm_client objectname
 ```
 
-* run the craziflie client
+* run the crazyflie client
 ```
     ./simpleclient
 ```
@@ -73,6 +73,8 @@ in the directory you want your log files.  This will produce a file that contain
 
 Running the visualizer
 ======================
+After running ``make -j`` in the drake-distro/director folder:
+
 ```
 drake-distro/build/bin/ddConsoleApp -m crazyflieviewer
 ```
