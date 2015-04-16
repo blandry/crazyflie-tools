@@ -12,7 +12,7 @@
      <color rgba="1 0 0"/>
    </material>
 
-   <link name="body">
+   <link name="CannonBody">
    	<inertial>
    		<mass value=".5" />
    		<origin xyz="0 0 0" rpy="0 0 0"/>
