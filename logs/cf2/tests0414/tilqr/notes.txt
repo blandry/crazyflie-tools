@@ -1,0 +1,6 @@
+TILQR in Drake with EKF,
+
+stabilizing [0 0 1.25] to make plots of error vs time.
+
+    Q = diag([20 20 1000 1 1 500 .001 .001 .001 1 1 5]);
+    R = eye(4);
