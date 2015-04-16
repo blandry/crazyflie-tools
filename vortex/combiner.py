@@ -55,3 +55,31 @@ if __name__=="__main__":
     exit(0)
 
   lc.unsubscribe(subscription)
+
+
+
+
+
+#   class Combiner
+
+#   __init__:
+#     self.fullstate = 12 by 1
+
+#   cfhandler(self,channel,data):
+#     self.fullstate[0:5] = data
+
+#   cannonhandler():
+#     same thing ecet
+#     self.fullstate[6:]
+
+# main():
+#   lc 
+#   combiner = combiner()
+#   subscribe('c',combioner.handler1)
+#   subscribe('canon',combinerhandler2)
+#   while True:
+#     lc.handle()
+#     msg = newmsg
+#     msg.data = combiner.fullstate
+#     lc.publish(msg.encode()
+#     
