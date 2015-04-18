@@ -1,6 +1,6 @@
 options.floating=true;
 r=RigidBodyManipulator('crazyflie.urdf',options); 
-r=r.addRobotFromURDF('cannon.urdf', [], [], options);
+r=r.addRobotFromURDF('quadrotor.urdf', [], [], options);
 v = r.constructVisualizer();
 
 state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder_OnlySix,'x');
