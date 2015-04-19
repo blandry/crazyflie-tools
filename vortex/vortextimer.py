@@ -1,6 +1,5 @@
 #!/usr/bin/env python2
 
-import u3
 import lcm
 import math
 from crazyflie_t import vortex_sensor_t
@@ -12,6 +11,8 @@ class VortexSensor():
     self.lookingforvortex = False
     self.start = time.time()
     self.sensordistance = 0.58 # 58 cm measured between sensors
+    self.waittime = 4 # seconds to wait before giving up looking for vortex ring at rear sensor
+    self.threshold = 5 # threshold for pitot sensor, in m/s
 
   def my_handler(self, channel, data):
     msg = vortex_sensor_t.decode(data)
@@ -24,20 +25,22 @@ class VortexSensor():
     #print("")
 
     # Sensor 2 is up front
-    if msg.sensor2 > 5 and not self.lookingforvortex:
+    if msg.sensor2 > self.threshold and not self.lookingforvortex:
       print("She's a beauty!  Vortex at the front sensor!")
       self.start = time.time()
       self.lookingforvortex = True
 
-    if msg.sensor1 > 5 and self.lookingforvortex:
-      print("She's at the rear now!")
-      delay = time.time() - self.start
-      print("That took " + str(delay) + " seconds!")
-      speed = self.sensordistance / delay
-      print("Estimated vortex speed is " + str(speed) + " meters / sec!")
-      self.lookingforvortex = False
-
-
+    if self.lookingforvortex:
+      delay = time.time() - self.start      
+      if delay > self.waittime:
+        self.lookingforvortex = False
+      elif msg.sensor1 > self.threshold:
+        print("She's at the rear now!")
+        delay = time.time() - self.start
+        print("That took " + str(delay) + " seconds!")
+        speed = self.sensordistance / delay
+        print("Estimated vortex speed is " + str(speed) + " meters / sec!")
+        self.lookingforvortex = False
 
 if __name__=="__main__":
 

@@ -1,0 +1,30 @@
+<robot name="cannon">
+   <material name="Brown">
+     <color rgba="83./255. 53./255. 10./255."/>
+   </material>
+   <material name="White">
+     <color rgba="1 1 1"/>
+   </material>
+   <material name="Grey">
+     <color rgba=".3 .3 .3"/>
+   </material>
+   <material name="Red">
+     <color rgba="1 0 0"/>
+   </material>
+
+   <link name="CannonBody">
+   	<inertial>
+   		<mass value=".5" />
+   		<origin xyz="0 0 0" rpy="0 0 0"/>
+		  <inertia ixx="10"  ixy="0"  ixz="0" iyy="10" iyz="0" izz="10" />
+   	</inertial>
+  	<visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size=".5 .5 .5"/>
+      </geometry>
+      <material name="White"/>
+    </visual>
+   </link>
+
+</robot>
