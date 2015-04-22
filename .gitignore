@@ -55,3 +55,6 @@ target/
 
 # OSX
 .DS_Store
+
+# Drake viewer out
+matlab/drake_viewer.out
