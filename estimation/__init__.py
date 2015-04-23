@@ -5,7 +5,7 @@ import numpy as np
 import MahonyAHRS
 from Queue import Queue
 from threading import Thread
-from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t, dxyz_compare_t, kalman_args_t
+from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t, dxyz_compare_t, kalman_args_t, crazyflie_hover_commands_t
 from vicon_t import vicon_pos_t
 from ukf import UnscentedKalmanFilter
 from ekf import ExtendedKalmanFilter
@@ -202,12 +202,23 @@ class StateEstimator():
 			msg.t = self.get_time()
 			self._xhat_lc.publish("crazyflie_state_estimate", msg.encode())
 
+		# if 1.1-xhat[0] <= 0.01:
+		# 	msg = crazyflie_hover_commands_t()
+		# 	msg.hover = True
+		# 	self._xhat_lc.publish('crazyflie_hover_commands',msg.encode())
+
 		return xhat
 
 	def get_time(self):
 		if self._tvlqr_counting:
 			self._current_dt += (time.time()-self._last_time_update)
 		self._last_time_update = time.time()
+
+		# if self._current_dt >= 4.375-.75:
+		# 	msg = crazyflie_hover_commands_t()
+		# 	msg.hover = True
+		# 	self._xhat_lc.publish('crazyflie_hover_commands',msg.encode())
+
 		return self._current_dt
 
 	def _estimator_watchdog(self):

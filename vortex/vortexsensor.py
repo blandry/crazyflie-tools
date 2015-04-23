@@ -6,7 +6,6 @@ import math
 from crazyflie_t import vortex_sensor_t
 
 
-
 if __name__=="__main__":
 
     VOLTS_TO_PASCAL = 819 # Source: ardupilot AP_Airspeed_analog.cpp
