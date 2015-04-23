@@ -1,0 +1,1 @@
+- log 00 was on MBP, just blowing on front sensor and then rear sensor
