@@ -34,12 +34,15 @@ class VortexSensor():
       delay = time.time() - self.start      
       if delay > self.waittime:
         self.lookingforvortex = False
+        print("Gave up looking for that one...")
       elif msg.sensor1 > self.threshold:
         print("She's at the rear now!")
         delay = time.time() - self.start
         print("That took " + str(delay) + " seconds!")
         speed = self.sensordistance / delay
         print("Estimated vortex speed is " + str(speed) + " meters / sec!")
+        msg.velocity = speed
+        lc.publish('vortex_sensor',msg.encode())
         self.lookingforvortex = False
 
 if __name__=="__main__":
