@@ -21,7 +21,7 @@ if __name__=="__main__":
     d = u3.U3()
     lc = lcm.LCM()
 
-    CALIBRATION_TIME = 1 # desired calibration time in seconds
+    CALIBRATION_TIME = 5 # desired calibration time in seconds
     SENSOR_FREQUENCY = 500 # in seconds
 
     for i in range(1,SENSOR_FREQUENCY*CALIBRATION_TIME):
