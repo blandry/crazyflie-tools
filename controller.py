@@ -31,6 +31,16 @@ Ktilqr = np.array([[ 7.1623,   -0.0000,  -15.8114,    0.0000,    6.3078,   11.18
                   [-7.1623,   -0.0000,  -15.8114,    0.0000,   -6.3078,   11.1803,   -2.0167,   -0.0000,   -7.2476,    0.0000,   -1.0742,    3.3139],
                   [-0.0000,   7.1623,  -15.8114,   -6.3078,   -0.0000,  -11.1803,    0.0000,    2.0167,   -7.2476,   -1.0742,    0.0000,   -3.3139]])
 
+Kpostilqr = np.array([
+   [ 0.0000,    0.4994,   -0.0000,   -0.4951,    0.0000,   -0.0000,    0.0000,    0.2251,    0.0000,   -0.0074,    0.0000,   -0.0000],
+   [-0.4994,   -0.0000,    0.0000,    0.0000,   -0.4951,   -0.0000,   -0.2251,   -0.0000,    0.0000,    0.0000,   -0.0074,   -0.0000],
+   [-0.0000,    0.0000,    0.0000,   -0.0000,   -0.0000,   -0.6934,   -0.0000,    0.0000,   -0.0000,   -0.0000,   -0.0000,   -0.0820],
+   [ 0.0000,    9.9875,   -0.0000,   -9.9011,    0.0000,   -0.0000,    0.0000,    4.5015,    0.0000,   -0.1477,    0.0000,   -0.0000],
+   [-9.9875,   -0.0000,    0.0000,    0.0000,   -9.9011,   -0.0000,   -4.5015,   -0.0000,    0.0000,    0.0000,   -0.1477,   -0.0000],
+   [-0.0000,    0.0000,    0.0000,   -0.0000,   -0.0000,   -9.9062,   -0.0000,    0.0000,   -0.0000,   -0.0000,   -0.0000,   -1.1712],
+   [ 0.0000,    0.0000,  -10.0000,   -0.0000,    0.0000,   -0.0000,    0.0000,    0.0000,   -5.7768,    0.0000,    0.0000,   -0.0000],
+	])
+
 # Input mode in the Crazyflie
 MODES = {
 '32bits':       1,
@@ -55,7 +65,7 @@ class Controller():
 		self._xhat_desired = np.zeros([12,1])
 		Thread(target=self._hover_watchdog).start()
 
-		self._K = {'32bits': K32bits, 'omegasqu': Komegasqu, 'tilqr': Ktilqr}
+		self._K = {'32bits': K32bits, 'omegasqu': Komegasqu, 'tilqr': Ktilqr, 'postilqr': Kpostilqr}
 
 		if self._pos_control:
 			self._latest_control_input = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -86,6 +96,18 @@ class Controller():
 			if not self._is_running:
 				return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 			control_input = list(self._latest_control_input)
+			if self._reset_xhat_desired:
+				if self._go_to_start:
+					self._xhat_desired = np.array([-1.5, 0, 1.25, 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
+					self._go_to_start = False
+				else:
+					self._xhat_desired = np.array([xhat[0], xhat[1], xhat[2], 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
+					#self._xhat_desired = np.array([1.1, 0, 1.25, 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
+				self._reset_xhat_desired = False
+			if self._hover:
+				xhat_error = np.array(xhat).transpose()-self._xhat_desired
+				control_input = np.dot(self._K.get('postilqr'),xhat_error).tolist()
+				control_input[6] += 16.3683 - 15.0
 			if self._listen_to_extra_input:
 				control_input[6] += self._extra_control_input[4]
 			if self._publish_to_lcm:
