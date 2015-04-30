@@ -160,27 +160,31 @@ classdef Crazyflie
       controller = controller.inOutputFrame(input_frame);
     end
     
-    function controller = getSOS(obj, xd)
+    function [controller,V] = getSOS(obj, xd)
       if (nargin<2)
         xd = zeros(12,1);
       end
 
       obj.manip = obj.manip.setInputLimits(-Inf*ones(4,1),Inf*ones(4,1));
-      %options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
-      [ctilqr,V] = tilqr(obj.manip,xd,obj.nominal_input,obj.Q,obj.R);
+      sysframe = CoordinateFrame('sysframe',4,'u');
+      sysframe.addTransform(AffineTransform(sysframe,obj.manip.getInputFrame,eye(4),obj.nominal_input));
+      obj.manip.getInputFrame.addTransform(AffineTransform(obj.manip.getInputFrame,sysframe,eye(4),-obj.nominal_input));
+      obj.manip = obj.manip.inInputFrame(sysframe);
+      
+      [ctilqr,V] = tilqr(obj.manip,xd,zeros(4,1),obj.Q,obj.R);
 
       % Do Taylor expansions
       x0 = Point(obj.manip.getStateFrame,xd);
-      u0 = Point(obj.manip.getInputFrame,obj.nominal_input);
+      u0 = Point(obj.manip.getInputFrame,zeros(4,1));
       sys = taylorApprox(obj.manip,0,x0,u0,3);
-
+      
       % Options for control design
       options = struct();
       options.controller_deg = 1; % Degree of polynomial controller to search for
       options.max_iterations = 10; % Maximum number of iterations (3 steps per iteration)
       options.converged_tol = 1e-3; % Tolerance for checking convergence
       
-      options.rho0 = 0.01; % Initial guess for rho
+      options.rho0 = 30; % Initial guess for rho
 
       options.clean_tol = 1e-6; % tolerance for cleaning small terms
       options.backoff_percent = 5; % 1 percent backing off
@@ -194,6 +198,7 @@ classdef Crazyflie
 
       % Perform controller design and verification
       disp('Starting verification...')
+
       [controller,V] = maxROAFeedback(sys,ctilqr,V,options);
       
       state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
@@ -203,6 +208,45 @@ classdef Crazyflie
       input_frame = LCMCoordinateFrame('crazyflie_input',InputCoder('omegasqu'),'u');
       controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(length(obj.nominal_input)),obj.nominal_input-15));
       controller = controller.inOutputFrame(input_frame);      
+    end
+    
+    function controller = getPositionControlTilqr(obj, xd)
+      if (nargin<2)
+        xd = zeros(12,1);
+      end
+      
+      position_model = CrazyflieModel();
+      Q = eye(12);
+      R = eye(7);
+      u0 = [0 0 0 0 0 0 position_model.nominal_thrust]';
+      options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
+      [controller,V] = tilqr(position_model,xd,u0,Q,R,options);
+            
+      state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
+      state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,controller.getInputFrame,eye(length(xd)),-xd));
+      controller = controller.inInputFrame(state_estimator_frame);
+      
+      input_frame = LCMCoordinateFrame('crazyflie_input',PositionInputCoder(),'u');
+      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(length(u0)),u0-[0 0 0 0 0 0 15]'));
+      controller = controller.inOutputFrame(input_frame);
+    end
+    
+    function runPositionControl(obj,utraj,tspan,input_freq)
+      input_frame = LCMCoordinateFrame('crazyflie_input',PositionInputCoder(),'u');
+      utraj = setOutputFrame(utraj,input_frame);
+      if (nargin<3)
+        options.tspan = utraj.tspan;
+        if (options.tspan(1)<0)
+          options.tspan(1) = 0;
+        end
+      else
+        options.tspan = tspan;
+      end
+      if (nargin<4)
+        input_freq = 100;
+      end
+      options.input_sample_time = 1/input_freq;
+      runLCM(utraj,[],options);
     end
       
     function xtraj = simulateTilqr(obj)
