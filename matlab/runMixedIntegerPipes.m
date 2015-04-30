@@ -2,7 +2,7 @@ AUTOSAVE = true;
 
 cf = Crazyflie();
 r = cf.manip;
-bot_radius = .09;
+bot_radius = .11;
 
 terrain = RigidBodyFlatTerrain();
 terrain = terrain.setGeometryColor([.1 .1 .1]');
@@ -12,13 +12,13 @@ dt = .5;
 degree = 3;
 n_segments = 7;
 
-start = [-1.8;0;1.25];
+start = [-1.5;0;1.25];
 goal = [1.1;0;1.25];
 
 r = addRobotFromURDF(r, 'pipes.urdf');
 
-lb = [-2.3;-.7;.2];
-ub = [1.6;.7;2];
+lb = [-2;-.7;.2];
+ub = [1.6;.7;1.8];
 
 seeds = [...
          start';

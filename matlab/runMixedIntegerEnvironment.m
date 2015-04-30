@@ -63,6 +63,8 @@ for j=1:numel(obstacles)
   inflated_obstacles{j} = Pobs_inf.V';
 end
 
+%pause
+
 if can_draw_lcm_polytopes
   lcmgl = LCMGLClient('iris_seeds');
   % Clear the displayed polytopes

@@ -96,13 +96,15 @@ figure(2)
 hold on
 for i=1:numel(exp)
   data = exp{i};
-  plot(data(:,1),data(:,2),'bo');
+  plot(data(:,1),data(:,2),'b*');
 end
 % uses the sample points of the last exp
 plot([0;data(:,1);25],evalparams(Kf,[0;data(:,1);25]),'r');
 title('Final model predictions');
 xlim([0 25]);
 ylim([0,45]);
+xlabel('omega^2');
+ylabel('weight (g)');
 
 end
 
