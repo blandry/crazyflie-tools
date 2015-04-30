@@ -2,14 +2,14 @@
 
 
 ############################ CLIENT OPTIONS ##########################################
-TXRX_FREQUENCY = 1000.0
+#TXRX_FREQUENCY = 1000.0
 STARTUP_NANOKONTROL = True
 USE_DRAKE_CONTROLLER = True
 
 SE_LISTEN_TO_VICON = True
 SE_PUBLISH_TO_LCM = True
 SE_USE_RPYDOT = True
-SE_USE_EKF = True
+SE_USE_EKF = False
 SE_USE_UKF = False
 SE_DELAY_COMP = False
 
@@ -17,6 +17,8 @@ CTRL_INPUT_TYPE = 'omegasqu'
 CTRL_LISTEN_TO_LCM = True
 CTRL_LISTEN_TO_EXTRA_INPUT = True
 CTRL_PUBLISH_TO_LCM = False
+
+CTRL_USE_POSITION_CONTROL = True
 ######################################################################################
 
 
@@ -62,6 +64,7 @@ class SimpleClient:
         self._send_vendor_setup(SET_RADIO_ARC, 0, 0, ())
 
         self._use_drake_controller = USE_DRAKE_CONTROLLER
+        self._use_pos_control = CTRL_USE_POSITION_CONTROL
 
         # state estimator
         self._state_estimator = StateEstimator(listen_to_vicon=SE_LISTEN_TO_VICON,
@@ -77,7 +80,8 @@ class SimpleClient:
                                       listen_to_lcm=CTRL_LISTEN_TO_LCM,
                                       control_input_updated_flag=self._control_input_updated_flag,
                                       listen_to_extra_input=CTRL_LISTEN_TO_EXTRA_INPUT,
-                                      publish_to_lcm=CTRL_PUBLISH_TO_LCM)
+                                      publish_to_lcm=CTRL_PUBLISH_TO_LCM,
+                                      pos_control=CTRL_USE_POSITION_CONTROL)
         
         # Transmitter thread (handles all comm with the crazyflie)
         Thread(target=self._transmitter_thread).start()
@@ -105,7 +109,7 @@ class SimpleClient:
         imu_lc = lcm.LCM()
 
         while True:
-            t0 = time.time()
+            #t0 = time.time()
 
             datain = self._write_read_usb(sensor_request_dataout)
             sensor_packet = self._datain_to_pk(datain)
@@ -119,6 +123,9 @@ class SimpleClient:
             self._state_estimator.add_imu_reading(imu_reading)
 
             # msg = crazyflie_imu_t()
+            # msg.omegax = imu_reading[0]
+            # msg.omegay = imu_reading[1]
+            # msg.omegaz = imu_reading[2]
             # msg.alphax = imu_reading[3]
             # msg.alphay = imu_reading[4]
             # msg.alphaz = imu_reading[5]
@@ -131,14 +138,20 @@ class SimpleClient:
                 self._control_input_updated_flag.wait(0.005)
 
             control_input = self._controller.get_control_input(xhat=xhat)
-            control_input_pk.data = struct.pack('<5fi',*control_input)
+            if self._use_pos_control:
+                control_input_pk.data = struct.pack('<7f',*control_input)
+            else:
+                control_input_pk.data = struct.pack('<5fi',*control_input)
             control_input_dataout = self._pk_to_dataout(control_input_pk) 
             self._write_usb(control_input_dataout)
 
-            self._state_estimator.add_input(control_input[0:4])
+            if not(self._use_pos_control):
+                # TODO: position control could still update the state
+                #       estimator about the last input sent
+                self._state_estimator.add_input(control_input[0:4])
 
-            tf = time.time()
-            time.sleep(max(0.0,(1.0/TXRX_FREQUENCY)-float(tf-t0)))
+            #tf = time.time()
+            #time.sleep(max(0.0,(1.0/TXRX_FREQUENCY)-float(tf-t0)))
 
     def _pk_to_dataout(self,pk):
         dataOut = array.array('B')

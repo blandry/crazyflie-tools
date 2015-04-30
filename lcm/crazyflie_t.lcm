@@ -19,6 +19,12 @@ struct crazyflie_input_t
   string type;
 }
 
+struct crazyflie_positioninput_t
+{
+  int64_t timestamp;
+  double input[7];
+}
+
 struct crazyflie_state_estimate_t
 {
   int64_t timestamp;

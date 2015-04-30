@@ -1,9 +1,8 @@
 import lcm
 import math
 import numpy as np
-from crazyflie_t import crazyflie_input_t, crazyflie_controller_commands_t, crazyflie_hover_commands_t
+from crazyflie_t import crazyflie_input_t, crazyflie_controller_commands_t, crazyflie_hover_commands_t, crazyflie_positioninput_t
 from threading import Thread
-
 
 ROLL_KP = 3.5*180/math.pi
 PITCH_KP = 3.5*180/math.pi
@@ -42,20 +41,27 @@ MODES = {
 class Controller():
 	
 	def __init__(self, control_input_type='32bits', listen_to_lcm=False, control_input_updated_flag=None,
-				 listen_to_extra_input=False, publish_to_lcm=False):
+				 listen_to_extra_input=False, publish_to_lcm=False, pos_control=False):
+
+		self._pos_control = pos_control
 
 		self._go_to_start = True
 
 		self._is_running = True
 		Thread(target=self._controller_watchdog).start()
-
+		
 		self._hover = False
 		self._reset_xhat_desired = False
 		self._xhat_desired = np.zeros([12,1])
 		Thread(target=self._hover_watchdog).start()
 
 		self._K = {'32bits': K32bits, 'omegasqu': Komegasqu, 'tilqr': Ktilqr}
-		self._latest_control_input = [0.0, 0.0, 0.0, 0.0, 0.0, MODES.get(control_input_type,1)]
+
+		if self._pos_control:
+			self._latest_control_input = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+		else:
+			self._latest_control_input = [0.0, 0.0, 0.0, 0.0, 0.0, MODES.get(control_input_type,1)]
+		
 		self._control_input_type = control_input_type
 
 		self._control_input_updated_flag = control_input_updated_flag
@@ -75,6 +81,18 @@ class Controller():
 			Thread(target=self._extra_input_thread).start()
 
 	def get_control_input(self, xhat=None):
+
+		if self._pos_control:
+			if not self._is_running:
+				return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+			control_input = list(self._latest_control_input)
+			if self._listen_to_extra_input:
+				control_input[6] += self._extra_control_input[4]
+			if self._publish_to_lcm:
+				msg = crazyflie_positioninput_t()
+				msg.input = control_input
+				self._control_input_lc.publish('crazyflie_input', msg.encode())
+			return control_input
 
 		if not self._is_running:
 			return [0.0, 0.0, 0.0, 0.0, 0.0, MODES.get(self._control_input_type,1)]
@@ -127,9 +145,13 @@ class Controller():
 			_control_input_listener_lc.handle()
 
 	def _update_control_input(self, channel, data):
-		msg = crazyflie_input_t.decode(data)
-		self._latest_control_input = list(msg.input) + [msg.offset, MODES.get(msg.type,1)]
-		self._control_input_type = msg.type
+		if self._pos_control:
+			msg = crazyflie_positioninput_t.decode(data)
+			self._latest_control_input = list(msg.input)
+		else:
+			msg = crazyflie_input_t.decode(data)
+			self._latest_control_input = list(msg.input) + [msg.offset, MODES.get(msg.type,1)]
+			self._control_input_type = msg.type
 		if self._control_input_updated_flag:
 			self._control_input_updated_flag.set()
 
