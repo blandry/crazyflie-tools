@@ -27,12 +27,15 @@ classdef Crazyflie
     % logs: 54
     % time 1.5
     % logs: 60, 68, 71, 72, 73
-    tvQ = diag([150 150 100 .001 .001 500 .001 .001 .001 1.5 1.5 1]);
-    tvQf = diag([150 150 50 .001 .001 1 .001 .001 .001 1 1 1]);
+    % tvQ = diag([150 150 100 .001 .001 500 .001 .001 .001 1.5 1.5 1]);
+    % tvQf = diag([150 150 50 .001 .001 1 .001 .001 .001 1 1 1]);
     
     % walls trajectory
     % tvQ = diag([60 100 60 .1 .1 500 .001 .001 .001 1.5 1.5 1]);
     % tvQf = diag([8 8 80 1 1 1 1 1 1 1 1 1]);
+    
+    tvQ = diag([80 80 60 .001 .001 600 .001 .001 .001 .001 .001 .001]);
+    tvQf = diag([80 80 60 .001 .001 600 .001 .001 .001 .001 .001 .001]);
     
     tvR = eye(4);
   end
@@ -216,18 +219,40 @@ classdef Crazyflie
       end
       
       position_model = CrazyflieModel();
-      Q = eye(12);
+      Q = diag([100 100 100 1 1 100 .001 .001 .001 .001 .001 .001]);
       R = eye(7);
       u0 = [0 0 0 0 0 0 position_model.nominal_thrust]';
       options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
       [controller,V] = tilqr(position_model,xd,u0,Q,R,options);
-            
+      
       state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
       state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,controller.getInputFrame,eye(length(xd)),-xd));
       controller = controller.inInputFrame(state_estimator_frame);
       
       input_frame = LCMCoordinateFrame('crazyflie_input',PositionInputCoder(),'u');
       controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(length(u0)),u0-[0 0 0 0 0 0 15]'));
+      controller = controller.inOutputFrame(input_frame);
+    end
+    
+    function controller = getPositionControlTvlqr(obj, xtraj, utraj)
+   
+      Q = diag([100 100 100 1 1 100 .001 .001 .001 .001 .001 .001]);
+      R = eye(7);
+      Qf = Q;
+      
+      model = CrazyflieModel();
+      xtraj = xtraj.setOutputFrame(model.getStateFrame);      
+      utraj = utraj.setOutputFrame(model.getInputFrame);
+      
+      options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
+      controller = tvlqr(model,xtraj,utraj,Q,R,Qf,options);
+      
+      state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
+      state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,controller.getInputFrame,eye(12),-xtraj));
+      controller = controller.inInputFrame(state_estimator_frame);
+      
+      input_frame = LCMCoordinateFrame('crazyflie_input',PositionInputCoder(),'u');
+      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(7),utraj-ConstantTrajectory([0 0 0 0 0 0 15])));
       controller = controller.inOutputFrame(input_frame);
     end
     

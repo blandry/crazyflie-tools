@@ -28,14 +28,15 @@ t0 = ytraj.tspan(1);
 tf = ytraj.tspan(2);
 tt = linspace(t0,tf,ceil((tf-t0)*options.traj_freq));
 xx = zeros(12,numel(tt));
-uu = zeros(4,numel(tt));
+%uu = zeros(4,numel(tt));
+uu = zeros(7,numel(tt));
 for i=1:numel(tt)
     [xx(:,i),uu(:,i)] = extractStateAndInput(plant,tt(i),ytraj,ydtraj,yddtraj,ydddtraj,yddddtraj,options);
 end
 xtraj = PPTrajectory(spline(tt,xx));
 xtraj = setOutputFrame(xtraj,getStateFrame(plant));
 utraj = PPTrajectory(spline(tt,uu));
-utraj = setOutputFrame(utraj,getInputFrame(plant));
+%utraj = setOutputFrame(utraj,getInputFrame(plant));
 end
 
 function [x,u] = extractStateAndInput(plant,t,ytraj,ydtraj,yddtraj,ydddtraj,yddddtraj,options)
@@ -99,4 +100,7 @@ function [x,u] = extractStateAndInput(plant,t,ytraj,ydtraj,yddtraj,ydddtraj,yddd
     end
     omega_squared = [kF; 0, kF(2)*L(2), 0, -kF(4)*L(4); -kF(1)*L(1), 0, kF(3)*L(3), 0; kM(1), -kM(2), kM(3), -kM(4)]\mellinger_u;
     u = omega_squared;
+    
+    % actually using the position controlled controller
+    u = [x(4:6);rpydot2angularvel(x(4:6),x(10:12));.25*u1/kF(1)];
 end
