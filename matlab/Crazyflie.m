@@ -252,7 +252,7 @@ classdef Crazyflie
       controller = controller.inInputFrame(state_estimator_frame);
       
       input_frame = LCMCoordinateFrame('crazyflie_input',PositionInputCoder(),'u');
-      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(7),utraj-ConstantTrajectory([0 0 0 0 0 0 15])));
+      controller.getOutputFrame.addTransform(AffineTransform(controller.getOutputFrame,input_frame,eye(7),utraj-ConstantTrajectory([0 0 0 0 0 0 15]')));
       controller = controller.inOutputFrame(input_frame);
     end
     
