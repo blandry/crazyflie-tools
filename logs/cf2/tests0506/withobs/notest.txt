@@ -1,0 +1,5 @@
+speeds
+
+forest: .9
+pipes: 1
+walls: 1.5
