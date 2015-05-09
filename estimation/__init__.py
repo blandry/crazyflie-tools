@@ -202,10 +202,10 @@ class StateEstimator():
 			msg.t = self.get_time()
 			self._xhat_lc.publish("crazyflie_state_estimate", msg.encode())
 
-		# if 1.1-xhat[0] <= 0.01:
-		# 	msg = crazyflie_hover_commands_t()
-		# 	msg.hover = True
-		# 	self._xhat_lc.publish('crazyflie_hover_commands',msg.encode())
+		if 1.1-xhat[0] <= 0.01:
+			msg = crazyflie_hover_commands_t()
+			msg.hover = True
+			self._xhat_lc.publish('crazyflie_hover_commands',msg.encode())
 
 		return xhat
 
@@ -214,10 +214,10 @@ class StateEstimator():
 			self._current_dt += (time.time()-self._last_time_update)
 		self._last_time_update = time.time()
 
-		# if self._current_dt >= 4.375-.75:
-		# 	msg = crazyflie_hover_commands_t()
-		# 	msg.hover = True
-		# 	self._xhat_lc.publish('crazyflie_hover_commands',msg.encode())
+		if self._current_dt >= 6.125-.25:
+			msg = crazyflie_hover_commands_t()
+			msg.hover = True
+			self._xhat_lc.publish('crazyflie_hover_commands',msg.encode())
 
 		return self._current_dt
 

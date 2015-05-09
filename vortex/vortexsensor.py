@@ -4,6 +4,7 @@ import u3
 import lcm
 import math
 from crazyflie_t import vortex_sensor_t
+import time
 
 
 if __name__=="__main__":
@@ -66,6 +67,8 @@ if __name__=="__main__":
             _airspeed2         = 0.7 * _airspeed2  +  0.3 * _raw_airspeed2;
             msg.sensor2 = _raw_airspeed2 #smoothing turned off for now
 
+
+            msg.timestamp = time.time()
 
             lc.publish('vortex_sensor',msg.encode())
 
