@@ -1,0 +1,4 @@
+1-7 at 1 speed
+8 at .7 speed
+9-12 at .5 speed
+13 at .7 speed
