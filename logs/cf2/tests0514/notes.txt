@@ -1,0 +1,4 @@
+1-6 = speed 1
+7-9 = speed .7
+10-28 = speed .5
+29- = speed 1
