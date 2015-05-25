@@ -4,6 +4,11 @@ import numpy as np
 from crazyflie_t import crazyflie_input_t, crazyflie_controller_commands_t, crazyflie_hover_commands_t, crazyflie_positioninput_t
 from threading import Thread
 
+GO_TO_START = True
+XHAT_START = [-1.5, 0, 1.25, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+NOMINAL_W2 = 16.3683
+XHAT_DESIRED = [0, 0, 1.25, 0, 0, 0, 0, 0, 0, 0, 0, 0] 
+
 ROLL_KP = 3.5*180/math.pi
 PITCH_KP = 3.5*180/math.pi
 YAW_KP = 0
@@ -55,14 +60,14 @@ class Controller():
 
 		self._pos_control = pos_control
 
-		self._go_to_start = True
+		self._go_to_start = GO_TO_START
 
 		self._is_running = True
 		Thread(target=self._controller_watchdog).start()
 		
 		self._hover = False
 		self._reset_xhat_desired = False
-		self._xhat_desired = np.zeros([12,1])
+		self._xhat_desired = np.array(XHAT_DESIRED).transpose()
 		Thread(target=self._hover_watchdog).start()
 
 		self._K = {'32bits': K32bits, 'omegasqu': Komegasqu, 'tilqr': Ktilqr, 'postilqr': Kpostilqr}
@@ -95,51 +100,59 @@ class Controller():
 		if self._pos_control:
 			if not self._is_running:
 				return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-			control_input = list(self._latest_control_input)
+			
+			if self._listen_to_lcm or not xhat:
+				control_input = list(self._latest_control_input)
+			else:
+				control_input = np.dot(self._K.get('postilqr'),np.array(xhat).transpose()-self._xhat_desired).tolist()
+				control_input[6] += NOMINAL_W2 - 15.0
+			
 			if self._reset_xhat_desired:
 				if self._go_to_start:
-					self._xhat_desired = np.array([-1.5, 0, 1.25, 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
+					self._xhat_desired = np.array(XHAT_START).transpose()
 					self._go_to_start = False
 				else:
 					self._xhat_desired = np.array([xhat[0], xhat[1], xhat[2], 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
-					#self._xhat_desired = np.array([1.1, 0, 1.25, 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
 				self._reset_xhat_desired = False
+
 			if self._hover:
-				xhat_error = np.array(xhat).transpose()-self._xhat_desired
-				control_input = np.dot(self._K.get('postilqr'),xhat_error).tolist()
-				control_input[6] += 16.3683 - 15.0
+				control_input = np.dot(self._K.get('postilqr'),np.array(xhat).transpose()-self._xhat_desired).tolist()
+				control_input[6] += NOMINAL_W2 - 15.0
+			
 			if self._listen_to_extra_input:
 				control_input[6] += self._extra_control_input[4]
+			
 			if self._publish_to_lcm:
 				msg = crazyflie_positioninput_t()
 				msg.input = control_input
 				self._control_input_lc.publish('crazyflie_input', msg.encode())
+			
 			return control_input
 
 		if not self._is_running:
 			return [0.0, 0.0, 0.0, 0.0, 0.0, MODES.get(self._control_input_type,1)]
 
 		if self._listen_to_lcm or not xhat:
-			control_input = list(self._latest_control_input) # note how we create a NEW list
+			control_input = list(self._latest_control_input)
 		else:
-			thrust_input = np.dot(self._K.get(self._control_input_type),np.array(xhat)).tolist()
+			thrust_input = np.dot(self._K.get(self._control_input_type),np.array(xhat).transpose()-self._xhat_desired).tolist()
 			control_input = thrust_input + [0.0, MODES.get(self._control_input_type,1)]
 
 		if self._reset_xhat_desired:
 			if self._go_to_start:
-				self._xhat_desired = np.array([-1.5, 0, 1.25, 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
+				self._xhat_desired = np.array(XHAT_START).transpose()
 				self._go_to_start = False
 			else:
 				self._xhat_desired = np.array([xhat[0], xhat[1], xhat[2], 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
-				#self._xhat_desired = np.array([1.1, 0, 1.25, 0, 0, 0, 0, 0, 0, 0, 0, 0]).transpose()
 			self._reset_xhat_desired = False
+			
 		if self._hover:
 			xhat_error = np.array(xhat).transpose()-self._xhat_desired
 			thrust_input = np.dot(self._K.get('tilqr'),xhat_error).tolist()
-			thrust_input[0] += 16.2950 - 15
-			thrust_input[1] += 16.2950 - 15
-			thrust_input[2] += 16.2950 - 15
-			thrust_input[3] += 16.2950 - 15
+			thrust_input[0] += NOMINAL_W2 - 15
+			thrust_input[1] += NOMINAL_W2 - 15
+			thrust_input[2] += NOMINAL_W2 - 15
+			thrust_input[3] += NOMINAL_W2 - 15
 			control_input = thrust_input + [0.0, MODES.get('omegasqu',2)]
 
 		if self._listen_to_extra_input:
@@ -149,7 +162,6 @@ class Controller():
 			control_input[2] += self._extra_control_input[2]
 			control_input[3] += self._extra_control_input[3]
 			control_input[4] += self._extra_control_input[4]
-			# this is why we had to create a new list
 
 		if self._publish_to_lcm:
 			msg = crazyflie_input_t()
