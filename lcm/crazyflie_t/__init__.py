@@ -5,6 +5,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from .crazyflie_pos_t import crazyflie_pos_t
 from .crazyflie_input_t import crazyflie_input_t
+from .crazyflie_positioninput_t import crazyflie_positioninput_t
 from .crazyflie_state_estimate_t import crazyflie_state_estimate_t
 from .crazyflie_imu_t import crazyflie_imu_t
 from .crazyflie_state_estimator_commands_t import crazyflie_state_estimator_commands_t

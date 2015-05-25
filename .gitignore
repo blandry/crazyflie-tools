@@ -61,3 +61,4 @@ matlab/drake_viewer.out
 
 # Some logs in here are too big
 logs/cf2/vortex0423/Round-2/
+vortex/lcmlog-*
