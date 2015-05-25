@@ -3,6 +3,7 @@
 
 ############################ CLIENT OPTIONS ##########################################
 #TXRX_FREQUENCY = 1000.0
+
 STARTUP_NANOKONTROL = True
 USE_DRAKE_CONTROLLER = True
 
