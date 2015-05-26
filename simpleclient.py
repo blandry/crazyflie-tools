@@ -205,6 +205,7 @@ if __name__ == '__main__':
         print i[0]
 
     if len(available) > 0:
-        client = SimpleClient('radio://0/80/250K') #available[0][0]
+        client = SimpleClient('radio://0/80/250K')
+        #client = SimpleClient(available[0][0]) 
     else:
         print "No Crazyflies found, cannot run the client"

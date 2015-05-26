@@ -115,7 +115,7 @@ class StateEstimator():
 
 	def _vicon_listener(self):
 		_vicon_listener_lc = lcm.LCM()
-		_vicon_listener_lc.subscribe('crazflie2-pete2',self._add_vicon_reading)
+		_vicon_listener_lc.subscribe('crazflie2-pete1',self._add_vicon_reading)
 		while True:
 			_vicon_listener_lc.handle()
 

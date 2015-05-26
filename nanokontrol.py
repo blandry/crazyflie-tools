@@ -12,14 +12,14 @@ from crazyflie_t import crazyflie_input_t, crazyflie_state_estimator_commands_t,
 
 INPUT_TYPE = 'omegasqu'
 INPUT_MIN = 0.0
-INPUT_MAX = 15.0
+INPUT_MAX = 16.0
 
 # INPUT_TYPE = 'onboardpd'
 # INPUT_MIN = 0
 # INPUT_MAX = 65000
 
 IS_EXTRA_INPUT = True
-INPUT_FREQ = 100.0;
+INPUT_FREQ = 200.0;
 
 class Kon():
 
@@ -74,8 +74,8 @@ class Kon():
         self.read_input()        
         
         msg = crazyflie_input_t()
-        msg.input[0] = (self.sliders.get(0,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
-        msg.input[1] = (self.sliders.get(1,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
+        msg.input[0] = (self.sliders.get(0,0)/127.0)*(INPUT_MAX-INPUT_MIN)*.1+INPUT_MIN
+        msg.input[1] = (self.sliders.get(1,0)/127.0)*(INPUT_MAX-INPUT_MIN)*.1+INPUT_MIN
         msg.input[2] = (self.sliders.get(2,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
         msg.input[3] = (self.sliders.get(3,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
         msg.offset = (self.sliders.get(4,0)/127.0)*(INPUT_MAX-INPUT_MIN)+INPUT_MIN
