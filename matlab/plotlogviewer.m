@@ -1,3 +1,5 @@
+load('/Users/pflomacpro/crazyflie-tools/matlab/data/strings1/results.mat')
+load('regions.mat')
 
 
 options.floating = true;
