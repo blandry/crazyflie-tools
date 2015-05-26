@@ -1,0 +1,670 @@
+<robot name="strings">
+   <material name="Brown">
+     <color rgba="83./255. 53./255. 10./255."/>
+   </material>
+   <material name="White">
+     <color rgba="1 1 1"/>
+   </material>
+   <material name="Grey">
+     <color rgba=".3 .3 .3"/>
+   </material>
+   <material name="Red">
+     <color rgba="1 0 0"/>
+   </material>
+   <link name="world"/>
+
+   <link name="l1">
+   	<inertial>
+   		<mass value=".5" />
+   		<origin xyz="0 0 1.5" rpy="0 0 0"/>
+		  <inertia ixx="10"  ixy="0"  ixz="0" iyy="10" iyz="0" izz="1" />
+   	</inertial>
+  	<visual>
+      <origin xyz="0 0 1.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 3"/>
+      </geometry>
+      <material name="White"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 1.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 3"/>
+      </geometry>
+    </collision>
+   </link>
+   <joint name="l1_weld" type="fixed">
+    <parent link="world"/>
+      <child link="l1"/>
+    <origin xyz="-.36 .5 0" rpy="0 0 0" />
+   </joint>
+   <link name="l2">
+   	<inertial>
+   		<mass value=".5" />
+   		<origin xyz="0 0 1.5" rpy="0 0 0"/>
+		  <inertia ixx="10"  ixy="0"  ixz="0" iyy="10" iyz="0" izz="1" />
+   	</inertial>
+  	<visual>
+      <origin xyz="0 0 1.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 3"/>
+      </geometry>
+      <material name="White"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 1.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 3"/>
+      </geometry>
+    </collision>
+   </link>
+   <joint name="l2_weld" type="fixed">
+    <parent link="world"/>
+      <child link="l2"/>
+    <origin xyz="-.36 -.5 0" rpy="0 0 0" />
+   </joint>
+
+   <link name="l3">
+   	<inertial>
+   		<mass value=".5" />
+   		<origin xyz="0 0 1.5" rpy="0 0 0"/>
+		  <inertia ixx="10"  ixy="0"  ixz="0" iyy="10" iyz="0" izz="1" />
+   	</inertial>
+  	<visual>
+      <origin xyz="0 0 1.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 3"/>
+      </geometry>
+      <material name="White"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 1.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 3"/>
+      </geometry>
+    </collision>
+   </link>
+   <joint name="l3_weld" type="fixed">
+    <parent link="world"/>
+      <child link="l3"/>
+    <origin xyz="0 .5 0" rpy="0 0 0" />
+   </joint>
+   <link name="l4">
+   	<inertial>
+   		<mass value=".5" />
+   		<origin xyz="0 0 1.5" rpy="0 0 0"/>
+		  <inertia ixx="10"  ixy="0"  ixz="0" iyy="10" iyz="0" izz="1" />
+   	</inertial>
+  	<visual>
+      <origin xyz="0 0 1.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 3"/>
+      </geometry>
+      <material name="White"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 1.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 3"/>
+      </geometry>
+    </collision>
+   </link>
+   <joint name="l4_weld" type="fixed">
+    <parent link="world"/>
+      <child link="l4"/>
+    <origin xyz="0 -.5 0" rpy="0 0 0" />
+   </joint>
+
+   <link name="l5">
+   	<inertial>
+   		<mass value=".5" />
+   		<origin xyz="0 0 1.5" rpy="0 0 0"/>
+		  <inertia ixx="10"  ixy="0"  ixz="0" iyy="10" iyz="0" izz="1" />
+   	</inertial>
+  	<visual>
+      <origin xyz="0 0 1.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 3"/>
+      </geometry>
+      <material name="White"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 1.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 3"/>
+      </geometry>
+    </collision>
+   </link>
+   <joint name="l5_weld" type="fixed">
+    <parent link="world"/>
+      <child link="l5"/>
+    <origin xyz=".36 .5 0" rpy="0 0 0" />
+   </joint>
+   <link name="l6">
+   	<inertial>
+   		<mass value=".5" />
+   		<origin xyz="0 0 1.5" rpy="0 0 0"/>
+		  <inertia ixx="10"  ixy="0"  ixz="0" iyy="10" iyz="0" izz="1" />
+   	</inertial>
+  	<visual>
+      <origin xyz="0 0 1.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 3"/>
+      </geometry>
+      <material name="White"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 1.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.042 3"/>
+      </geometry>
+    </collision>
+   </link>
+   <joint name="l6_weld" type="fixed">
+    <parent link="world"/>
+      <child link="l6"/>
+    <origin xyz=".36 -.5 0" rpy="0 0 0" />
+   </joint>
+
+   <link name="string1">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.99398"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.99398"/>
+         <geometry>
+            <box size=".002 .002 1.988"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.99398"/>
+         <geometry>
+            <box size=".002 .002 1.988"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string1_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string1"/>
+      <origin rpy="0.53691 0.18209 0.050222" xyz="-0.36 0.5 0.09"/>
+   </joint>
+   <link name="string2">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.51091"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.51091"/>
+         <geometry>
+            <box size=".002 .002 1.0218"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.51091"/>
+         <geometry>
+            <box size=".002 .002 1.0218"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string2_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string2"/>
+      <origin rpy="1.3638 0 0" xyz="-0.36 0.5 0.74"/>
+   </joint>
+   <link name="string3">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.57306"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.57306"/>
+         <geometry>
+            <box size=".002 .002 1.1461"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.57306"/>
+         <geometry>
+            <box size=".002 .002 1.1461"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string3_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string3"/>
+      <origin rpy="1.0603 0 0" xyz="-0.36 0.5 1.12"/>
+   </joint>
+   <link name="string4">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.78102"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.78102"/>
+         <geometry>
+            <box size=".002 .002 1.562"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.78102"/>
+         <geometry>
+            <box size=".002 .002 1.562"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string4_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string4"/>
+      <origin rpy="0.8058 0.47905 0.20743" xyz="-0.36 0.5 1.33"/>
+   </joint>
+   <link name="string5">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.6162"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.6162"/>
+         <geometry>
+            <box size=".002 .002 1.2324"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.6162"/>
+         <geometry>
+            <box size=".002 .002 1.2324"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string5_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string5"/>
+      <origin rpy="1.5508 0.62393 0.61234" xyz="-0.36 0.5 1.6"/>
+   </joint>
+   <link name="string6">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.6234"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.6234"/>
+         <geometry>
+            <box size=".002 .002 1.2468"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.6234"/>
+         <geometry>
+            <box size=".002 .002 1.2468"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string6_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string6"/>
+      <origin rpy="1.383 0.61564 0.51474" xyz="-0.36 0.5 1.74"/>
+   </joint>
+   <link name="string7">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.60747"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.60747"/>
+         <geometry>
+            <box size=".002 .002 1.2149"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.60747"/>
+         <geometry>
+            <box size=".002 .002 1.2149"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string7_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string7"/>
+      <origin rpy="2.1748 0 0" xyz="-0.36 0.5 2.15"/>
+   </joint>
+   <link name="string8">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.50022"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.50022"/>
+         <geometry>
+            <box size=".002 .002 1.0004"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.50022"/>
+         <geometry>
+            <box size=".002 .002 1.0004"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string8_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string8"/>
+      <origin rpy="1.5408 0 0" xyz="0 0.5 0.765"/>
+   </joint>
+   <link name="string9">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.53141"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.53141"/>
+         <geometry>
+            <box size=".002 .002 1.0628"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.53141"/>
+         <geometry>
+            <box size=".002 .002 1.0628"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string9_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string9"/>
+      <origin rpy="1.5708 0.34556 0.34556" xyz="0 0.5 1.15"/>
+   </joint>
+   <link name="string10">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.79033"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.79033"/>
+         <geometry>
+            <box size=".002 .002 1.5807"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.79033"/>
+         <geometry>
+            <box size=".002 .002 1.5807"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string10_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string10"/>
+      <origin rpy="2.4344 -0.22977 -0.60597" xyz="0 0.5 1.28"/>
+   </joint>
+   <link name="string11">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.5"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.5"/>
+         <geometry>
+            <box size=".002 .002 1"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.5"/>
+         <geometry>
+            <box size=".002 .002 1"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string11_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string11"/>
+      <origin rpy="1.5708 0 0" xyz="0 0.5 1.42"/>
+   </joint>
+   <link name="string12">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.98555"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.98555"/>
+         <geometry>
+            <box size=".002 .002 1.9711"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.98555"/>
+         <geometry>
+            <box size=".002 .002 1.9711"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string12_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string12"/>
+      <origin rpy="2.5994 0.18367 0.63993" xyz="0 0.5 1.78"/>
+   </joint>
+   <link name="string13">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.54218"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.54218"/>
+         <geometry>
+            <box size=".002 .002 1.0844"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.54218"/>
+         <geometry>
+            <box size=".002 .002 1.0844"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string13_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string13"/>
+      <origin rpy="1.7826 -0.33842 -0.41681" xyz="0 0.5 2.05"/>
+   </joint>
+   <link name="string14">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.63531"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.63531"/>
+         <geometry>
+            <box size=".002 .002 1.2706"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.63531"/>
+         <geometry>
+            <box size=".002 .002 1.2706"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string14_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string14"/>
+      <origin rpy="1.2702 -0.60243 -0.45014" xyz="0.36 0.5 0.8"/>
+   </joint>
+   <link name="string15">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.63531"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.63531"/>
+         <geometry>
+            <box size=".002 .002 1.2706"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.63531"/>
+         <geometry>
+            <box size=".002 .002 1.2706"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string15_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string15"/>
+      <origin rpy="1.2702 -0.60243 -0.45014" xyz="0.36 0.5 1.16"/>
+   </joint>
+   <link name="string16">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.54231"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.54231"/>
+         <geometry>
+            <box size=".002 .002 1.0846"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.54231"/>
+         <geometry>
+            <box size=".002 .002 1.0846"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string16_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string16"/>
+      <origin rpy="1.9684 0 0" xyz="0.36 0.5 1.61"/>
+   </joint>
+   <link name="string17">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.50249"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.50249"/>
+         <geometry>
+            <box size=".002 .002 1.005"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.50249"/>
+         <geometry>
+            <box size=".002 .002 1.005"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string17_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string17"/>
+      <origin rpy="1.4711 0 0" xyz="0.36 0.5 2"/>
+   </joint>
+   <link name="string18">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 1.01"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 1.01"/>
+         <geometry>
+            <box size=".002 .002 2.02"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 1.01"/>
+         <geometry>
+            <box size=".002 .002 2.02"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string18_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string18"/>
+      <origin rpy="0 0 0" xyz="-0.36 0.3 0"/>
+   </joint>
+   <link name="string19">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 0.71"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 0.71"/>
+         <geometry>
+            <box size=".002 .002 1.42"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 0.71"/>
+         <geometry>
+            <box size=".002 .002 1.42"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string19_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string19"/>
+      <origin rpy="0 0 0" xyz="0 -0.34 0"/>
+   </joint>
+   <link name="string20">
+      <inertial>
+         <mass value=".5"/>
+         <origin rpy="0 0 0" xyz="0 0 1"/>
+         <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="1"/>
+      </inertial>
+      <visual>
+         <origin rpy="0 0 0" xyz="0 0 1"/>
+         <geometry>
+            <box size=".002 .002 2"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin rpy="0 0 0" xyz="0 0 1"/>
+         <geometry>
+            <box size=".002 .002 2"/>
+         </geometry>
+      </collision>
+   </link>
+   <joint name="string20_weld" type="fixed">
+      <parent link="world"/>
+      <child link="string20"/>
+      <origin rpy="0 0 0" xyz="0.36 0 0"/>
+   </joint>
+
+</robot>

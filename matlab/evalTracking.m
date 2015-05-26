@@ -1,3 +1,6 @@
+% hold off
+% close all
+
 t0 = xtraj.tspan(1);
 tf = xtraj.tspan(2);
 
@@ -68,34 +71,32 @@ tref = xtraj.getBreaks();
 % plot(ureft,uref(4,:),'b');
 % plot(ut,u(4,:),'r');
 
-figure(66)
+figure(88)
 hold on
-trunc = 90;
-trunc2 = 30;
+trunc = 0;
+trunc2 = 0;
 plot(tref(1:end-trunc),xref(1:3,1:end-trunc),'-.');
 plot(t(1:end-trunc2),x(1:3,1:end-trunc2),'LineWidth',2);
 legend('x reference','y reference','z reference','x actual','y actual','z actual');
 xlabel('time (s)');
 ylabel('position (m)');
-title('Position of the quadrotor over time');
+%title('Position of the quadrotor over time');
 
-figure(67)
-hold on
-plot(-xref(2,:),xref(1,:),'-.');
-plot(-x(2,:),x(1,:),'LineWidth',2);
-legend('reference','actual');
-xlabel('y position (m)');
-ylabel('x position (m)');
-title('Trajectory Tracking');
-axis equal
+% figure(67)
+% hold on
+% plot(-xref(2,:),xref(1,:),'-.');
+% plot(-x(2,:),x(1,:),'LineWidth',2);
+% legend('reference','actual');
+% xlabel('y position (m)');
+% ylabel('x position (m)');
+% title('Trajectory Tracking');
+% axis equal
 
-figure(68)
-hold on
-trunc2 = 40;
+figure(104)
+trunc2 = 0;
 xrefsamp = xtraj.eval(t(1:end-trunc2));
 plot(t(1:end-trunc2),x(1:3,1:end-trunc2)-xrefsamp(1:3,:),'.');
-legend('x error','y error','z errpr');
+legend('x error','y error','z error');
 xlabel('time (s)');
 ylabel('error (m)');
-title('Error of the quadrotor over time');
-
+%title('Error of the quadrotor over time');
