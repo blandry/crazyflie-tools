@@ -219,12 +219,12 @@ classdef Crazyflie
       end
       
       position_model = CrazyflieModel();
-      Q = diag([100 100 100 1 1 100 .001 .001 .001 .001 .001 .001]);
+      Q = diag([350 350 1400 5 5 1000 .001 .001 .001 .001 .001 .001]);
       R = eye(7);
       u0 = [0 0 0 0 0 0 position_model.nominal_thrust]';
       options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
       [controller,V] = tilqr(position_model,xd,u0,Q,R,options);
-      
+         
       state_estimator_frame = LCMCoordinateFrame('crazyflie_state_estimate',StateEstimatesCoder,'x');
       state_estimator_frame.addTransform(AffineTransform(state_estimator_frame,controller.getInputFrame,eye(length(xd)),-xd));
       controller = controller.inInputFrame(state_estimator_frame);
@@ -236,11 +236,38 @@ classdef Crazyflie
     
     function controller = getPositionControlTvlqr(obj, xtraj, utraj)
    
-      Q = diag([100 100 100 1 1 100 .001 .001 .001 .001 .001 .001]);
+      % forest
+      %Q = diag([80 80 100 1 1 100 .001 .001 .001 .001 .001 .001]);
+      
+      % pipes
+      %Q = diag([100 100 100 1 1 100 .001 .001 .001 .001 .001 .001]);
+      
+      % walls
+      %Q = diag([120 120 150 1 1 100 .001 .001 .001 .001 .001 .001]);
+      
+      % strings
+      %Q = diag([120 120 120 1 1 150 .001 .001 .001 .001 .001 5]);
+      %Q = diag([450 450 350 10 10 500 .001 .001 .001 .001 .001 10]);
+      %Q = diag([150 150 150 1 1 500 .001 .001 .001 .001 .001 1]);
+      %Q = diag([200 200 200 1 1 300 .001 .001 .001 .001 .001 5]);
+      %Q = diag([120 120 120 1 1 150 .001 .001 .001 .001 .001 5]);
+      %Q = diag([200 200 200 1 1 200 .001 .001 .001 .001 .001 5]);
+      
+      Q = diag([300 300 300 2.5 2.5 300 .001 .001 .001 .001 .001 5]);
+      %Q = diag([500 500 500 2.5 2.5 800 .001 .001 .001 .001 .001 5]);
+
       R = eye(7);
-      Qf = Q;
       
       model = CrazyflieModel();
+      
+      Qf = Q;
+      %Qti = diag([100 100 100 1 1 100 .001 .001 .001 .001 .001 .001]);
+      %Rti = eye(7);
+      %u0ti = [0 0 0 0 0 0 model.nominal_thrust]';
+      %options.angle_flag = [0 0 0 1 1 1 0 0 0 0 0 0]';
+      %V = tilqr(model,xtraj.eval(xtraj.tspan(2)),u0ti,Qti,Rti,options);
+      %Qf = diag([150 150 150 1 1 300 .001 .001 .001 .001 .001 .001]);
+      
       xtraj = xtraj.setOutputFrame(model.getStateFrame);      
       utraj = utraj.setOutputFrame(model.getInputFrame);
       

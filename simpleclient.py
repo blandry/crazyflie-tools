@@ -5,7 +5,7 @@
 #TXRX_FREQUENCY = 1000.0
 
 STARTUP_NANOKONTROL = True
-USE_DRAKE_CONTROLLER = True
+USE_DRAKE_CONTROLLER = False
 
 SE_LISTEN_TO_VICON = True
 SE_PUBLISH_TO_LCM = True
@@ -15,7 +15,7 @@ SE_USE_UKF = False
 SE_DELAY_COMP = False
 
 CTRL_INPUT_TYPE = 'omegasqu'
-CTRL_LISTEN_TO_LCM = True
+CTRL_LISTEN_TO_LCM = False
 CTRL_LISTEN_TO_EXTRA_INPUT = True
 CTRL_PUBLISH_TO_LCM = False
 
@@ -205,6 +205,7 @@ if __name__ == '__main__':
         print i[0]
 
     if len(available) > 0:
-        client = SimpleClient('radio://0/80/250K') #available[0][0]
+        client = SimpleClient('radio://0/80/250K')
+        #client = SimpleClient(available[0][0]) 
     else:
         print "No Crazyflies found, cannot run the client"
