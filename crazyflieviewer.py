@@ -51,7 +51,7 @@ def setupStrings():
     d = DebugData()
     poles = [[-.36,.5,1.5],[-.36,-.5,1.5],[0,.5,1.5],[0,-.5,1.5],[.36,.5,1.5],[.36,-.5,1.5]]
     for pole in poles:
-        d.addCylinder(pole, [0,0,1], 3, radius=0.042)
+        d.addCylinder(pole, [0,0,1], 3, radius=0.021)
     vis.updatePolyData(d.getPolyData(), 'poles')
 
     d = DebugData()
@@ -94,32 +94,40 @@ class QuadCamera():
 
     def onRobotDraw(self, msg):
 
-        alpha = .5
+        # alpha = .5
+        # pos = np.array(msg.position[1])
+
+        # if self.last_pos==None:
+        #     #self.cam_pos = np.array([-1.5, -.1, 1.25]) 
+        #     self.cam_pos = pos
+        #     self.fpoint = pos + np.array([.5, 0, 0])
+        # else:
+        #     v = pos-self.last_pos
+        #     if np.linalg.norm(v)>0.005:
+        #         self.dir = v/np.linalg.norm(v)
+        #         #self.cam_pos = alpha*(pos - v*.05) + (1-alpha)*self.cam_pos
+        #         self.cam_pos = pos - .25*self.dir
+        #         self.fpoint = alpha*(pos + .5*self.dir) + (1-alpha)*self.last_fpoint
+        #     else:
+        #         self.fpoint = pos
+
+        # self.last_pos = pos
+        # self.last_fpoint = self.fpoint
+
+        # self.fpoint = pos
+
+        # camera = app.view.camera()
+        # camera.SetFocalPoint(self.fpoint.tolist())
+        # #camera.SetPosition(self.cam_pos.tolist())
+        # camera.SetViewAngle(100)
+        # camera.SetViewUp([0,0,1])
+
         pos = np.array(msg.position[1])
-
-        if self.last_pos==None:
-            #self.cam_pos = np.array([-1.5, -.1, 1.25]) 
-            self.cam_pos = pos
-            self.fpoint = pos + np.array([.5, 0, 0])
-        else:
-            v = pos-self.last_pos
-            if np.linalg.norm(v)>0.005:
-                self.dir = v/np.linalg.norm(v)
-                #self.cam_pos = alpha*(pos - v*.05) + (1-alpha)*self.cam_pos
-                self.cam_pos = pos - .25*self.dir
-                self.fpoint = alpha*(pos + .5*self.dir) + (1-alpha)*self.last_fpoint
-            else:
-                self.fpoint = pos
-
-        self.last_pos = pos
-        self.last_fpoint = self.fpoint
-
-        self.fpoint = pos
-
         camera = app.view.camera()
-        camera.SetFocalPoint(self.fpoint.tolist())
-        #camera.SetPosition(self.cam_pos.tolist())
-        camera.SetViewAngle(100)
+
+        #camera.SetPosition([-.,.5,1.5])
+        camera.SetFocalPoint((.9*np.array(camera.GetFocalPoint())+.1*pos).tolist())
+        #camera.SetViewAngle(100)
         camera.SetViewUp([0,0,1])
 
         app.view.render()
@@ -136,11 +144,11 @@ if __name__=='__main__':
     #lcmUtils.addSubscriber('sbach_camera', vicon_pos_t, updateCamera)
     
     # to have the camera follow the robot
-    #quad_cam = QuadCamera()
-    #lcmUtils.addSubscriber('DRAKE_VIEWER_DRAW', lcmdrake.lcmt_viewer_draw, quad_cam.onRobotDraw)
+    quad_cam = QuadCamera()
+    lcmUtils.addSubscriber('DRAKE_VIEWER_DRAW', lcmdrake.lcmt_viewer_draw, quad_cam.onRobotDraw)
 
     # to plot the strings obstacles course
-    #setupStrings()
+    setupStrings()
 
     applogic.setBackgroundColor([0.3, 0.3, 0.35], [0.95,0.95,1])
     
