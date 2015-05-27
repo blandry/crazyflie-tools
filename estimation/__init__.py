@@ -15,10 +15,11 @@ from transforms import angularvel2rpydot, body2world, quat2rpy, world2body
 
 class StateEstimator():
 
-	def __init__(self, listen_to_vicon=False, publish_to_lcm=False, 
+	def __init__(self, listen_to_vicon=False, vicon_channel=None, publish_to_lcm=False, 
 				 use_rpydot=False, use_ekf=False, use_ukf=False,
 				 delay_comp=False):
 		
+
 		self._tvlqr_counting = False
 		self._last_time_update = time.time()
 		self._current_dt = 0.0
@@ -39,7 +40,7 @@ class StateEstimator():
 		self._valid_vicon = False
 		self._vicon_alpha_pos = .8
 		self._vicon_alpha_vel = .7
-		self._vicon_init_yaw = None
+		self._vicon_yaw = 0.0
 
 		self._use_rpydot = use_rpydot
 		self._publish_to_lcm = publish_to_lcm
@@ -47,6 +48,7 @@ class StateEstimator():
 			self._xhat_lc = lcm.LCM()
 
 		self._listen_to_vicon = listen_to_vicon
+		self._vicon_channel = vicon_channel
 		if listen_to_vicon:
 			Thread(target=self._vicon_listener).start()
 
@@ -85,8 +87,8 @@ class StateEstimator():
 		self.integralFB = new_quat[4:]
 		try:
 			self._last_rpy = quat2rpy(self.q)
-			if self._vicon_init_yaw:
-				self._last_rpy[2] += self._vicon_init_yaw
+			if self._listen_to_vicon:
+				self._last_rpy[2] = self._vicon_yaw
 		except ValueError:
 			pass
 		self._last_gyro = [gx,gy,gz]
@@ -115,7 +117,7 @@ class StateEstimator():
 
 	def _vicon_listener(self):
 		_vicon_listener_lc = lcm.LCM()
-		_vicon_listener_lc.subscribe('crazflie2-pete1',self._add_vicon_reading)
+		_vicon_listener_lc.subscribe(self._vicon_channel,self._add_vicon_reading)
 		while True:
 			_vicon_listener_lc.handle()
 
@@ -127,8 +129,8 @@ class StateEstimator():
 			#self._last_dxyz = [0.0, 0.0, 0.0]
 			return
 		
-		if not self._vicon_init_yaw:
-			self._vicon_init_yaw = msg.q[5]
+		# put any filtering on yaw here if needed
+		self._vicon_yaw = self._vicon_alpha_pos*msg.q[5]+(1-self._vicon_alpha_pos)*self._vicon_yaw
 
 		xyz = list(msg.q)[0:3]
 		dxyz = [0.0, 0.0, 0.0]

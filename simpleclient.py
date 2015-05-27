@@ -8,6 +8,7 @@ STARTUP_NANOKONTROL = True
 USE_DRAKE_CONTROLLER = False
 
 SE_LISTEN_TO_VICON = True
+SE_VICON_CHANNEL = 'crazflie2-pete'
 SE_PUBLISH_TO_LCM = True
 SE_USE_RPYDOT = True
 SE_USE_EKF = True
@@ -69,6 +70,7 @@ class SimpleClient:
 
         # state estimator
         self._state_estimator = StateEstimator(listen_to_vicon=SE_LISTEN_TO_VICON,
+                                               vicon_channel=SE_VICON_CHANNEL,
                                                publish_to_lcm=SE_PUBLISH_TO_LCM,
                                                use_rpydot=SE_USE_RPYDOT,
                                                use_ekf=SE_USE_EKF,
@@ -102,15 +104,22 @@ class SimpleClient:
     def _transmitter_thread(self):
         sensor_request_pk = CRTPPacket()
         sensor_request_pk.port = CRTPPort.SENSORS
-        sensor_request_pk.data = struct.pack('')
-        sensor_request_dataout = self._pk_to_dataout(sensor_request_pk)
         control_input_pk = CRTPPacket()
         control_input_pk.port = CRTPPort.OFFBOARDCTRL
+
+        vicon_yaw = 0.0
+        if SE_LISTEN_TO_VICON:
+            use_vicon_yaw = 1
+        else:
+            use_vicon_yaw = 0
         
         imu_lc = lcm.LCM()
 
         while True:
             #t0 = time.time()
+
+            sensor_request_pk.data = struct.pack('<fi',vicon_yaw,use_vicon_yaw)
+            sensor_request_dataout = self._pk_to_dataout(sensor_request_pk)
 
             datain = self._write_read_usb(sensor_request_dataout)
             sensor_packet = self._datain_to_pk(datain)
@@ -134,6 +143,7 @@ class SimpleClient:
 
             self._control_input_updated_flag.clear()
             xhat = self._state_estimator.get_xhat()
+            vicon_yaw = xhat[5]
             if self._use_drake_controller:
                 # wait for Drake to give us the control input
                 self._control_input_updated_flag.wait(0.005)
