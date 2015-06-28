@@ -36,6 +36,7 @@ end
 
 if (nargout<1)
   v = constructVisualizer(cf.manip);
+  xtraj = xtraj.setOutputFrame(cf.manip.getStateFrame);      
   v.playback(xtraj,struct('slider',true));
 end
 
