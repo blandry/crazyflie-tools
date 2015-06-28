@@ -5,7 +5,7 @@ import numpy as np
 import MahonyAHRS
 from Queue import Queue
 from threading import Thread
-from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t, dxyz_compare_t, kalman_args_t, crazyflie_hover_commands_t
+from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t, crazyflie_controller_commands_t, dxyz_compare_t, kalman_args_t, crazyflie_hover_commands_t
 from vicon_t import vicon_pos_t
 from ukf import UnscentedKalmanFilter
 from ekf import ExtendedKalmanFilter
@@ -207,9 +207,9 @@ class StateEstimator():
 		# uncomment the following if you want to trigger hover at a predefined state
 		if xhat[2] <= 0.5:
 			print('This is how low')
-			msg = crazyflie_state_estimator_commands_t()
-            msg.is_running = False
-            self.lc.publish('crazyflie_state_estimator_commands', msg.encode())
+			msg = crazyflie_controller_commands_t()
+      msg.is_running = False
+      self.lc.publish('crazyflie_controller_commands', msg.encode())
 		# 	msg = crazyflie_hover_commands_t()
 		# 	msg.hover = True
 		# 	self._xhat_lc.publish('crazyflie_hover_commands',msg.encode())
