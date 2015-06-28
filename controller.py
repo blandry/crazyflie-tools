@@ -5,7 +5,7 @@ from crazyflie_t import crazyflie_input_t, crazyflie_controller_commands_t, craz
 from threading import Thread
 
 GO_TO_START = True
-XHAT_START = [0, 0, .4, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+XHAT_START = [1.3, 0, .4, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 NOMINAL_W2 = 16.3683
 XHAT_DESIRED = [1.3, 0, .5, 0, 0, 0, 0, 0, 0, 0, 0, 0] 
 
