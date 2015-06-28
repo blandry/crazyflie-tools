@@ -1,22 +1,22 @@
 function [xtraj,utraj,prog] = runDircol()
 
-cf = Crazyflie();
+cf = CrazyflieModel();
 
-N = 31;
+N = 11;
 minimum_duration = .1;
 maximum_duration = 4;
-prog = DircolTrajectoryOptimization(cf.manip,N,[minimum_duration maximum_duration]);  
+prog = DircolTrajectoryOptimization(cf,N,[minimum_duration maximum_duration]);  
 
 x0 = Point(getStateFrame(cf.manip));
 x0.base_x = 0;
-x0.base_z = 1.25;
-u0 = double(cf.nominal_input);
+x0.base_z = .4;
+u0 = [0 0 0 0 0 0 cf.nominal_thrust]';
 
 prog = prog.addStateConstraint(ConstantConstraint(double(x0)),1);
 prog = prog.addInputConstraint(ConstantConstraint(u0),1);
 
 xf = x0;
-xf.base_x = 2;
+xf.base_x = 1;
 prog = prog.addStateConstraint(ConstantConstraint(double(xf)),N);
 prog = prog.addInputConstraint(ConstantConstraint(u0),N);
 
@@ -42,7 +42,7 @@ end
 end
 
 function [g,dg] = cost(dt,x,u)
-  R = eye(4);
+  R = eye(7);
   g = u'*R*u;
   dg = [0,zeros(1,size(x,1)),2*u'*R];
 end

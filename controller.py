@@ -5,7 +5,7 @@ from crazyflie_t import crazyflie_input_t, crazyflie_controller_commands_t, craz
 from threading import Thread
 
 GO_TO_START = True
-XHAT_START = [1.5, 0, 1.25, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+XHAT_START = [0, 0, .4, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 NOMINAL_W2 = 16.3683
 XHAT_DESIRED = [1.3, 0, .5, 0, 0, 0, 0, 0, 0, 0, 0, 0] 
 
@@ -107,7 +107,7 @@ class Controller():
 				control_input = list(self._latest_control_input)
 			else:
 				control_input = np.dot(self._K.get('postilqr'),np.array(xhat).transpose()-(self._xhat_desired+np.array([self._extra_control_input[0], self._extra_control_input[1], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))).tolist()
-				control_input[6] += NOMINAL_W2 - 16.0
+				control_input[6] += NOMINAL_W2 - 15.0
 			
 			if self._reset_xhat_desired:
 				if self._go_to_start:
