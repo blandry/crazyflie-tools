@@ -205,11 +205,11 @@ class StateEstimator():
 			self._xhat_lc.publish("crazyflie_state_estimate", msg.encode())
 
 		# uncomment the following if you want to trigger hover at a predefined state
-		if xhat[2] <= 0.5:
+		if xhat[2] <= 0.15:
 			print('This is how low')
 			msg = crazyflie_controller_commands_t()
 			msg.is_running = False
-			self.lc.publish('crazyflie_controller_commands', msg.encode())
+			self._xhat_lc.publish('crazyflie_controller_commands', msg.encode())
 		# 	msg = crazyflie_hover_commands_t()
 		# 	msg.hover = True
 		# 	self._xhat_lc.publish('crazyflie_hover_commands',msg.encode())
