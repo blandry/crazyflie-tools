@@ -5,9 +5,9 @@ from crazyflie_t import crazyflie_input_t, crazyflie_controller_commands_t, craz
 from threading import Thread
 
 GO_TO_START = True
-XHAT_START = [1.5, 0.5, .5, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+XHAT_START = [0, -0.61, 0.01, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 NOMINAL_W2 = 16.3683
-XHAT_DESIRED = [1.5, 0.5, .7, 0, 0, 0, 0, 0, 0, 0, 0, 0] 
+XHAT_DESIRED = [0, -0.61, 0.50, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 ROLL_KP = 3.5*180/math.pi
 PITCH_KP = 3.5*180/math.pi

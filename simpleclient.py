@@ -5,10 +5,10 @@
 #TXRX_FREQUENCY = 1000.0
 
 STARTUP_NANOKONTROL = True
-USE_DRAKE_CONTROLLER = False
+USE_DRAKE_CONTROLLER = True
 
 SE_LISTEN_TO_VICON = True
-SE_VICON_CHANNEL = 'crazflie2-pete2'
+SE_VICON_CHANNEL = 'cf2_pete1'
 SE_PUBLISH_TO_LCM = True
 SE_USE_RPYDOT = True
 SE_USE_EKF = True
@@ -16,9 +16,9 @@ SE_USE_UKF = False
 SE_DELAY_COMP = False
 
 CTRL_INPUT_TYPE = 'omegasqu'
-CTRL_LISTEN_TO_LCM = False
+CTRL_LISTEN_TO_LCM = True
 CTRL_LISTEN_TO_EXTRA_INPUT = True
-CTRL_PUBLISH_TO_LCM = False
+CTRL_PUBLISH_TO_LCM = True
 
 CTRL_USE_POSITION_CONTROL = True
 ######################################################################################
