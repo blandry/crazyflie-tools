@@ -17,7 +17,7 @@ class StateEstimator():
 
 	def __init__(self, listen_to_vicon=False, publish_to_lcm=False, 
 				 use_rpydot=False, use_ekf=False, use_ukf=False,
-				 delay_comp=False):
+				 delay_comp=False, listen_to_webcam=True):
 		
 		self._tvlqr_counting = False
 		self._last_time_update = time.time()
@@ -46,9 +46,11 @@ class StateEstimator():
 		if publish_to_lcm:
 			self._xhat_lc = lcm.LCM()
 
-		self._listen_to_vicon = listen_to_vicon
-		if listen_to_vicon:
-			Thread(target=self._vicon_listener).start()
+		#self._listen_to_vicon = listen_to_vicon            # Commented out for now
+		#if listen_to_vicon:
+		#	Thread(target=self._vicon_listener).start()
+		if listen_to_webcam:
+			Thread(target=self._webcam_listener).start()
 
 		self._input_log = list()
 		self._last_input = [0.0, 0.0, 0.0, 0.0]
@@ -113,6 +115,7 @@ class StateEstimator():
 			control_inputs = [[[0.0, 0.0, 0.0, 0.0],tspan]]
 		return control_inputs
 
+
 	def _vicon_listener(self):
 		_vicon_listener_lc = lcm.LCM()
 		_vicon_listener_lc.subscribe('crazyflie2_squ_ext',self._add_vicon_reading)
@@ -121,6 +124,45 @@ class StateEstimator():
 
 	def _add_vicon_reading(self, channel, data):
 		msg = vicon_pos_t.decode(data)
+		
+		if msg.q[0] < -999:
+			self._valid_vicon = False
+			#self._last_dxyz = [0.0, 0.0, 0.0]
+			return
+		
+		if not self._vicon_init_yaw:
+			self._vicon_init_yaw = msg.q[5]
+
+		xyz = list(msg.q)[0:3]
+		dxyz = [0.0, 0.0, 0.0]
+		if self._valid_vicon:
+			dt = 1.0/120.0
+			dt_measured = (msg.timestamp-self._last_vicon_update)/1000.0
+			if (dt_measured>1.5*dt):
+				dt = dt_measured
+			dxyz[0] = (1.0/dt)*(xyz[0]-self._last_xyz_raw[0])
+			dxyz[1] = (1.0/dt)*(xyz[1]-self._last_xyz_raw[1])
+			dxyz[2] = (1.0/dt)*(xyz[2]-self._last_xyz_raw[2])
+			self._last_xyz_raw = list(xyz)
+		
+		self._last_xyz[0] = self._vicon_alpha_pos*xyz[0]+(1-self._vicon_alpha_pos)*self._last_xyz[0]
+		self._last_xyz[1] = self._vicon_alpha_pos*xyz[1]+(1-self._vicon_alpha_pos)*self._last_xyz[1]
+		self._last_xyz[2] = self._vicon_alpha_pos*xyz[2]+(1-self._vicon_alpha_pos)*self._last_xyz[2]
+		self._last_dxyz[0] = self._vicon_alpha_vel*dxyz[0]+(1-self._vicon_alpha_vel)*self._last_dxyz[0]
+		self._last_dxyz[1] = self._vicon_alpha_vel*dxyz[1]+(1-self._vicon_alpha_vel)*self._last_dxyz[1]
+		self._last_dxyz[2] = self._vicon_alpha_vel*dxyz[2]+(1-self._vicon_alpha_vel)*self._last_dxyz[2]
+		self._last_vicon_update = msg.timestamp
+		self._valid_vicon = True
+
+
+	def _webcam_listener(self):
+		_webcam_listener_lc = lcm.LCM()
+		_webcam_listener_lc.subscribe('webcam_pos',self._add_webcam_reading)
+		while True:
+			_webcam_listener_lc.handle()
+
+	def _add_webcam_reading(self, channel, data):
+		msg = webcam_pos_t.decode(data)
 		
 		if msg.q[0] < -999:
 			self._valid_vicon = False
