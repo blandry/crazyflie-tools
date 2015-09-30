@@ -104,3 +104,14 @@ struct vortex_sensor_t
   double sensor2;
   double velocity;
 }
+
+struct webcam_pos_t
+{
+  int64_t timestamp;
+  double x;
+  double y;
+  double z;
+  double roll;
+  double pitch;
+  double yaw;
+}
