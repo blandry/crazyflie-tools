@@ -17,6 +17,13 @@ Installation
     sudo bash setup.sh
 ```
 
+* install the estimator
+```    
+    cd estimation
+    sudo python setup.py install
+```
+
+
 * flash the firmware
 ```    
     cd crazyflie-firmware-2
@@ -26,6 +33,8 @@ Installation
 * install vicon
 ```    
     cd vicon
+    mkdir bin
+    mkdir obj
     cp lib/libViconDataStreamSDK_CPP.so /usr/lib/libViconDataStreamSDK_CPP.so
     make
 ```
