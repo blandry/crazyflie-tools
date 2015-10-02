@@ -108,6 +108,7 @@ struct vortex_sensor_t
 struct webcam_pos_t
 {
   int64_t timestamp;
+  int64_t frame_id;
   double x;
   double y;
   double z;
