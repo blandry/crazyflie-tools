@@ -21,6 +21,7 @@ Installation
 ```    
     cd estimation
     sudo python setup.py install
+    sudo pip install filterpy
 ```
 
 
