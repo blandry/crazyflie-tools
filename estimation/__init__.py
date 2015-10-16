@@ -5,7 +5,7 @@ import numpy as np
 import MahonyAHRS
 from Queue import Queue
 from threading import Thread
-from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t, dxyz_compare_t, kalman_args_t, crazyflie_hover_commands_t
+from crazyflie_t import crazyflie_state_estimate_t, crazyflie_state_estimator_commands_t, dxyz_compare_t, kalman_args_t, crazyflie_hover_commands_t, webcam_pos_t
 from vicon_t import vicon_pos_t
 from ukf import UnscentedKalmanFilter
 from ekf import ExtendedKalmanFilter
@@ -157,22 +157,22 @@ class StateEstimator():
 
 	def _webcam_listener(self):
 		_webcam_listener_lc = lcm.LCM()
-		_webcam_listener_lc.subscribe('webcam_pos',self._add_webcam_reading)
+		_webcam_listener_lc.subscribe('WEBCAM_POS',self._add_webcam_reading)
 		while True:
 			_webcam_listener_lc.handle()
 
 	def _add_webcam_reading(self, channel, data):
 		msg = webcam_pos_t.decode(data)
 		
-		if msg.q[0] < -999:
+		if msg.frame_id == -1:
 			self._valid_vicon = False
 			#self._last_dxyz = [0.0, 0.0, 0.0]
 			return
 		
 		if not self._vicon_init_yaw:
-			self._vicon_init_yaw = msg.q[5]
+			self._vicon_init_yaw = msg.yaw
 
-		xyz = list(msg.q)[0:3]
+		xyz = [msg.x, msg.y, msg.z]
 		dxyz = [0.0, 0.0, 0.0]
 		if self._valid_vicon:
 			dt = 1.0/120.0

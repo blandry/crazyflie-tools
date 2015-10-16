@@ -4,7 +4,7 @@
 ############################ CLIENT OPTIONS ##########################################
 #TXRX_FREQUENCY = 1000.0
 
-STARTUP_NANOKONTROL = True
+STARTUP_NANOKONTROL = False
 USE_DRAKE_CONTROLLER = True
 
 SE_LISTEN_TO_VICON = True

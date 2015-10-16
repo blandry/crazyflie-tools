@@ -8,9 +8,14 @@ if __name__=="__main__":
     while True:
         msg = webcam_pos_t()
 
-        msg.x = 0;webcam_x
-        msg.y = 0;webcam_y
-        msg.z = 0;webcam_z
+        msg.x = 0 #webcam_x
+        msg.y = 0 #webcam_y
+        msg.z = 0 #webcam_z
+
+        msg.roll = 0
+        msg.pitch = 0
+        msg.yaw = 0
+
 
         msg.timestamp = time.time()
 
